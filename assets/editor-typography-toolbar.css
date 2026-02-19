@@ -1,0 +1,38 @@
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item.is-active,
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item.is-checked,
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item[aria-checked="true"],
+.elodin-bridge-type-menu .components-menu-item.is-active,
+.elodin-bridge-type-menu .components-menu-item.is-checked,
+.elodin-bridge-type-menu .components-menu-item[aria-checked="true"] {
+	background: #1d2327 !important;
+	color: #fff !important;
+}
+
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item.is-active:hover,
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item.is-checked:hover,
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item[aria-checked="true"]:hover,
+.elodin-bridge-type-menu .components-menu-item.is-active:hover,
+.elodin-bridge-type-menu .components-menu-item.is-checked:hover,
+.elodin-bridge-type-menu .components-menu-item[aria-checked="true"]:hover {
+	background: #1d2327 !important;
+	color: #fff !important;
+}
+
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item:focus,
+.elodin-bridge-type-menu .components-dropdown-menu__menu-item:focus-visible,
+.elodin-bridge-type-menu .components-menu-item:focus,
+.elodin-bridge-type-menu .components-menu-item:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.elodin-bridge-type-menu button:focus,
+.elodin-bridge-type-menu button:focus-visible,
+.elodin-bridge-type-menu .components-button:focus,
+.elodin-bridge-type-menu .components-button:focus-visible,
+.elodin-bridge-type-menu .components-menu-item__button:focus,
+.elodin-bridge-type-menu .components-menu-item__button:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+	border-color: transparent !important;
+}

@@ -20,12 +20,31 @@ function elodin_bridge_is_heading_paragraph_overrides_enabled() {
 }
 
 /**
+ * Check if balanced text toolbar feature is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_balanced_text_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT, 1 );
+}
+
+/**
  * Register plugin settings.
  */
 function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES,
+		array(
+			'type' => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default' => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT,
 		array(
 			'type' => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
@@ -69,7 +88,8 @@ function elodin_bridge_render_admin_page() {
 		return;
 	}
 
-	$enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
+	$heading_paragraph_overrides_enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
+	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
 	?>
 	<div class="wrap elodin-bridge-admin">
 		<h1><?php echo esc_html__( 'Bridge', 'elodin-bridge' ); ?></h1>
@@ -93,7 +113,7 @@ function elodin_bridge_render_admin_page() {
 						id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>"
 						name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>"
 						value="1"
-						<?php checked( $enabled ); ?>
+						<?php checked( $heading_paragraph_overrides_enabled ); ?>
 					/>
 					<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 						<span class="elodin-bridge-admin__toggle-thumb"></span>
@@ -103,6 +123,32 @@ function elodin_bridge_render_admin_page() {
 
 				<p class="elodin-bridge-admin__description">
 					<?php esc_html_e( 'Adds block toolbar controls for paragraph/heading typography overrides and applies those override classes using your GeneratePress typography values (desktop, tablet, and mobile).', 'elodin-bridge' ); ?>
+				</p>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<label class="elodin-bridge-admin__toggle" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT ); ?>">
+					<input
+						type="hidden"
+						name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT ); ?>"
+						value="0"
+					/>
+					<input
+						type="checkbox"
+						class="elodin-bridge-admin__toggle-input"
+						id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT ); ?>"
+						name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT ); ?>"
+						value="1"
+						<?php checked( $balanced_text_enabled ); ?>
+					/>
+					<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+						<span class="elodin-bridge-admin__toggle-thumb"></span>
+					</span>
+					<span><?php esc_html_e( 'Enable balanced text toggle', 'elodin-bridge' ); ?></span>
+				</label>
+
+				<p class="elodin-bridge-admin__description">
+					<?php esc_html_e( 'Adds a separate block toolbar button to toggle the .balanced class on paragraphs and headings. When active, that class applies text-wrap: balance.', 'elodin-bridge' ); ?>
 				</p>
 			</div>
 

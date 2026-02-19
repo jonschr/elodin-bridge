@@ -15,6 +15,10 @@
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
+.elodin-bridge-admin__card + .elodin-bridge-admin__card {
+	margin-top: 12px;
+}
+
 .elodin-bridge-admin__toggle {
 	display: flex;
 	align-items: center;

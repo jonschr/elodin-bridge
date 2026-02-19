@@ -264,7 +264,7 @@ function elodin_bridge_build_css_rule( $selector, $declarations ) {
 }
 
 /**
- * Build responsive class override CSS from GeneratePress dynamic typography settings.
+ * Build responsive heading/paragraph class override CSS from GeneratePress typography settings.
  *
  * @return string
  */
@@ -274,10 +274,10 @@ function elodin_bridge_build_typography_override_css() {
 		return '';
 	}
 
+	$source_selector = ':is(p,h1,h2,h3,h4,h5,h6)';
 	$css = '';
 	$tablet_css = '';
 	$mobile_css = '';
-	$source_selector = ':is(p,h1,h2,h3,h4,h5,h6)';
 
 	foreach ( $presets as $class_name => $preset ) {
 		$selector = $source_selector . '.' . $class_name;
@@ -320,15 +320,48 @@ function elodin_bridge_enqueue_typography_override_styles() {
 add_action( 'enqueue_block_assets', 'elodin_bridge_enqueue_typography_override_styles' );
 
 /**
+ * Build balanced text CSS.
+ *
+ * @return string
+ */
+function elodin_bridge_build_balanced_text_css() {
+	return ':is(p,h1,h2,h3,h4,h5,h6).balanced{text-wrap:balance!important;}';
+}
+
+/**
+ * Enqueue balanced text styles for front-end and block editor content.
+ */
+function elodin_bridge_enqueue_balanced_text_styles() {
+	if ( ! elodin_bridge_is_balanced_text_enabled() ) {
+		return;
+	}
+
+	$css = elodin_bridge_build_balanced_text_css();
+	if ( '' === $css ) {
+		return;
+	}
+
+	$handle = 'elodin-bridge-balanced-text';
+	wp_register_style( $handle, false, array(), ELODIN_BRIDGE_VERSION );
+	wp_enqueue_style( $handle );
+	wp_add_inline_style( $handle, $css );
+}
+add_action( 'enqueue_block_assets', 'elodin_bridge_enqueue_balanced_text_styles' );
+
+/**
  * Enqueue block editor toolbar controls for typography class toggles.
  */
 function elodin_bridge_enqueue_editor_typography_toolbar() {
-	if ( ! elodin_bridge_is_heading_paragraph_overrides_enabled() ) {
+	$enable_heading_paragraph_overrides = elodin_bridge_is_heading_paragraph_overrides_enabled();
+	$enable_balanced_text = elodin_bridge_is_balanced_text_enabled();
+	if ( ! $enable_heading_paragraph_overrides && ! $enable_balanced_text ) {
 		return;
 	}
 
 	$script_path = ELODIN_BRIDGE_DIR . '/assets/editor-typography-toolbar.js';
 	$script_url = ELODIN_BRIDGE_URL . 'assets/editor-typography-toolbar.js';
+	$style_path = ELODIN_BRIDGE_DIR . '/assets/editor-typography-toolbar.css';
+	$style_url = ELODIN_BRIDGE_URL . 'assets/editor-typography-toolbar.css';
 
 	if ( ! file_exists( $script_path ) ) {
 		return;
@@ -341,5 +374,26 @@ function elodin_bridge_enqueue_editor_typography_toolbar() {
 		(string) filemtime( $script_path ),
 		true
 	);
+
+	wp_add_inline_script(
+		'elodin-bridge-editor-typography-toolbar',
+		'window.elodinBridgeToolbarSettings = ' . wp_json_encode(
+			array(
+				'enableHeadingParagraphOverrides' => $enable_heading_paragraph_overrides,
+				'enableBalancedText' => $enable_balanced_text,
+			)
+		) . ';',
+		'before'
+	);
+
+	if ( $enable_heading_paragraph_overrides && file_exists( $style_path ) ) {
+		wp_enqueue_style(
+			'elodin-bridge-editor-typography-toolbar',
+			$style_url,
+			array(),
+			(string) filemtime( $style_path )
+		);
+	}
+
 }
 add_action( 'enqueue_block_editor_assets', 'elodin_bridge_enqueue_editor_typography_toolbar' );
