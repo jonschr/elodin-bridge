@@ -56,14 +56,6 @@ function elodin_bridge_get_seed_image_sizes() {
 			'crop'    => 1,
 			'gallery' => 1,
 		),
-		array(
-			'slug'    => 'blog',
-			'label'   => __( 'Blog', 'elodin-bridge' ),
-			'width'   => 820,
-			'height'  => 300,
-			'crop'    => 1,
-			'gallery' => 0,
-		),
 	);
 }
 
@@ -74,7 +66,7 @@ function elodin_bridge_get_seed_image_sizes() {
  */
 function elodin_bridge_get_image_sizes_defaults() {
 	return array(
-		'enabled' => 1,
+		'enabled' => 0,
 		'sizes'   => elodin_bridge_get_seed_image_sizes(),
 	);
 }
@@ -154,7 +146,19 @@ function elodin_bridge_get_legacy_image_size_rows( $value ) {
 function elodin_bridge_sanitize_image_sizes_settings( $value ) {
 	$defaults = elodin_bridge_get_image_sizes_defaults();
 	$value = is_array( $value ) ? $value : array();
-	$raw_sizes = isset( $value['sizes'] ) && is_array( $value['sizes'] ) ? $value['sizes'] : array();
+	$enabled = elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] );
+	$has_sizes_payload = array_key_exists( 'sizes', $value ) && is_array( $value['sizes'] );
+	$raw_sizes = $has_sizes_payload ? $value['sizes'] : array();
+
+	// If the feature is being disabled and row inputs are not present in the request,
+	// keep previously saved rows instead of wiping them out.
+	if ( ! $has_sizes_payload && 0 === $enabled ) {
+		$existing_settings = get_option( ELODIN_BRIDGE_OPTION_IMAGE_SIZES, array() );
+		if ( is_array( $existing_settings ) && isset( $existing_settings['sizes'] ) && is_array( $existing_settings['sizes'] ) ) {
+			$raw_sizes = $existing_settings['sizes'];
+		}
+	}
+
 	if ( empty( $raw_sizes ) && ( isset( $value['custom_sizes'] ) || isset( $value['builtin_gallery'] ) ) ) {
 		$raw_sizes = elodin_bridge_get_legacy_image_size_rows( $value );
 	}
@@ -181,7 +185,7 @@ function elodin_bridge_sanitize_image_sizes_settings( $value ) {
 	}
 
 	return array(
-		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'enabled' => $enabled,
 		'sizes'   => $sizes,
 	);
 }
@@ -228,6 +232,105 @@ function elodin_bridge_get_registered_bridge_image_sizes() {
 	}
 
 	return $sizes;
+}
+
+/**
+ * Default values for first/last block body class settings.
+ *
+ * @return array{enabled:int,enable_first:int,enable_last:int,enable_debug:int,section_blocks:array<int,string>}
+ */
+function elodin_bridge_get_block_edge_class_defaults() {
+	return array(
+		'enabled'        => 0,
+		'enable_first'   => 1,
+		'enable_last'    => 1,
+		'enable_debug'   => 0,
+		'section_blocks' => array(
+			'core/cover',
+			'core/block',
+			'generateblocks/element',
+		),
+	);
+}
+
+/**
+ * Normalize a block-name list from textarea/array input.
+ *
+ * @param mixed $value Raw block list value.
+ * @return array<int,string>
+ */
+function elodin_bridge_sanitize_block_name_list( $value ) {
+	$items = array();
+	$seen = array();
+	$raw_items = is_array( $value ) ? $value : preg_split( '/[\r\n,]+/', (string) $value );
+	if ( ! is_array( $raw_items ) ) {
+		return $items;
+	}
+
+	foreach ( $raw_items as $item ) {
+		$item = strtolower( trim( (string) $item ) );
+		if ( '' === $item ) {
+			continue;
+		}
+
+		$item = preg_replace( '/[^a-z0-9_\/-]+/', '', $item );
+		$item = trim( (string) $item, "-/\t\n\r\0\x0B" );
+		if ( '' === $item || isset( $seen[ $item ] ) ) {
+			continue;
+		}
+
+		$items[] = $item;
+		$seen[ $item ] = true;
+	}
+
+	return $items;
+}
+
+/**
+ * Sanitize first/last block body class settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,enable_first:int,enable_last:int,enable_debug:int,section_blocks:array<int,string>}
+ */
+function elodin_bridge_sanitize_block_edge_class_settings( $value ) {
+	$defaults = elodin_bridge_get_block_edge_class_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	$section_blocks = array_key_exists( 'section_blocks', $value )
+		? elodin_bridge_sanitize_block_name_list( $value['section_blocks'] )
+		: $defaults['section_blocks'];
+
+	return array(
+		'enabled'        => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'enable_first'   => elodin_bridge_sanitize_toggle( $value['enable_first'] ?? $defaults['enable_first'] ),
+		'enable_last'    => elodin_bridge_sanitize_toggle( $value['enable_last'] ?? $defaults['enable_last'] ),
+		'enable_debug'   => elodin_bridge_sanitize_toggle( $value['enable_debug'] ?? $defaults['enable_debug'] ),
+		'section_blocks' => $section_blocks,
+	);
+}
+
+/**
+ * Get normalized first/last block body class settings.
+ *
+ * @return array{enabled:int,enable_first:int,enable_last:int,enable_debug:int,section_blocks:array<int,string>}
+ */
+function elodin_bridge_get_block_edge_class_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_block_edge_class_defaults();
+	}
+
+	return elodin_bridge_sanitize_block_edge_class_settings( $saved );
+}
+
+/**
+ * Check if first/last block body class feature is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_block_edge_classes_enabled() {
+	$settings = elodin_bridge_get_block_edge_class_settings();
+	return ! empty( $settings['enabled'] );
 }
 
 /**
@@ -382,6 +485,42 @@ function elodin_bridge_is_editor_ui_restrictions_enabled() {
 }
 
 /**
+ * Check if media library infinite scrolling is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_media_library_infinite_scrolling_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING, 1 );
+}
+
+/**
+ * Check if Bridge shortcodes are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_shortcodes_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES, 1 );
+}
+
+/**
+ * Check if GenerateBlocks boundary highlights are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_generateblocks_boundary_highlights_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS, 1 );
+}
+
+/**
+ * Check if prettier widgets styles are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_prettier_widgets_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS, 1 );
+}
+
+/**
  * Check if content type behavior mapping is enabled.
  *
  * @return bool
@@ -460,6 +599,56 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_block_edge_class_settings',
+			'default'           => elodin_bridge_get_block_edge_class_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_IMAGE_SIZES,
 		array(
 			'type'              => 'array',
@@ -520,6 +709,12 @@ function elodin_bridge_render_admin_page() {
 	$heading_paragraph_overrides_enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
 	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
 	$editor_ui_restrictions_enabled = elodin_bridge_is_editor_ui_restrictions_enabled();
+	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
+	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
+	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();
+	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
+	$block_edge_class_settings = elodin_bridge_get_block_edge_class_settings();
+	$block_edge_classes_enabled = elodin_bridge_is_block_edge_classes_enabled();
 	$image_sizes_settings = elodin_bridge_get_image_sizes_settings();
 	$image_size_rows = array_values( $image_sizes_settings['sizes'] );
 	$content_type_behavior_settings = elodin_bridge_get_content_type_behavior_settings();
@@ -532,7 +727,7 @@ function elodin_bridge_render_admin_page() {
 				<span class="elodin-bridge-admin__version"><?php echo esc_html( sprintf( 'v%s', ELODIN_BRIDGE_VERSION ) ); ?></span>
 			</h1>
 			<p class="elodin-bridge-admin__intro">
-				<?php esc_html_e( 'Bridging the gap between GenerateBlocks / GeneratePress\' extensive default settings and the few extra items we need on just about every site, so that backend editing is faster, more intuitive, and more user-friendly.', 'elodin-bridge' ); ?>
+				<?php esc_html_e( 'Bridging the gap between WordPress\'s extensive capabilities for hybrid themes and the few extra items we need on just about every site, so that backend editing is faster and more intuitive.', 'elodin-bridge' ); ?>
 			</p>
 		</div>
 
@@ -603,6 +798,215 @@ function elodin_bridge_render_admin_page() {
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Adds a separate block toolbar button to toggle the .balanced class on paragraphs and headings. When active, that class applies text-wrap: balance.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo ! empty( $content_type_behavior_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-content-type-behavior-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-content-type-behavior-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $content_type_behavior_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable page-like vs post-like content type mapping', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'The only behavior this changes on your site is in the backend editor: enabled content types get a black title background with strike-through styling on the title when not being interacted with.', 'elodin-bridge' ); ?>
+						</p>
+
+						<?php if ( ! empty( $content_type_behavior_post_types ) ) : ?>
+							<div class="elodin-bridge-admin__content-type-list">
+								<?php foreach ( $content_type_behavior_post_types as $post_type => $label ) : ?>
+									<label class="elodin-bridge-admin__content-type-item" for="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>">
+										<input
+											type="hidden"
+											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
+											value="0"
+										/>
+										<input
+											type="checkbox"
+											class="elodin-bridge-admin__content-type-checkbox"
+											id="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>"
+											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
+											value="1"
+											<?php checked( ! empty( $content_type_behavior_settings['post_types'][ $post_type ] ) ); ?>
+										/>
+										<span class="elodin-bridge-admin__content-type-label"><?php echo esc_html( $label ); ?></span>
+									</label>
+								<?php endforeach; ?>
+							</div>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'Checked content types receive that backend title styling; unchecked content types do not.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $editor_ui_restrictions_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
+							value="1"
+							<?php checked( $editor_ui_restrictions_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable fullscreen mode and publish sidebar in the editor', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Injects inline JS to disable fullscreen mode and disable the publish sidebar in the block editor.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $media_library_infinite_scrolling_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING ); ?>"
+							value="1"
+							<?php checked( $media_library_infinite_scrolling_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable media library infinite scrolling', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Forces Media Library infinite scrolling on (equivalent to adding the media_library_infinite_scrolling filter).', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $shortcodes_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES ); ?>"
+							value="1"
+							<?php checked( $shortcodes_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable footer and copyright shortcodes', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Registers [year], [c], [tm], and [r] shortcodes. Trademark and registered outputs use superscript markup.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $generateblocks_boundary_highlights_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>"
+							value="1"
+							<?php checked( $generateblocks_boundary_highlights_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-heading-row">
+							<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable GenerateBlocks boundary highlights in the editor', 'elodin-bridge' ); ?></span>
+							<span class="elodin-bridge-admin__requirement-tag"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
+						</span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Adds dashed outlines around GenerateBlocks containers/elements in the block editor to make block boundaries easier to identify while editing.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $prettier_widgets_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS ); ?>"
+							value="1"
+							<?php checked( $prettier_widgets_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Prettier widgets', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Applies cleaner spacing and full-width layout rules in the Widgets editor for easier backend editing.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>
@@ -760,87 +1164,77 @@ function elodin_bridge_render_admin_page() {
 			</div>
 
 			<div class="elodin-bridge-admin__card">
-				<div class="elodin-bridge-admin__feature <?php echo $editor_ui_restrictions_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>">
+				<div class="elodin-bridge-admin__feature <?php echo $block_edge_classes_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-block-edge-classes-enabled">
 						<input
 							type="hidden"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enabled]"
 							value="0"
 						/>
 						<input
 							type="checkbox"
 							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
-							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>"
+							id="elodin-bridge-block-edge-classes-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enabled]"
 							value="1"
-							<?php checked( $editor_ui_restrictions_enabled ); ?>
+							<?php checked( $block_edge_classes_enabled ); ?>
 						/>
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
 						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable fullscreen mode and publish sidebar in the editor', 'elodin-bridge' ); ?></span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable first/last block body classes', 'elodin-bridge' ); ?></span>
 					</label>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Injects inline JS to disable fullscreen mode and disable the publish sidebar in the block editor.', 'elodin-bridge' ); ?>
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="elodin-bridge-admin__card">
-				<div class="elodin-bridge-admin__feature <?php echo ! empty( $content_type_behavior_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-content-type-behavior-enabled">
-						<input
-							type="hidden"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
-							value="0"
-						/>
-						<input
-							type="checkbox"
-							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
-							id="elodin-bridge-content-type-behavior-enabled"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
-							value="1"
-							<?php checked( ! empty( $content_type_behavior_settings['enabled'] ) ); ?>
-						/>
-						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
-							<span class="elodin-bridge-admin__toggle-thumb"></span>
-						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable page-like vs post-like content type mapping', 'elodin-bridge' ); ?></span>
-					</label>
-
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'The only behavior this changes on your site is in the backend editor: enabled content types get a black title background with strike-through styling on the title when not being interacted with.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Adds body classes for the first and/or last top-level block (for example: first-block-is-section, last-block-is-section, first-block-is-core-group, last-block-is-generateblocks-container). These sorts of body classes are useful for conditional styling. For example, you might want a transparent header and apply styles for that only when your first block is full-width, which can be inferred by whether a "section" style block is first or last.', 'elodin-bridge' ); ?>
 						</p>
 
-						<?php if ( ! empty( $content_type_behavior_post_types ) ) : ?>
-							<div class="elodin-bridge-admin__content-type-list">
-								<?php foreach ( $content_type_behavior_post_types as $post_type => $label ) : ?>
-									<label class="elodin-bridge-admin__content-type-item" for="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>">
-										<input
-											type="hidden"
-											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
-											value="0"
-										/>
-										<input
-											type="checkbox"
-											class="elodin-bridge-admin__content-type-checkbox"
-											id="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>"
-											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
-											value="1"
-											<?php checked( ! empty( $content_type_behavior_settings['post_types'][ $post_type ] ) ); ?>
-										/>
-										<span class="elodin-bridge-admin__content-type-label"><?php echo esc_html( $label ); ?></span>
-									</label>
-								<?php endforeach; ?>
-							</div>
-							<p class="elodin-bridge-admin__note">
-								<?php esc_html_e( 'Checked content types receive that backend title styling; unchecked content types do not.', 'elodin-bridge' ); ?>
-							</p>
-						<?php endif; ?>
+						<div class="elodin-bridge-admin__edge-toggle-list">
+							<label class="elodin-bridge-admin__edge-toggle-item">
+								<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_first]" value="0" />
+								<input
+									type="checkbox"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_first]"
+									value="1"
+									<?php checked( ! empty( $block_edge_class_settings['enable_first'] ) ); ?>
+								/>
+								<span><?php esc_html_e( 'Enable first block classes', 'elodin-bridge' ); ?></span>
+							</label>
+							<label class="elodin-bridge-admin__edge-toggle-item">
+								<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_last]" value="0" />
+								<input
+									type="checkbox"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_last]"
+									value="1"
+									<?php checked( ! empty( $block_edge_class_settings['enable_last'] ) ); ?>
+								/>
+								<span><?php esc_html_e( 'Enable last block classes', 'elodin-bridge' ); ?></span>
+							</label>
+							<label class="elodin-bridge-admin__edge-toggle-item">
+								<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_debug]" value="0" />
+								<input
+									type="checkbox"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[enable_debug]"
+									value="1"
+									<?php checked( ! empty( $block_edge_class_settings['enable_debug'] ) ); ?>
+								/>
+								<span><?php esc_html_e( 'Show front-end top-level block debug panel', 'elodin-bridge' ); ?></span>
+							</label>
+						</div>
+
+						<label class="elodin-bridge-admin__edge-textarea-label" for="elodin-bridge-section-blocks">
+							<?php esc_html_e( 'Blocks that count as sections (shared for first and last block checks)', 'elodin-bridge' ); ?>
+						</label>
+						<textarea
+							id="elodin-bridge-section-blocks"
+							class="large-text code elodin-bridge-admin__edge-textarea"
+							rows="8"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES ); ?>[section_blocks]"
+						><?php echo esc_textarea( implode( "\n", $block_edge_class_settings['section_blocks'] ) ); ?></textarea>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Enter one block name per line (example: core/group or generateblocks/container).', 'elodin-bridge' ); ?>
+						</p>
 					</div>
 				</div>
 			</div>

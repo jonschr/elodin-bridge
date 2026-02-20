@@ -1,5 +1,18 @@
 # Elodin Bridge Changes
 
+## Version 0.3
+
+### Added
+- New editor helper setting: `Enable GenerateBlocks boundary highlights in the editor` (default on).
+- New editor helper setting: `Prettier widgets` (default on) for improved Widgets screen block spacing/layout.
+- `Requires GenerateBlocks` tag on the GenerateBlocks boundary highlight feature card.
+
+### Changed
+- Moved GenerateBlocks boundary highlight styles out of Pine Forge theme and into Bridge as a dedicated, toggleable feature.
+- Moved Widgets editor styling rules out of Pine Forge theme and into Bridge as a dedicated, toggleable feature.
+- Image-size defaults now seed only `square` (the `blog` default row was removed).
+- Image-size settings persistence improved: disabling the feature no longer wipes previously saved custom image-size rows.
+
 ## Version 0.2
 
 ### Added
@@ -17,6 +30,17 @@
 - Editor UI restrictions feature:
   - Optional inline JS to disable fullscreen mode and disable publish sidebar in the block editor.
   - Detaches legacy theme callback (`elodin_disable_fullscreen_mode`) so Bridge controls this behavior.
+- Media library infinite scrolling feature:
+  - New settings toggle (default on) to force Media Library infinite scrolling via `media_library_infinite_scrolling`.
+- Shortcode feature:
+  - New settings toggle (default on) to register helper shortcodes: `[year]`, `[c]`, `[tm]`, and `[r]`.
+  - `[tm]` and `[r]` render with superscript markup by default.
+- First/last block body class feature:
+  - Global feature toggle (default off), plus independent first-block and last-block toggles.
+  - Configurable first-block and last-block body class generation for top-level blocks.
+  - Shared editable list of block names that count as sections (default: `core/cover`, `core/block`, `generateblocks/element`).
+  - Adds classes like `first-block-is-section`, `last-block-is-section`, `first-block-is-{block}`, and `last-block-is-{block}`.
+  - Optional front-end debug panel (bottom-right) showing top-level block names for the current singular page.
 - Image sizes feature:
   - Unified custom image-size table UI (editable `slug`, `label`, `width`, `height`, `crop`, gallery availability).
   - Default seeded rows: `square` and `blog`, treated like normal editable custom sizes.

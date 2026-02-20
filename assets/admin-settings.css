@@ -174,6 +174,35 @@
 	color: #50575e;
 }
 
+.elodin-bridge-admin__edge-toggle-list {
+	margin-top: 12px;
+	display: grid;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__edge-toggle-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__edge-toggle-item input[type="checkbox"] {
+	margin: 0;
+}
+
+.elodin-bridge-admin__edge-textarea-label {
+	display: block;
+	margin: 14px 0 6px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__edge-textarea {
+	width: 100%;
+}
+
 .elodin-bridge-admin__content-type-list {
 	margin-top: 14px;
 	display: grid;
@@ -220,6 +249,33 @@
 	vertical-align: middle;
 }
 
+.elodin-bridge-admin__image-size-table {
+	table-layout: fixed;
+}
+
+.elodin-bridge-admin__image-size-table th:nth-child(1) {
+	width: 14%;
+}
+
+.elodin-bridge-admin__image-size-table th:nth-child(2) {
+	width: 14%;
+}
+
+.elodin-bridge-admin__image-size-table th:nth-child(3),
+.elodin-bridge-admin__image-size-table th:nth-child(4) {
+	width: 9%;
+}
+
+.elodin-bridge-admin__image-size-table th:nth-child(5),
+.elodin-bridge-admin__image-size-table th:nth-child(6) {
+	white-space: nowrap;
+	width: 15%;
+}
+
+.elodin-bridge-admin__image-size-table th:nth-child(7) {
+	width: 10%;
+}
+
 .elodin-bridge-admin__image-size-builder {
 	display: grid;
 	gap: 10px;
@@ -227,11 +283,12 @@
 
 .elodin-bridge-admin__image-size-row .small-text {
 	width: 100%;
-	max-width: 100px;
+	max-width: 72px;
 }
 
 .elodin-bridge-admin__image-size-row .regular-text {
 	width: 100%;
+	max-width: 150px;
 }
 
 .elodin-bridge-admin__actions {
