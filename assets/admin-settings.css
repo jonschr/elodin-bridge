@@ -1,5 +1,5 @@
 .elodin-bridge-admin {
-	max-width: 860px;
+	max-width: none;
 }
 
 .elodin-bridge-admin__hero {
@@ -33,32 +33,160 @@
 	max-width: 72ch;
 }
 
+.elodin-bridge-admin__toolbar {
+	position: sticky;
+	top: 32px;
+	z-index: 30;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px 12px;
+	border: 1px solid #c3c4c7;
+	border-radius: 10px;
+	background: rgba(218, 221, 225, 0.96);
+	backdrop-filter: blur(4px);
+	margin-bottom: 14px;
+}
+
+.elodin-bridge-admin__category-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__category-button {
+	appearance: none;
+	border: 1px solid #b6bcc2;
+	background: #fff;
+	color: #1d2327;
+	border-radius: 10px;
+	padding: 7px 12px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+	cursor: pointer;
+	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.elodin-bridge-admin__category-button:hover {
+	background: #f0f0f1;
+	border-color: #8c8f94;
+}
+
+.elodin-bridge-admin__category-button.is-active {
+	background: #1d2327;
+	border-color: #1d2327;
+	color: #fff;
+}
+
+.elodin-bridge-admin__category-button:focus-visible {
+	outline: 2px solid #72aee6;
+	outline-offset: 1px;
+}
+
+.elodin-bridge-admin__toolbar-save .button {
+	margin: 0;
+}
+
+.elodin-bridge-admin__toolbar-save {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__save-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 32px;
+	padding: 0 10px;
+	border: 1px solid #c3c4c7;
+	border-radius: 8px;
+	background: #fff;
+	color: #50575e;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.elodin-bridge-admin__save-status[data-state="saving"] {
+	color: #1d2327;
+	border-color: #72aee6;
+}
+
+.elodin-bridge-admin__save-status[data-state="saved"] {
+	color: #0a4b78;
+	border-color: #72aee6;
+}
+
+.elodin-bridge-admin__save-status[data-state="error"] {
+	color: #8a2424;
+	border-color: #d63638;
+}
+
+.elodin-bridge-admin__save-debug {
+	max-width: min(560px, 90vw);
+	padding: 10px;
+	border: 1px solid #d63638;
+	border-radius: 8px;
+	background: #fff7f7;
+	font-size: 12px;
+	line-height: 1.45;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__save-debug > strong {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.elodin-bridge-admin__save-debug pre {
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	max-height: 180px;
+	overflow: auto;
+}
+
+.elodin-bridge-admin__cards {
+	column-count: 3;
+	column-gap: 12px;
+}
+
 .elodin-bridge-admin__card {
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 12px;
 	padding: 24px;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0 0 12px;
+	break-inside: avoid;
+	-webkit-column-break-inside: avoid;
+	page-break-inside: avoid;
+	position: relative;
+	overflow: hidden;
 }
 
-.elodin-bridge-admin__card + .elodin-bridge-admin__card {
-	margin-top: 12px;
+.elodin-bridge-admin__card--wide {
+	/* In masonry mode we keep consistent card width to avoid layout gaps. */
 }
 
-.elodin-bridge-admin__feature {
-	display: grid;
-	grid-template-columns: 44px minmax(0, 1fr);
-	column-gap: 12px;
-	row-gap: 10px;
-	align-items: start;
+.elodin-bridge-admin__card[hidden] {
+	display: none;
 }
 
 .elodin-bridge-admin__feature-header {
-	grid-column: 1 / -1;
 	display: grid;
 	grid-template-columns: 44px minmax(0, 1fr);
 	column-gap: 12px;
-	align-items: center;
+	align-items: start;
 	color: #1d2327;
 	cursor: pointer;
 	text-decoration: none;
@@ -68,14 +196,11 @@
 	font-size: 15px;
 	font-weight: 600;
 	line-height: 1.4;
+	padding-top: 1px;
 }
 
 .elodin-bridge-admin__feature-heading-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	width: 100%;
+	display: block;
 }
 
 .elodin-bridge-admin__requirement-tag {
@@ -92,18 +217,29 @@
 	white-space: nowrap;
 }
 
+.elodin-bridge-admin__requirement-tag--corner {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	margin: 0;
+	border-bottom: 0;
+	border-right: 0;
+	border-radius: 12px 0 0 0;
+	z-index: 2;
+}
+
+.elodin-bridge-admin__feature.has-requirement .elodin-bridge-admin__feature-title {
+	padding-right: 0;
+}
+
+.elodin-bridge-admin__feature.has-requirement .elodin-bridge-admin__feature-body {
+	padding-bottom: 20px;
+}
+
 .elodin-bridge-admin__feature-body {
-	grid-column: 2;
-	display: none;
+	display: block;
+	margin-top: 12px;
 	min-width: 0;
-}
-
-.elodin-bridge-admin__feature.is-enabled .elodin-bridge-admin__feature-body {
-	display: block;
-}
-
-.elodin-bridge-admin__feature.is-unavailable .elodin-bridge-admin__feature-body {
-	display: block;
 }
 
 .elodin-bridge-admin__feature-body > :first-child {
@@ -268,59 +404,211 @@
 	font-size: 14px;
 }
 
-.elodin-bridge-admin__image-size-table th,
-.elodin-bridge-admin__image-size-table td {
-	vertical-align: middle;
-}
-
-.elodin-bridge-admin__image-size-table {
-	table-layout: fixed;
-}
-
-.elodin-bridge-admin__image-size-table th:nth-child(1) {
-	width: 14%;
-}
-
-.elodin-bridge-admin__image-size-table th:nth-child(2) {
-	width: 14%;
-}
-
-.elodin-bridge-admin__image-size-table th:nth-child(3),
-.elodin-bridge-admin__image-size-table th:nth-child(4) {
-	width: 9%;
-}
-
-.elodin-bridge-admin__image-size-table th:nth-child(5),
-.elodin-bridge-admin__image-size-table th:nth-child(6) {
-	white-space: nowrap;
-	width: 15%;
-}
-
-.elodin-bridge-admin__image-size-table th:nth-child(7) {
-	width: 10%;
-}
-
 .elodin-bridge-admin__image-size-builder {
 	display: grid;
 	gap: 10px;
+	min-width: 0;
 }
 
-.elodin-bridge-admin__image-size-row .small-text {
+.elodin-bridge-admin__custom-image-sizes {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+	margin-top: 8px;
+}
+
+.elodin-bridge-admin__image-size-row {
+	display: grid;
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 10px;
+	background: #f6f7f7;
+	min-width: 0;
+}
+
+.elodin-bridge-admin__image-size-row-main {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px 10px;
+	align-items: end;
+	min-width: 0;
+}
+
+.elodin-bridge-admin__image-size-row-options {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 18px;
+	min-width: 0;
+}
+
+.elodin-bridge-admin__image-size-field {
+	display: grid;
+	gap: 6px;
+	min-width: 0;
+}
+
+.elodin-bridge-admin__image-size-field > span {
+	font-size: 11px;
+	font-weight: 600;
+	color: #50575e;
+	line-height: 1.2;
+}
+
+.elodin-bridge-admin__image-size-field--slug {
+	grid-column: span 1;
+}
+
+.elodin-bridge-admin__image-size-field--label {
+	grid-column: span 1;
+}
+
+.elodin-bridge-admin__image-size-field--width,
+.elodin-bridge-admin__image-size-field--height {
+	grid-column: auto;
+}
+
+.elodin-bridge-admin__image-size-field--checkbox {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	min-width: 0;
+	padding-top: 2px;
+}
+
+.elodin-bridge-admin__image-size-field--checkbox > span {
+	max-width: none;
+	order: 2;
+	font-size: 12px;
+	line-height: 1.2;
+}
+
+.elodin-bridge-admin__image-size-field--checkbox .elodin-bridge-admin__image-size-switch {
+	order: 1;
+	flex-shrink: 0;
+	margin-top: 0;
+}
+
+.elodin-bridge-admin__image-size-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 72px;
+	margin-left: auto;
+}
+
+.elodin-bridge-admin__image-size-field .small-text,
+.elodin-bridge-admin__image-size-field .regular-text {
 	width: 100%;
-	max-width: 72px;
+	max-width: none;
+	height: 30px;
+	min-height: 30px;
+	font-size: 13px;
+	padding: 2px 8px;
 }
 
-.elodin-bridge-admin__image-size-row .regular-text {
+.elodin-bridge-admin__image-size-field input[type="number"].small-text {
 	width: 100%;
-	max-width: 150px;
+	max-width: none;
 }
 
-.elodin-bridge-admin__actions {
-	margin-top: 16px;
+.elodin-bridge-admin__image-size-field--slug .regular-text,
+.elodin-bridge-admin__image-size-field--label .regular-text,
+.elodin-bridge-admin__image-size-field--width .small-text,
+.elodin-bridge-admin__image-size-field--height .small-text {
+	max-width: none;
+}
+
+.elodin-bridge-admin__image-size-switch {
+	display: inline-flex;
+	position: relative;
+}
+
+.elodin-bridge-admin__toggle-track--small {
+	width: 32px;
+	height: 18px;
+	padding: 2px;
+}
+
+.elodin-bridge-admin__toggle-track--small .elodin-bridge-admin__toggle-thumb {
+	width: 12px;
+	height: 12px;
+}
+
+.elodin-bridge-admin__toggle-input:checked + .elodin-bridge-admin__toggle-track--small .elodin-bridge-admin__toggle-thumb {
+	transform: translateX(14px);
+}
+
+.elodin-bridge-admin__image-size-actions .elodin-bridge-admin__remove-image-size {
+	padding: 3px 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	text-decoration: none;
 }
 
 @media (max-width: 782px) {
+	.elodin-bridge-admin__toolbar {
+		top: 46px;
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.elodin-bridge-admin__toolbar-save {
+		display: flex;
+		justify-content: flex-end;
+		align-items: stretch;
+	}
+
+	.elodin-bridge-admin__cards {
+		column-count: 1;
+	}
+
 	.elodin-bridge-admin__responsive-values {
 		grid-template-columns: 1fr;
+	}
+
+	.elodin-bridge-admin__image-size-field--slug,
+	.elodin-bridge-admin__image-size-field--label,
+	.elodin-bridge-admin__image-size-field--width,
+	.elodin-bridge-admin__image-size-field--height {
+		grid-column: auto;
+	}
+
+	.elodin-bridge-admin__image-size-row-main {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.elodin-bridge-admin__image-size-row-options {
+		gap: 8px 14px;
+	}
+
+	.elodin-bridge-admin__image-size-actions {
+		justify-content: flex-start;
+		margin-left: 0;
+	}
+}
+
+@media (min-width: 783px) and (max-width: 1199px) {
+	.elodin-bridge-admin__cards {
+		column-count: 2;
+	}
+}
+
+@media (max-width: 560px) {
+	.elodin-bridge-admin__image-size-row-main {
+		grid-template-columns: 1fr;
+	}
+
+	.elodin-bridge-admin__image-size-field--checkbox {
+		align-items: center;
+	}
+
+	.elodin-bridge-admin__image-size-actions {
+		justify-content: flex-start;
+		margin-left: 0;
 	}
 }

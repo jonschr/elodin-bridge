@@ -804,6 +804,18 @@ function elodin_bridge_enqueue_admin_assets( $hook_suffix ) {
 			true
 		);
 	}
+
+	$autosave_script_path = ELODIN_BRIDGE_DIR . '/assets/admin-autosave.js';
+	$autosave_script_url = ELODIN_BRIDGE_URL . 'assets/admin-autosave.js';
+	if ( file_exists( $autosave_script_path ) ) {
+		wp_enqueue_script(
+			'elodin-bridge-admin-autosave',
+			$autosave_script_url,
+			array(),
+			(string) filemtime( $autosave_script_path ),
+			true
+		);
+	}
 }
 add_action( 'admin_enqueue_scripts', 'elodin_bridge_enqueue_admin_assets' );
 
@@ -847,8 +859,29 @@ function elodin_bridge_render_admin_page() {
 		<form action="options.php" method="post" class="elodin-bridge-admin__form">
 			<?php settings_fields( 'elodin_bridge_settings' ); ?>
 
-			<div class="elodin-bridge-admin__card">
-				<div class="elodin-bridge-admin__feature <?php echo $heading_paragraph_overrides_enabled ? 'is-enabled' : ''; ?> <?php echo ! $heading_paragraph_overrides_available ? 'is-unavailable' : ''; ?>">
+			<div class="elodin-bridge-admin__toolbar">
+				<div class="elodin-bridge-admin__category-nav" role="tablist" aria-label="<?php esc_attr_e( 'Bridge settings categories', 'elodin-bridge' ); ?>">
+					<button type="button" class="elodin-bridge-admin__category-button is-active" data-bridge-category="editor" aria-pressed="true"><?php esc_html_e( 'Editor Tweaks', 'elodin-bridge' ); ?></button>
+					<button type="button" class="elodin-bridge-admin__category-button" data-bridge-category="style" aria-pressed="false"><?php esc_html_e( 'Style Tweaks', 'elodin-bridge' ); ?></button>
+					<button type="button" class="elodin-bridge-admin__category-button" data-bridge-category="misc" aria-pressed="false"><?php esc_html_e( 'Miscellaneous', 'elodin-bridge' ); ?></button>
+				</div>
+				<div class="elodin-bridge-admin__toolbar-save">
+					<span class="elodin-bridge-admin__save-status" data-bridge-save-status data-state="idle" role="status" aria-live="polite">
+						<?php esc_html_e( 'Changes save automatically.', 'elodin-bridge' ); ?>
+					</span>
+					<div class="elodin-bridge-admin__save-debug" data-bridge-save-debug-wrap hidden>
+						<strong><?php esc_html_e( 'Autosave debug', 'elodin-bridge' ); ?></strong>
+						<pre data-bridge-save-debug></pre>
+					</div>
+					<noscript>
+						<button type="submit" name="submit" id="submit" class="button button-primary"><?php esc_html_e( 'Save Changes', 'elodin-bridge' ); ?></button>
+					</noscript>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__cards">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $heading_paragraph_overrides_enabled ? 'is-enabled' : ''; ?> <?php echo ! $heading_paragraph_overrides_available ? 'is-unavailable' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header <?php echo ! $heading_paragraph_overrides_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>">
 						<input
 							type="hidden"
@@ -867,11 +900,9 @@ function elodin_bridge_render_admin_page() {
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
 						</span>
-						<span class="elodin-bridge-admin__feature-heading-row">
-							<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable heading and paragraph style overrides', 'elodin-bridge' ); ?></span>
-							<span class="elodin-bridge-admin__requirement-tag"><?php esc_html_e( 'Requires GeneratePress', 'elodin-bridge' ); ?></span>
-						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable heading and paragraph style overrides', 'elodin-bridge' ); ?></span>
 					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GeneratePress', 'elodin-bridge' ); ?></span>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
@@ -886,7 +917,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature <?php echo $balanced_text_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT ); ?>">
 						<input
@@ -916,7 +947,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature <?php echo ! empty( $content_type_behavior_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-content-type-behavior-enabled">
 						<input
@@ -972,7 +1003,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $automatic_heading_margins_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-automatic-heading-margins-enabled">
 						<input
@@ -1037,7 +1068,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $last_child_margin_resets_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>">
 						<input
@@ -1067,7 +1098,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature <?php echo $editor_ui_restrictions_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS ); ?>">
 						<input
@@ -1097,7 +1128,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature <?php echo $media_library_infinite_scrolling_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING ); ?>">
 						<input
@@ -1127,7 +1158,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="misc">
 				<div class="elodin-bridge-admin__feature <?php echo $shortcodes_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES ); ?>">
 						<input
@@ -1157,8 +1188,8 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
-				<div class="elodin-bridge-admin__feature <?php echo $generateblocks_boundary_highlights_enabled ? 'is-enabled' : ''; ?>">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_boundary_highlights_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>">
 						<input
 							type="hidden"
@@ -1176,11 +1207,9 @@ function elodin_bridge_render_admin_page() {
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
 						</span>
-						<span class="elodin-bridge-admin__feature-heading-row">
-							<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable GenerateBlocks boundary highlights in the editor', 'elodin-bridge' ); ?></span>
-							<span class="elodin-bridge-admin__requirement-tag"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
-						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable GenerateBlocks boundary highlights in the editor', 'elodin-bridge' ); ?></span>
 					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
@@ -1190,7 +1219,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature <?php echo $prettier_widgets_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS ); ?>">
 						<input
@@ -1220,7 +1249,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="misc">
 				<div class="elodin-bridge-admin__feature <?php echo ! empty( $image_sizes_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-image-sizes-enabled">
 						<input
@@ -1255,22 +1284,12 @@ function elodin_bridge_render_admin_page() {
 								class="elodin-bridge-admin__image-size-builder"
 								data-next-index="<?php echo esc_attr( (string) count( $image_size_rows ) ); ?>"
 							>
-								<table class="widefat striped elodin-bridge-admin__image-size-table">
-									<thead>
-										<tr>
-											<th scope="col"><?php esc_html_e( 'Slug', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Label', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Width', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Height', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Hard Crop', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Allow In Galleries', 'elodin-bridge' ); ?></th>
-											<th scope="col"><?php esc_html_e( 'Remove', 'elodin-bridge' ); ?></th>
-										</tr>
-									</thead>
-									<tbody class="elodin-bridge-admin__custom-image-sizes">
-										<?php foreach ( $image_size_rows as $index => $size ) : ?>
-											<tr class="elodin-bridge-admin__image-size-row">
-												<td>
+								<div class="elodin-bridge-admin__custom-image-sizes">
+									<?php foreach ( $image_size_rows as $index => $size ) : ?>
+										<div class="elodin-bridge-admin__image-size-row">
+											<div class="elodin-bridge-admin__image-size-row-main">
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--slug">
+													<span><?php esc_html_e( 'Slug', 'elodin-bridge' ); ?></span>
 													<input
 														type="text"
 														class="regular-text code"
@@ -1278,8 +1297,9 @@ function elodin_bridge_render_admin_page() {
 														value="<?php echo esc_attr( $size['slug'] ?? '' ); ?>"
 														placeholder="hero_large"
 													/>
-												</td>
-												<td>
+												</label>
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--label">
+													<span><?php esc_html_e( 'Label', 'elodin-bridge' ); ?></span>
 													<input
 														type="text"
 														class="regular-text"
@@ -1287,8 +1307,9 @@ function elodin_bridge_render_admin_page() {
 														value="<?php echo esc_attr( $size['label'] ?? '' ); ?>"
 														placeholder="<?php esc_attr_e( 'Hero Large', 'elodin-bridge' ); ?>"
 													/>
-												</td>
-												<td>
+												</label>
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--width">
+													<span><?php esc_html_e( 'Width', 'elodin-bridge' ); ?></span>
 													<input
 														type="number"
 														class="small-text"
@@ -1297,8 +1318,9 @@ function elodin_bridge_render_admin_page() {
 														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][width]"
 														value="<?php echo esc_attr( isset( $size['width'] ) ? (string) $size['width'] : '' ); ?>"
 													/>
-												</td>
-												<td>
+												</label>
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--height">
+													<span><?php esc_html_e( 'Height', 'elodin-bridge' ); ?></span>
 													<input
 														type="number"
 														class="small-text"
@@ -1307,60 +1329,106 @@ function elodin_bridge_render_admin_page() {
 														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][height]"
 														value="<?php echo esc_attr( isset( $size['height'] ) ? (string) $size['height'] : '' ); ?>"
 													/>
-												</td>
-												<td>
+												</label>
+											</div>
+											<div class="elodin-bridge-admin__image-size-row-options">
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--checkbox elodin-bridge-admin__image-size-field--crop">
 													<input
 														type="hidden"
 														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][crop]"
 														value="0"
 													/>
-													<input
-														type="checkbox"
-														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][crop]"
-														value="1"
-														<?php checked( ! empty( $size['crop'] ) ); ?>
-													/>
-												</td>
-												<td>
+													<span class="elodin-bridge-admin__image-size-switch">
+														<input
+															type="checkbox"
+															class="elodin-bridge-admin__toggle-input elodin-bridge-admin__image-size-toggle-input"
+															name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][crop]"
+															value="1"
+															<?php checked( ! empty( $size['crop'] ) ); ?>
+														/>
+														<span class="elodin-bridge-admin__toggle-track elodin-bridge-admin__toggle-track--small" aria-hidden="true">
+															<span class="elodin-bridge-admin__toggle-thumb"></span>
+														</span>
+													</span>
+													<span><?php esc_html_e( 'Hard Crop', 'elodin-bridge' ); ?></span>
+												</label>
+												<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--checkbox elodin-bridge-admin__image-size-field--gallery">
 													<input
 														type="hidden"
 														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][gallery]"
 														value="0"
 													/>
-													<input
-														type="checkbox"
-														name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][gallery]"
-														value="1"
-														<?php checked( ! empty( $size['gallery'] ) ); ?>
-													/>
-												</td>
-												<td>
+													<span class="elodin-bridge-admin__image-size-switch">
+														<input
+															type="checkbox"
+															class="elodin-bridge-admin__toggle-input elodin-bridge-admin__image-size-toggle-input"
+															name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][<?php echo esc_attr( (string) $index ); ?>][gallery]"
+															value="1"
+															<?php checked( ! empty( $size['gallery'] ) ); ?>
+														/>
+														<span class="elodin-bridge-admin__toggle-track elodin-bridge-admin__toggle-track--small" aria-hidden="true">
+															<span class="elodin-bridge-admin__toggle-thumb"></span>
+														</span>
+													</span>
+													<span><?php esc_html_e( 'Allow In Galleries', 'elodin-bridge' ); ?></span>
+												</label>
+												<div class="elodin-bridge-admin__image-size-actions">
 													<button type="button" class="button-link-delete elodin-bridge-admin__remove-image-size"><?php esc_html_e( 'Remove', 'elodin-bridge' ); ?></button>
-												</td>
-											</tr>
-										<?php endforeach; ?>
-									</tbody>
-								</table>
+												</div>
+											</div>
+										</div>
+									<?php endforeach; ?>
+								</div>
 								<button type="button" class="button button-secondary elodin-bridge-admin__add-image-size"><?php esc_html_e( 'Add Custom Size', 'elodin-bridge' ); ?></button>
 							</div>
 						</div>
 
 						<script type="text/template" id="elodin-bridge-image-size-row-template">
-							<tr class="elodin-bridge-admin__image-size-row">
-								<td><input type="text" class="regular-text code" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][slug]" placeholder="hero_large" /></td>
-								<td><input type="text" class="regular-text" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][label]" placeholder="<?php esc_attr_e( 'Hero Large', 'elodin-bridge' ); ?>" /></td>
-								<td><input type="number" class="small-text" min="1" step="1" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][width]" /></td>
-								<td><input type="number" class="small-text" min="1" step="1" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][height]" /></td>
-								<td>
-									<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][crop]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][crop]" value="1" />
-								</td>
-								<td>
-									<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][gallery]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][gallery]" value="1" />
-								</td>
-								<td><button type="button" class="button-link-delete elodin-bridge-admin__remove-image-size"><?php esc_html_e( 'Remove', 'elodin-bridge' ); ?></button></td>
-							</tr>
+							<div class="elodin-bridge-admin__image-size-row">
+								<div class="elodin-bridge-admin__image-size-row-main">
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--slug">
+										<span><?php esc_html_e( 'Slug', 'elodin-bridge' ); ?></span>
+										<input type="text" class="regular-text code" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][slug]" placeholder="hero_large" />
+									</label>
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--label">
+										<span><?php esc_html_e( 'Label', 'elodin-bridge' ); ?></span>
+										<input type="text" class="regular-text" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][label]" placeholder="<?php esc_attr_e( 'Hero Large', 'elodin-bridge' ); ?>" />
+									</label>
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--width">
+										<span><?php esc_html_e( 'Width', 'elodin-bridge' ); ?></span>
+										<input type="number" class="small-text" min="1" step="1" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][width]" />
+									</label>
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--height">
+										<span><?php esc_html_e( 'Height', 'elodin-bridge' ); ?></span>
+										<input type="number" class="small-text" min="1" step="1" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][height]" />
+									</label>
+								</div>
+								<div class="elodin-bridge-admin__image-size-row-options">
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--checkbox elodin-bridge-admin__image-size-field--crop">
+										<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][crop]" value="0" />
+										<span class="elodin-bridge-admin__image-size-switch">
+											<input type="checkbox" class="elodin-bridge-admin__toggle-input elodin-bridge-admin__image-size-toggle-input" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][crop]" value="1" />
+											<span class="elodin-bridge-admin__toggle-track elodin-bridge-admin__toggle-track--small" aria-hidden="true">
+												<span class="elodin-bridge-admin__toggle-thumb"></span>
+											</span>
+										</span>
+										<span><?php esc_html_e( 'Hard Crop', 'elodin-bridge' ); ?></span>
+									</label>
+									<label class="elodin-bridge-admin__image-size-field elodin-bridge-admin__image-size-field--checkbox elodin-bridge-admin__image-size-field--gallery">
+										<input type="hidden" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][gallery]" value="0" />
+										<span class="elodin-bridge-admin__image-size-switch">
+											<input type="checkbox" class="elodin-bridge-admin__toggle-input elodin-bridge-admin__image-size-toggle-input" name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_IMAGE_SIZES ); ?>[sizes][__INDEX__][gallery]" value="1" />
+											<span class="elodin-bridge-admin__toggle-track elodin-bridge-admin__toggle-track--small" aria-hidden="true">
+												<span class="elodin-bridge-admin__toggle-thumb"></span>
+											</span>
+										</span>
+										<span><?php esc_html_e( 'Allow In Galleries', 'elodin-bridge' ); ?></span>
+									</label>
+									<div class="elodin-bridge-admin__image-size-actions">
+										<button type="button" class="button-link-delete elodin-bridge-admin__remove-image-size"><?php esc_html_e( 'Remove', 'elodin-bridge' ); ?></button>
+									</div>
+								</div>
+							</div>
 						</script>
 
 						<p class="elodin-bridge-admin__note">
@@ -1371,7 +1439,7 @@ function elodin_bridge_render_admin_page() {
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card">
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $block_edge_classes_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-block-edge-classes-enabled">
 						<input
@@ -1446,10 +1514,8 @@ function elodin_bridge_render_admin_page() {
 					</div>
 				</div>
 			</div>
-
-			<div class="elodin-bridge-admin__actions">
-				<?php submit_button( __( 'Save Changes', 'elodin-bridge' ), 'primary', 'submit', false ); ?>
 			</div>
+
 		</form>
 	</div>
 	<?php
@@ -1468,3 +1534,13 @@ function elodin_bridge_register_admin_menu() {
 	);
 }
 add_action( 'admin_menu', 'elodin_bridge_register_admin_menu' );
+
+/**
+ * Align settings save capability with the Bridge settings page capability.
+ *
+ * @return string
+ */
+function elodin_bridge_settings_page_capability() {
+	return 'edit_theme_options';
+}
+add_filter( 'option_page_capability_elodin_bridge_settings', 'elodin_bridge_settings_page_capability' );

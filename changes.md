@@ -1,5 +1,25 @@
 # Elodin Bridge Changes
 
+## Version 0.5
+
+### Added
+- Automatic settings save on the Bridge admin page (no manual submit required in normal JS-enabled use).
+  - Includes live save status messaging: idle, saving, saved, and error.
+  - Keeps a `<noscript>` manual save button fallback for non-JavaScript environments.
+- Temporary autosave debug output on save failure:
+  - Inline debug panel on the settings screen.
+  - Console diagnostics with request/response context.
+
+### Changed
+- Custom image-size editor row layout refined:
+  - Top row (`slug`, `label`, `width`, `height`) uses its own dedicated grid.
+  - Bottom row (`hard crop`, `allow in galleries`, `remove`) uses separate flex layout.
+- Image-size field sizing now enforces full-width form controls within their grid cells, including explicit full-width handling for `input[type=number].small-text`.
+
+### Fixed
+- Autosave endpoint resolution now uses the form `action` attribute directly to avoid collisions with hidden inputs named `action`.
+- Added explicit settings capability alignment for `elodin_bridge_settings` saves so page access and settings persistence use the same capability model.
+
 ## Version 0.4
 
 ### Added
