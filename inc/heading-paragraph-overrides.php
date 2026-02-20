@@ -256,7 +256,8 @@ function elodin_bridge_build_css_rule( $selector, $declarations ) {
 
 	$rule = $selector . '{';
 	foreach ( $declarations as $property => $value ) {
-		$rule .= $property . ':' . $value . '!important;';
+		$is_forceful_property = 'margin-bottom' !== $property;
+		$rule .= $property . ':' . $value . ( $is_forceful_property ? '!important' : '' ) . ';';
 	}
 	$rule .= '}';
 
@@ -320,80 +321,37 @@ function elodin_bridge_enqueue_typography_override_styles() {
 add_action( 'enqueue_block_assets', 'elodin_bridge_enqueue_typography_override_styles' );
 
 /**
- * Build balanced text CSS.
- *
- * @return string
+ * Enqueue heading/paragraph override controls in the block toolbar.
  */
-function elodin_bridge_build_balanced_text_css() {
-	return ':is(p,h1,h2,h3,h4,h5,h6).balanced{text-wrap:balance!important;}';
-}
-
-/**
- * Enqueue balanced text styles for front-end and block editor content.
- */
-function elodin_bridge_enqueue_balanced_text_styles() {
-	if ( ! elodin_bridge_is_balanced_text_enabled() ) {
+function elodin_bridge_enqueue_editor_heading_paragraph_overrides_toolbar() {
+	if ( ! elodin_bridge_is_heading_paragraph_overrides_enabled() ) {
 		return;
 	}
 
-	$css = elodin_bridge_build_balanced_text_css();
-	if ( '' === $css ) {
-		return;
-	}
-
-	$handle = 'elodin-bridge-balanced-text';
-	wp_register_style( $handle, false, array(), ELODIN_BRIDGE_VERSION );
-	wp_enqueue_style( $handle );
-	wp_add_inline_style( $handle, $css );
-}
-add_action( 'enqueue_block_assets', 'elodin_bridge_enqueue_balanced_text_styles' );
-
-/**
- * Enqueue block editor toolbar controls for typography class toggles.
- */
-function elodin_bridge_enqueue_editor_typography_toolbar() {
-	$enable_heading_paragraph_overrides = elodin_bridge_is_heading_paragraph_overrides_enabled();
-	$enable_balanced_text = elodin_bridge_is_balanced_text_enabled();
-	if ( ! $enable_heading_paragraph_overrides && ! $enable_balanced_text ) {
-		return;
-	}
-
-	$script_path = ELODIN_BRIDGE_DIR . '/assets/editor-typography-toolbar.js';
-	$script_url = ELODIN_BRIDGE_URL . 'assets/editor-typography-toolbar.js';
-	$style_path = ELODIN_BRIDGE_DIR . '/assets/editor-typography-toolbar.css';
-	$style_url = ELODIN_BRIDGE_URL . 'assets/editor-typography-toolbar.css';
+	$script_path = ELODIN_BRIDGE_DIR . '/assets/editor-heading-paragraph-overrides.js';
+	$script_url = ELODIN_BRIDGE_URL . 'assets/editor-heading-paragraph-overrides.js';
+	$style_path = ELODIN_BRIDGE_DIR . '/assets/editor-heading-paragraph-overrides.css';
+	$style_url = ELODIN_BRIDGE_URL . 'assets/editor-heading-paragraph-overrides.css';
 
 	if ( ! file_exists( $script_path ) ) {
 		return;
 	}
 
 	wp_enqueue_script(
-		'elodin-bridge-editor-typography-toolbar',
+		'elodin-bridge-editor-heading-paragraph-overrides',
 		$script_url,
 		array( 'wp-block-editor', 'wp-components', 'wp-compose', 'wp-data', 'wp-element', 'wp-hooks', 'wp-i18n' ),
 		(string) filemtime( $script_path ),
 		true
 	);
 
-	wp_add_inline_script(
-		'elodin-bridge-editor-typography-toolbar',
-		'window.elodinBridgeToolbarSettings = ' . wp_json_encode(
-			array(
-				'enableHeadingParagraphOverrides' => $enable_heading_paragraph_overrides,
-				'enableBalancedText' => $enable_balanced_text,
-			)
-		) . ';',
-		'before'
-	);
-
-	if ( $enable_heading_paragraph_overrides && file_exists( $style_path ) ) {
+	if ( file_exists( $style_path ) ) {
 		wp_enqueue_style(
-			'elodin-bridge-editor-typography-toolbar',
+			'elodin-bridge-editor-heading-paragraph-overrides',
 			$style_url,
 			array(),
 			(string) filemtime( $style_path )
 		);
 	}
-
 }
-add_action( 'enqueue_block_editor_assets', 'elodin_bridge_enqueue_editor_typography_toolbar' );
+add_action( 'enqueue_block_editor_assets', 'elodin_bridge_enqueue_editor_heading_paragraph_overrides_toolbar' );
