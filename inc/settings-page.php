@@ -11,6 +11,31 @@ function elodin_bridge_sanitize_toggle( $value ) {
 }
 
 /**
+ * Sanitize a single CSS length/expression field used in settings.
+ *
+ * @param mixed  $value    Raw setting value.
+ * @param string $fallback Fallback value.
+ * @return string
+ */
+function elodin_bridge_sanitize_css_value( $value, $fallback = '' ) {
+	$value = trim( wp_strip_all_tags( (string) $value ) );
+	if ( '' === $value ) {
+		return $fallback;
+	}
+
+	// Prevent malformed payloads while allowing values like 4em, var(--space), and clamp(...).
+	if ( false !== strpbrk( $value, ';{}\\' ) ) {
+		return $fallback;
+	}
+
+	if ( ! preg_match( '/^[a-zA-Z0-9%().,_+*\/\-\s]+$/', $value ) ) {
+		return $fallback;
+	}
+
+	return preg_replace( '/\s+/', ' ', $value );
+}
+
+/**
  * Check whether GeneratePress is the active theme or parent theme.
  *
  * @return bool
@@ -454,6 +479,52 @@ function elodin_bridge_get_content_type_behavior_settings() {
 }
 
 /**
+ * Get default values for automatic heading margin settings.
+ *
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_get_automatic_heading_margins_defaults() {
+	return array(
+		'enabled' => 1,
+		'desktop' => '3em',
+		'tablet'  => '2.5em',
+		'mobile'  => '2em',
+	);
+}
+
+/**
+ * Sanitize automatic heading margin settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_sanitize_automatic_heading_margins_settings( $value ) {
+	$defaults = elodin_bridge_get_automatic_heading_margins_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'desktop' => elodin_bridge_sanitize_css_value( $value['desktop'] ?? $defaults['desktop'], $defaults['desktop'] ),
+		'tablet'  => elodin_bridge_sanitize_css_value( $value['tablet'] ?? $defaults['tablet'], $defaults['tablet'] ),
+		'mobile'  => elodin_bridge_sanitize_css_value( $value['mobile'] ?? $defaults['mobile'], $defaults['mobile'] ),
+	);
+}
+
+/**
+ * Get normalized automatic heading margin settings.
+ *
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_get_automatic_heading_margins_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_automatic_heading_margins_defaults();
+	}
+
+	return elodin_bridge_sanitize_automatic_heading_margins_settings( $saved );
+}
+
+/**
  * Check if heading/paragraph style overrides are enabled.
  *
  * @return bool
@@ -473,6 +544,16 @@ function elodin_bridge_is_heading_paragraph_overrides_enabled() {
  */
 function elodin_bridge_is_balanced_text_enabled() {
 	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT, 1 );
+}
+
+/**
+ * Check if automatic heading margins are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_automatic_heading_margins_enabled() {
+	$settings = elodin_bridge_get_automatic_heading_margins_settings();
+	return ! empty( $settings['enabled'] );
 }
 
 /**
@@ -518,6 +599,15 @@ function elodin_bridge_is_generateblocks_boundary_highlights_enabled() {
  */
 function elodin_bridge_is_prettier_widgets_enabled() {
 	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS, 1 );
+}
+
+/**
+ * Check if last-child margin reset styles are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_last_child_margin_resets_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS, 1 );
 }
 
 /**
@@ -579,6 +669,16 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_automatic_heading_margins_settings',
+			'default'           => elodin_bridge_get_automatic_heading_margins_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR,
 		array(
 			'type'              => 'array',
@@ -630,6 +730,16 @@ function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS,
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
@@ -708,11 +818,14 @@ function elodin_bridge_render_admin_page() {
 	$heading_paragraph_overrides_available = elodin_bridge_is_generatepress_parent_theme();
 	$heading_paragraph_overrides_enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
 	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
+	$automatic_heading_margins_settings = elodin_bridge_get_automatic_heading_margins_settings();
+	$automatic_heading_margins_enabled = elodin_bridge_is_automatic_heading_margins_enabled();
 	$editor_ui_restrictions_enabled = elodin_bridge_is_editor_ui_restrictions_enabled();
 	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
 	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
 	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();
 	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
+	$last_child_margin_resets_enabled = elodin_bridge_is_last_child_margin_resets_enabled();
 	$block_edge_class_settings = elodin_bridge_get_block_edge_class_settings();
 	$block_edge_classes_enabled = elodin_bridge_is_block_edge_classes_enabled();
 	$image_sizes_settings = elodin_bridge_get_image_sizes_settings();
@@ -855,6 +968,101 @@ function elodin_bridge_render_admin_page() {
 								<?php esc_html_e( 'Checked content types receive that backend title styling; unchecked content types do not.', 'elodin-bridge' ); ?>
 							</p>
 						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $automatic_heading_margins_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-automatic-heading-margins-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-automatic-heading-margins-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $automatic_heading_margins_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable automatic heading margins', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Applies automatic top margins to block headings (h1-h4), with first-child headings reset to 0.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__responsive-values">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-heading-margin-desktop">
+								<span><?php esc_html_e( 'Desktop', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-heading-margin-desktop"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[desktop]"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['desktop'] ?? '3em' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-heading-margin-tablet">
+								<span><?php esc_html_e( 'Tablet', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-heading-margin-tablet"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[tablet]"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['tablet'] ?? '2.5em' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-heading-margin-mobile">
+								<span><?php esc_html_e( 'Mobile', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-heading-margin-mobile"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[mobile]"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['mobile'] ?? '2em' ); ?>"
+								/>
+							</label>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like 4em, var(--space-heading-top), or clamp(2rem, 3vw, 4rem).', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card">
+				<div class="elodin-bridge-admin__feature <?php echo $last_child_margin_resets_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>"
+							value="1"
+							<?php checked( $last_child_margin_resets_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable last-child margin resets', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Sets margin-bottom: 0 for last-child headings, paragraphs, lists, and button groups.', 'elodin-bridge' ); ?>
+						</p>
 					</div>
 				</div>
 			</div>

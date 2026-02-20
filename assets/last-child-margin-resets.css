@@ -1,0 +1,13 @@
+h1.wp-block-heading:last-child,
+h2.wp-block-heading:last-child,
+h3.wp-block-heading:last-child,
+h4.wp-block-heading:last-child,
+h5.wp-block-heading:last-child,
+h6.wp-block-heading:last-child,
+p:last-child,
+ul:last-child,
+ol:last-child,
+.wp-block-list:last-child,
+.wp-block-buttons:last-child {
+	margin-bottom: 0;
+}

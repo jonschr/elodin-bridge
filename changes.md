@@ -1,5 +1,23 @@
 # Elodin Bridge Changes
 
+## Version 0.4
+
+### Added
+- New typography utility setting: `Enable automatic heading margins` (default on).
+  - Configurable responsive values for Desktop, Tablet, and Mobile.
+  - Default values: `3em` (desktop), `2.5em` (tablet), and `2em` (mobile).
+  - Applies to `h1`-`h4` block headings, with `:first-child` headings reset to `margin-top: 0`.
+- New spacing utility setting: `Enable last-child margin resets` (default on).
+  - Sets `margin-bottom: 0` for last-child headings, paragraphs, lists, and button groups.
+
+### Changed
+- Heading conversion classes now always reset top margin for converted heading styles:
+  - `.h1`, `.h2`, `.h3`, `.h4` now output `margin-top: 0`.
+- Automatic heading margin output now includes kicker-related spacing rules:
+  - `.is-style-kicker:first-child` gets `margin-block-start: 0 !important`.
+  - `.is-style-kicker:last-child` gets `margin-block-end: 0 !important`.
+  - Adjacent heading spacing is removed for `.is-style-kicker + h1/h2/h3/h4.wp-block-heading`.
+
 ## Version 0.3
 
 ### Added

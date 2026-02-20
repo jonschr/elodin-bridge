@@ -3,7 +3,7 @@
 	Plugin Name: Elodin Bridge
 	Plugin URI: https://elod.in
     Description: Just another plugin
-	Version: 0.3
+	Version: 0.4
     Author: Jon Schroeder
     Author URI: https://elod.in
 
@@ -26,15 +26,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Plugin constants.
 define( 'ELODIN_BRIDGE_DIR', dirname( __FILE__ ) );
 define( 'ELODIN_BRIDGE_URL', plugin_dir_url( __FILE__ ) );
-define( 'ELODIN_BRIDGE_VERSION', '0.3' );
+define( 'ELODIN_BRIDGE_VERSION', '0.4' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES', 'elodin_bridge_enable_heading_paragraph_overrides' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT', 'elodin_bridge_enable_balanced_text' );
 define( 'ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR', 'elodin_bridge_content_type_behavior' );
+define( 'ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS', 'elodin_bridge_automatic_heading_margins' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS', 'elodin_bridge_enable_editor_ui_restrictions' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING', 'elodin_bridge_enable_media_library_infinite_scrolling' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES', 'elodin_bridge_enable_shortcodes' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS', 'elodin_bridge_enable_generateblocks_boundary_highlights' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS', 'elodin_bridge_enable_prettier_widgets' );
+define( 'ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS', 'elodin_bridge_enable_last_child_margin_resets' );
 define( 'ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES', 'elodin_bridge_block_edge_classes' );
 define( 'ELODIN_BRIDGE_OPTION_IMAGE_SIZES', 'elodin_bridge_image_sizes' );
 define( 'ELODIN_BRIDGE_TYPOGRAPHY_RESET', '__elodin_bridge_typography_reset__' );
@@ -44,10 +46,12 @@ define( 'ELODIN_BRIDGE_UPDATE_BRANCH', 'master' );
 require_once ELODIN_BRIDGE_DIR . '/inc/settings-page.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/heading-paragraph-overrides.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/balanced-text.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/automatic-heading-margins.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/content-type-behavior.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/editor-ui-restrictions.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/media-library-infinite-scrolling.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/shortcodes.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/last-child-margin-resets.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-boundary-highlights.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/prettier-widgets.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/block-edge-classes.php';

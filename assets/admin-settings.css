@@ -235,6 +235,30 @@
 	color: #646970;
 }
 
+.elodin-bridge-admin__responsive-values {
+	margin-top: 12px;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	max-width: 680px;
+}
+
+.elodin-bridge-admin__responsive-field {
+	display: grid;
+	gap: 6px;
+}
+
+.elodin-bridge-admin__responsive-field > span {
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+
+.elodin-bridge-admin__responsive-field .regular-text {
+	width: 100%;
+	max-width: 100%;
+}
+
 .elodin-bridge-admin__image-size-section {
 	margin-top: 14px;
 }
@@ -293,4 +317,10 @@
 
 .elodin-bridge-admin__actions {
 	margin-top: 16px;
+}
+
+@media (max-width: 782px) {
+	.elodin-bridge-admin__responsive-values {
+		grid-template-columns: 1fr;
+	}
 }

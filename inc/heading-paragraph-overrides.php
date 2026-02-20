@@ -276,7 +276,7 @@ function elodin_bridge_build_typography_override_css() {
 	}
 
 	$source_selector = ':is(p,h1,h2,h3,h4,h5,h6)';
-	$css = '';
+	$css = '.h1,.h2,.h3,.h4{margin-top:0;}';
 	$tablet_css = '';
 	$mobile_css = '';
 
