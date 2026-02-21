@@ -611,6 +611,15 @@ function elodin_bridge_is_last_child_margin_resets_enabled() {
 }
 
 /**
+ * Check if mobile fixed-background repair is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_mobile_fixed_background_repair_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR, 1 );
+}
+
+/**
  * Check if content type behavior mapping is enabled.
  *
  * @return bool
@@ -749,6 +758,16 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES,
 		array(
 			'type'              => 'array',
@@ -838,6 +857,7 @@ function elodin_bridge_render_admin_page() {
 	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();
 	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
 	$last_child_margin_resets_enabled = elodin_bridge_is_last_child_margin_resets_enabled();
+	$mobile_fixed_background_repair_enabled = elodin_bridge_is_mobile_fixed_background_repair_enabled();
 	$block_edge_class_settings = elodin_bridge_get_block_edge_class_settings();
 	$block_edge_classes_enabled = elodin_bridge_is_block_edge_classes_enabled();
 	$image_sizes_settings = elodin_bridge_get_image_sizes_settings();
@@ -1093,6 +1113,47 @@ function elodin_bridge_render_admin_page() {
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Sets margin-bottom: 0 for last-child headings, paragraphs, lists, and button groups.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature <?php echo $mobile_fixed_background_repair_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR ); ?>"
+							value="1"
+							<?php checked( $mobile_fixed_background_repair_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Repair fixed-position background images on mobile', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'On mobile breakpoints, scans for elements using fixed background attachments and switches them to non-fixed to avoid known browser rendering bugs.', 'elodin-bridge' ); ?>
+						</p>
+						<p class="elodin-bridge-admin__note">
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: %s: Can I Use URL for background-attachment support. */
+									__( 'Compatibility note: <a href="%s" target="_blank" rel="noopener noreferrer">background-attachment browser support</a> is mixed on mobile. At present, Safari on iOS and the Android Browser show partial to no support.', 'elodin-bridge' ),
+									esc_url( 'https://caniuse.com/background-attachment' )
+								)
+							);
+							?>
 						</p>
 					</div>
 				</div>

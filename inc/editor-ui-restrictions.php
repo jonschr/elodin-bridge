@@ -28,28 +28,21 @@ function elodin_bridge_enqueue_editor_ui_restrictions() {
 
 	wp_add_inline_script(
 		$handle,
-		'( function( wp ) {
-			if ( ! wp || ! wp.data || ! wp.domReady ) {
-				return;
-			}
-
-			wp.domReady( function() {
-				const selectEditPost = wp.data.select( "core/edit-post" );
-				const dispatchEditPost = wp.data.dispatch( "core/edit-post" );
-
-				if (
-					selectEditPost &&
-					dispatchEditPost &&
-					typeof selectEditPost.isFeatureActive === "function" &&
-					typeof dispatchEditPost.toggleFeature === "function" &&
-					selectEditPost.isFeatureActive( "fullscreenMode" )
-				) {
-					dispatchEditPost.toggleFeature( "fullscreenMode" );
+			'( function( wp ) {
+				if ( ! wp || ! wp.data || ! wp.domReady ) {
+					return;
 				}
 
-				const dispatchEditor = wp.data.dispatch( "core/editor" );
-				if ( dispatchEditor && typeof dispatchEditor.disablePublishSidebar === "function" ) {
-					dispatchEditor.disablePublishSidebar();
+				wp.domReady( function() {
+					const dispatchPreferences = wp.data.dispatch( "core/preferences" );
+					if ( dispatchPreferences && typeof dispatchPreferences.set === "function" ) {
+						dispatchPreferences.set( "core", "fullscreenMode", false );
+						dispatchPreferences.set( "core/edit-post", "fullscreenMode", false );
+					}
+
+					const dispatchEditor = wp.data.dispatch( "core/editor" );
+					if ( dispatchEditor && typeof dispatchEditor.disablePublishSidebar === "function" ) {
+						dispatchEditor.disablePublishSidebar();
 				}
 			} );
 		} )( window.wp );'
