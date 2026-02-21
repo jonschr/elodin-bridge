@@ -28,7 +28,7 @@
 	margin-top: 0 !important;
 }
 
-.elodin-bridge-page-like-title .editor-styles-wrapper .wp-block {
+.elodin-bridge-page-like-title .editor-styles-wrapper > .wp-block {
 	max-width: 100%;
 }
 

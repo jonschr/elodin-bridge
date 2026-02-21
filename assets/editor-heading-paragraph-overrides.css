@@ -36,3 +36,32 @@
 	box-shadow: none !important;
 	border-color: transparent !important;
 }
+
+.block-editor-block-toolbar .elodin-bridge-toolbar-toggle.components-toolbar-button,
+.block-editor-block-toolbar .elodin-bridge-toolbar-toggle.components-button {
+	min-width: 30px;
+	width: 30px;
+	justify-content: center;
+}
+
+.block-editor-block-toolbar .elodin-bridge-type-icon {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 1px;
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+
+.block-editor-block-toolbar .elodin-bridge-type-icon strong,
+.block-editor-block-toolbar .elodin-bridge-type-icon span {
+	display: inline-block;
+}
+
+.block-editor-block-toolbar .elodin-bridge-type-icon strong {
+	font-weight: 700;
+}
+
+.block-editor-block-toolbar .elodin-bridge-type-icon span {
+	font-weight: 400;
+}

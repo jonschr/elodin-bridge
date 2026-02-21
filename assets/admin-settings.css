@@ -157,6 +157,19 @@
 	column-gap: 12px;
 }
 
+.elodin-bridge-admin__category-section {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	padding: 24px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	margin: 0 0 12px;
+}
+
+.elodin-bridge-admin__category-section[hidden] {
+	display: none;
+}
+
 .elodin-bridge-admin__card {
 	background: #fff;
 	border: 1px solid #dcdcde;
@@ -176,6 +189,10 @@
 
 .elodin-bridge-admin__card--wide {
 	/* In masonry mode we keep consistent card width to avoid layout gaps. */
+}
+
+.elodin-bridge-admin__card[data-bridge-category="variables"] {
+	column-span: all;
 }
 
 .elodin-bridge-admin__card[hidden] {
@@ -379,6 +396,63 @@
 	max-width: 680px;
 }
 
+.elodin-bridge-admin__variables-grid {
+	margin-top: 12px;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.elodin-bridge-admin__variable-field {
+	display: grid;
+	gap: 6px;
+	padding: 10px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 10px;
+	background: #f6f7f7;
+}
+
+.elodin-bridge-admin__variable-name {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__variable-name code {
+	font-size: 12px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__variable-name small {
+	font-size: 11px;
+	font-weight: 600;
+	color: #646970;
+}
+
+.elodin-bridge-admin__variable-value {
+	display: block;
+	padding: 8px 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #fff;
+	font-size: 12px;
+	line-height: 1.35;
+	word-break: break-word;
+}
+
+.elodin-bridge-admin__variable-missing {
+	display: block;
+	padding: 8px 10px;
+	border: 1px dashed #b8bcc2;
+	border-radius: 8px;
+	background: #fff;
+	font-size: 12px;
+	line-height: 1.35;
+	color: #8a2424;
+}
+
 .elodin-bridge-admin__responsive-field {
 	display: grid;
 	gap: 6px;
@@ -571,6 +645,10 @@
 		grid-template-columns: 1fr;
 	}
 
+	.elodin-bridge-admin__variables-grid {
+		grid-template-columns: 1fr;
+	}
+
 	.elodin-bridge-admin__image-size-field--slug,
 	.elodin-bridge-admin__image-size-field--label,
 	.elodin-bridge-admin__image-size-field--width,
@@ -595,6 +673,10 @@
 @media (min-width: 783px) and (max-width: 1199px) {
 	.elodin-bridge-admin__cards {
 		column-count: 2;
+	}
+
+	.elodin-bridge-admin__variables-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 

@@ -271,21 +271,26 @@ function elodin_bridge_build_css_rule( $selector, $declarations ) {
  */
 function elodin_bridge_build_typography_override_css() {
 	$presets = elodin_bridge_get_dynamic_typography_presets();
-	if ( empty( $presets ) ) {
-		return '';
-	}
-
 	$source_selector = ':is(p,h1,h2,h3,h4,h5,h6)';
+	$margin_top_zero_selector = ':is(p,h1,h2,h3,h4).elodin-mt,:is(p,h1,h2,h3,h4).elodin-mt-0';
+	$margin_top_small_selector = ':is(p,h1,h2,h3,h4).elodin-mt-s';
+	$margin_top_medium_selector = ':is(p,h1,h2,h3,h4).elodin-mt-m';
 	$css = '.h1,.h2,.h3,.h4{margin-top:0;}';
 	$tablet_css = '';
 	$mobile_css = '';
 
-	foreach ( $presets as $class_name => $preset ) {
-		$selector = $source_selector . '.' . $class_name;
-		$css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'desktop' ) );
-		$tablet_css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'tablet' ) );
-		$mobile_css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'mobile' ) );
+	if ( ! empty( $presets ) ) {
+		foreach ( $presets as $class_name => $preset ) {
+			$selector = $source_selector . '.' . $class_name;
+			$css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'desktop' ) );
+			$tablet_css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'tablet' ) );
+			$mobile_css .= elodin_bridge_build_css_rule( $selector, elodin_bridge_build_typography_declarations( $preset, 'mobile' ) );
+		}
 	}
+
+	$css .= $margin_top_zero_selector . '{margin-top:0!important;}';
+	$css .= $margin_top_small_selector . '{margin-top:var( --space-s )!important;}';
+	$css .= $margin_top_medium_selector . '{margin-top:var( --space-m )!important;}';
 
 	if ( '' !== $tablet_css ) {
 		$tablet_query = function_exists( 'generate_get_media_query' ) ? generate_get_media_query( 'tablet' ) : '(max-width: 1024px)';
@@ -343,6 +348,16 @@ function elodin_bridge_enqueue_editor_heading_paragraph_overrides_toolbar() {
 		array( 'wp-block-editor', 'wp-components', 'wp-compose', 'wp-data', 'wp-element', 'wp-hooks', 'wp-i18n' ),
 		(string) filemtime( $script_path ),
 		true
+	);
+	wp_add_inline_script(
+		'elodin-bridge-editor-heading-paragraph-overrides',
+		'window.elodinBridgeTypographyToolbar = ' . wp_json_encode(
+			array(
+				'enableTypeOverrides' => elodin_bridge_is_heading_paragraph_overrides_enabled(),
+				'enableBalancedText'  => elodin_bridge_is_balanced_text_enabled(),
+			)
+		) . ';',
+		'before'
 	);
 
 	if ( file_exists( $style_path ) ) {

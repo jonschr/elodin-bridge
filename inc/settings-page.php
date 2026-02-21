@@ -486,9 +486,9 @@ function elodin_bridge_get_content_type_behavior_settings() {
 function elodin_bridge_get_automatic_heading_margins_defaults() {
 	return array(
 		'enabled' => 1,
-		'desktop' => '3em',
-		'tablet'  => '2.5em',
-		'mobile'  => '2em',
+		'desktop' => 'var( --space-l )',
+		'tablet'  => 'var( --space-l )',
+		'mobile'  => 'var( --space-l )',
 	);
 }
 
@@ -525,6 +525,545 @@ function elodin_bridge_get_automatic_heading_margins_settings() {
 }
 
 /**
+ * Get spacing alias tokens and their expected theme.json slugs.
+ *
+ * @return array<int,array{token:string,label:string,source_slugs:array<int,string>}>
+ */
+function elodin_bridge_get_spacing_variable_scale() {
+	return array(
+		array(
+			'token'        => 's',
+			'label'        => __( 'Small', 'elodin-bridge' ),
+			'source_slugs' => array( 'small', 's' ),
+		),
+		array(
+			'token'        => 'm',
+			'label'        => __( 'Medium', 'elodin-bridge' ),
+			'source_slugs' => array( 'medium', 'm' ),
+		),
+		array(
+			'token'        => 'l',
+			'label'        => __( 'Large', 'elodin-bridge' ),
+			'source_slugs' => array( 'large', 'l' ),
+		),
+		array(
+			'token'        => 'xl',
+			'label'        => __( 'Extra Large', 'elodin-bridge' ),
+			'source_slugs' => array( 'x-large', 'xl' ),
+		),
+		array(
+			'token'        => '2xl',
+			'label'        => __( '2XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xx-large', '2xl', 'xxl' ),
+		),
+		array(
+			'token'        => '3xl',
+			'label'        => __( '3XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xxx-large', '3xl', 'xxxl' ),
+		),
+		array(
+			'token'        => '4xl',
+			'label'        => __( '4XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xxxx-large', '4xl', 'xxxxl' ),
+		),
+	);
+}
+
+/**
+ * Get the active theme.json file path.
+ *
+ * Prefers the active stylesheet theme, then falls back to parent template theme.
+ *
+ * @return string
+ */
+function elodin_bridge_get_active_theme_json_path() {
+	$stylesheet_json = trailingslashit( get_stylesheet_directory() ) . 'theme.json';
+	if ( file_exists( $stylesheet_json ) ) {
+		return $stylesheet_json;
+	}
+
+	$template_json = trailingslashit( get_template_directory() ) . 'theme.json';
+	if ( file_exists( $template_json ) ) {
+		return $template_json;
+	}
+
+	return '';
+}
+
+/**
+ * Get decoded active theme.json data.
+ *
+ * @return array<string,mixed>
+ */
+function elodin_bridge_get_active_theme_json_data() {
+	static $loaded = false;
+	static $decoded = array();
+
+	if ( $loaded ) {
+		return $decoded;
+	}
+
+	$loaded = true;
+	$theme_json_path = elodin_bridge_get_active_theme_json_path();
+	if ( '' === $theme_json_path || ! is_readable( $theme_json_path ) ) {
+		return $decoded;
+	}
+
+	$raw_json = file_get_contents( $theme_json_path );
+	if ( false === $raw_json || '' === $raw_json ) {
+		return $decoded;
+	}
+
+	$parsed = json_decode( $raw_json, true );
+	if ( is_array( $parsed ) ) {
+		$decoded = $parsed;
+	}
+
+	return $decoded;
+}
+
+/**
+ * Read spacing presets from the active theme.json file.
+ *
+ * @return array<string,array{slug:string,name:string,size:string}>
+ */
+function elodin_bridge_get_theme_spacing_size_presets() {
+	$decoded = elodin_bridge_get_active_theme_json_data();
+	if ( ! is_array( $decoded ) ) {
+		return array();
+	}
+
+	$raw_presets = $decoded['settings']['spacing']['spacingSizes'] ?? array();
+	if ( ! is_array( $raw_presets ) ) {
+		return array();
+	}
+
+	$presets = array();
+	foreach ( $raw_presets as $preset ) {
+		if ( ! is_array( $preset ) ) {
+			continue;
+		}
+
+		$slug = sanitize_key( $preset['slug'] ?? '' );
+		$size = elodin_bridge_sanitize_css_value( $preset['size'] ?? '', '' );
+		if ( '' === $slug || '' === $size ) {
+			continue;
+		}
+
+		$name = sanitize_text_field( $preset['name'] ?? '' );
+		if ( '' === $name ) {
+			$name = $slug;
+		}
+
+		$presets[ $slug ] = array(
+			'slug' => $slug,
+			'name' => $name,
+			'size' => $size,
+		);
+	}
+
+	return $presets;
+}
+
+/**
+ * Build alias mappings from theme spacing presets to short variable names.
+ *
+ * @return array<int,array{token:string,label:string,source_slug:string,source_name:string,value:string}>
+ */
+function elodin_bridge_get_spacing_variable_aliases() {
+	$definitions = elodin_bridge_get_spacing_variable_scale();
+	$presets = elodin_bridge_get_theme_spacing_size_presets();
+	$aliases = array();
+
+	foreach ( $definitions as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$label = sanitize_text_field( $definition['label'] ?? '' );
+		$source_slugs = isset( $definition['source_slugs'] ) && is_array( $definition['source_slugs'] ) ? $definition['source_slugs'] : array();
+		$matched_preset = array();
+
+		foreach ( $source_slugs as $source_slug ) {
+			$source_slug = sanitize_key( $source_slug );
+			if ( '' === $source_slug || ! isset( $presets[ $source_slug ] ) ) {
+				continue;
+			}
+
+			$matched_preset = $presets[ $source_slug ];
+			break;
+		}
+
+		if ( empty( $matched_preset ) && isset( $presets[ $token ] ) ) {
+			$matched_preset = $presets[ $token ];
+		}
+
+		$aliases[] = array(
+			'token'       => $token,
+			'label'       => $label,
+			'source_slug' => isset( $matched_preset['slug'] ) ? (string) $matched_preset['slug'] : '',
+			'source_name' => isset( $matched_preset['name'] ) ? (string) $matched_preset['name'] : '',
+			'value'       => isset( $matched_preset['size'] ) ? (string) $matched_preset['size'] : '',
+		);
+	}
+
+	return $aliases;
+}
+
+/**
+ * Get font-size alias tokens and their expected theme.json slugs.
+ *
+ * @return array<int,array{token:string,label:string,source_slugs:array<int,string>}>
+ */
+function elodin_bridge_get_font_size_variable_scale() {
+	return array(
+		array(
+			'token'        => 'xs',
+			'label'        => __( 'Extra Small', 'elodin-bridge' ),
+			'source_slugs' => array( 'x-small', 'xs' ),
+		),
+		array(
+			'token'        => 's',
+			'label'        => __( 'Small', 'elodin-bridge' ),
+			'source_slugs' => array( 'small', 's' ),
+		),
+		array(
+			'token'        => 'b',
+			'label'        => __( 'Base', 'elodin-bridge' ),
+			'source_slugs' => array( 'base', 'b' ),
+		),
+		array(
+			'token'        => 'm',
+			'label'        => __( 'Medium', 'elodin-bridge' ),
+			'source_slugs' => array( 'medium', 'm' ),
+		),
+		array(
+			'token'        => 'l',
+			'label'        => __( 'Large', 'elodin-bridge' ),
+			'source_slugs' => array( 'large', 'l' ),
+		),
+		array(
+			'token'        => 'xl',
+			'label'        => __( 'Extra Large', 'elodin-bridge' ),
+			'source_slugs' => array( 'x-large', 'xl' ),
+		),
+		array(
+			'token'        => '2xl',
+			'label'        => __( '2XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xx-large', '2xl', 'xxl' ),
+		),
+	);
+}
+
+/**
+ * Read font-size presets from the active theme.json file.
+ *
+ * @return array<string,array{slug:string,name:string,size:string}>
+ */
+function elodin_bridge_get_theme_font_size_presets() {
+	$decoded = elodin_bridge_get_active_theme_json_data();
+	if ( ! is_array( $decoded ) ) {
+		return array();
+	}
+
+	$raw_presets = $decoded['settings']['typography']['fontSizes'] ?? array();
+	if ( ! is_array( $raw_presets ) ) {
+		return array();
+	}
+
+	$presets = array();
+	foreach ( $raw_presets as $preset ) {
+		if ( ! is_array( $preset ) ) {
+			continue;
+		}
+
+		$slug = sanitize_key( $preset['slug'] ?? '' );
+		$size = elodin_bridge_sanitize_css_value( $preset['size'] ?? '', '' );
+		if ( '' === $slug || '' === $size ) {
+			continue;
+		}
+
+		$name = sanitize_text_field( $preset['name'] ?? '' );
+		if ( '' === $name ) {
+			$name = $slug;
+		}
+
+		$presets[ $slug ] = array(
+			'slug' => $slug,
+			'name' => $name,
+			'size' => $size,
+		);
+	}
+
+	return $presets;
+}
+
+/**
+ * Build alias mappings from theme font-size presets to short variable names.
+ *
+ * @return array<int,array{token:string,label:string,source_slug:string,source_name:string,value:string}>
+ */
+function elodin_bridge_get_font_size_variable_aliases() {
+	$definitions = elodin_bridge_get_font_size_variable_scale();
+	$presets = elodin_bridge_get_theme_font_size_presets();
+	$aliases = array();
+
+	foreach ( $definitions as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$label = sanitize_text_field( $definition['label'] ?? '' );
+		$source_slugs = isset( $definition['source_slugs'] ) && is_array( $definition['source_slugs'] ) ? $definition['source_slugs'] : array();
+		$matched_preset = array();
+
+		foreach ( $source_slugs as $source_slug ) {
+			$source_slug = sanitize_key( $source_slug );
+			if ( '' === $source_slug || ! isset( $presets[ $source_slug ] ) ) {
+				continue;
+			}
+
+			$matched_preset = $presets[ $source_slug ];
+			break;
+		}
+
+		if ( empty( $matched_preset ) && isset( $presets[ $token ] ) ) {
+			$matched_preset = $presets[ $token ];
+		}
+
+		$aliases[] = array(
+			'token'       => $token,
+			'label'       => $label,
+			'source_slug' => isset( $matched_preset['slug'] ) ? (string) $matched_preset['slug'] : '',
+			'source_name' => isset( $matched_preset['name'] ) ? (string) $matched_preset['name'] : '',
+			'value'       => isset( $matched_preset['size'] ) ? (string) $matched_preset['size'] : '',
+		);
+	}
+
+	return $aliases;
+}
+
+/**
+ * Get default values for spacing variable settings.
+ *
+ * @return array{enabled:int}
+ */
+function elodin_bridge_get_spacing_variables_defaults() {
+	return array(
+		'enabled' => 1,
+	);
+}
+
+/**
+ * Sanitize spacing variable settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int}
+ */
+function elodin_bridge_sanitize_spacing_variables_settings( $value ) {
+	$defaults = elodin_bridge_get_spacing_variables_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+	);
+}
+
+/**
+ * Get normalized spacing variable settings.
+ *
+ * @return array{enabled:int}
+ */
+function elodin_bridge_get_spacing_variables_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_SPACING_VARIABLES, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_spacing_variables_defaults();
+	}
+
+	return elodin_bridge_sanitize_spacing_variables_settings( $saved );
+}
+
+/**
+ * Check if spacing variables output is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_spacing_variables_enabled() {
+	$settings = elodin_bridge_get_spacing_variables_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Get default values for font-size variable settings.
+ *
+ * @return array{enabled:int}
+ */
+function elodin_bridge_get_font_size_variables_defaults() {
+	return array(
+		'enabled' => 1,
+	);
+}
+
+/**
+ * Sanitize font-size variable settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int}
+ */
+function elodin_bridge_sanitize_font_size_variables_settings( $value ) {
+	$defaults = elodin_bridge_get_font_size_variables_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+	);
+}
+
+/**
+ * Get normalized font-size variable settings.
+ *
+ * @return array{enabled:int}
+ */
+function elodin_bridge_get_font_size_variables_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_font_size_variables_defaults();
+	}
+
+	return elodin_bridge_sanitize_font_size_variables_settings( $saved );
+}
+
+/**
+ * Check if font-size variables output is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_font_size_variables_enabled() {
+	$settings = elodin_bridge_get_font_size_variables_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Get default values for GenerateBlocks layout gap default settings.
+ *
+ * @return array{enabled:int,column_gap_desktop:string,row_gap_desktop:string,column_gap_tablet:string,row_gap_tablet:string,column_gap_mobile:string,row_gap_mobile:string}
+ */
+function elodin_bridge_get_generateblocks_layout_gap_defaults_defaults() {
+	return array(
+		'enabled'            => 1,
+		'column_gap_desktop' => 'var( --space-xl )',
+		'row_gap_desktop'    => 'var( --space-m )',
+		'column_gap_tablet'  => 'var( --space-xl )',
+		'row_gap_tablet'     => 'var( --space-m )',
+		'column_gap_mobile'  => 'var( --space-xl )',
+		'row_gap_mobile'     => 'var( --space-m )',
+	);
+}
+
+/**
+ * Sanitize GenerateBlocks layout gap default settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,column_gap_desktop:string,row_gap_desktop:string,column_gap_tablet:string,row_gap_tablet:string,column_gap_mobile:string,row_gap_mobile:string}
+ */
+function elodin_bridge_sanitize_generateblocks_layout_gap_defaults_settings( $value ) {
+	$defaults = elodin_bridge_get_generateblocks_layout_gap_defaults_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled'            => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'column_gap_desktop' => elodin_bridge_sanitize_css_value( $value['column_gap_desktop'] ?? $defaults['column_gap_desktop'], $defaults['column_gap_desktop'] ),
+		'row_gap_desktop'    => elodin_bridge_sanitize_css_value( $value['row_gap_desktop'] ?? $defaults['row_gap_desktop'], $defaults['row_gap_desktop'] ),
+		'column_gap_tablet'  => elodin_bridge_sanitize_css_value( $value['column_gap_tablet'] ?? $defaults['column_gap_tablet'], $defaults['column_gap_tablet'] ),
+		'row_gap_tablet'     => elodin_bridge_sanitize_css_value( $value['row_gap_tablet'] ?? $defaults['row_gap_tablet'], $defaults['row_gap_tablet'] ),
+		'column_gap_mobile'  => elodin_bridge_sanitize_css_value( $value['column_gap_mobile'] ?? $defaults['column_gap_mobile'], $defaults['column_gap_mobile'] ),
+		'row_gap_mobile'     => elodin_bridge_sanitize_css_value( $value['row_gap_mobile'] ?? $defaults['row_gap_mobile'], $defaults['row_gap_mobile'] ),
+	);
+}
+
+/**
+ * Get normalized GenerateBlocks layout gap default settings.
+ *
+ * @return array{enabled:int,column_gap_desktop:string,row_gap_desktop:string,column_gap_tablet:string,row_gap_tablet:string,column_gap_mobile:string,row_gap_mobile:string}
+ */
+function elodin_bridge_get_generateblocks_layout_gap_defaults_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_generateblocks_layout_gap_defaults_defaults();
+	}
+
+	return elodin_bridge_sanitize_generateblocks_layout_gap_defaults_settings( $saved );
+}
+
+/**
+ * Check if GenerateBlocks layout gap defaults are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_generateblocks_layout_gap_defaults_enabled() {
+	$settings = elodin_bridge_get_generateblocks_layout_gap_defaults_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Get default values for root-level container padding settings.
+ *
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_get_root_level_container_padding_defaults() {
+	return array(
+		'enabled' => 1,
+		'desktop' => 'var( --space-xl )',
+		'tablet'  => 'var( --space-l )',
+		'mobile'  => 'var( --space-m )',
+	);
+}
+
+/**
+ * Sanitize root-level container padding settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_sanitize_root_level_container_padding_settings( $value ) {
+	$defaults = elodin_bridge_get_root_level_container_padding_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'desktop' => elodin_bridge_sanitize_css_value( $value['desktop'] ?? $defaults['desktop'], $defaults['desktop'] ),
+		'tablet'  => elodin_bridge_sanitize_css_value( $value['tablet'] ?? $defaults['tablet'], $defaults['tablet'] ),
+		'mobile'  => elodin_bridge_sanitize_css_value( $value['mobile'] ?? $defaults['mobile'], $defaults['mobile'] ),
+	);
+}
+
+/**
+ * Get normalized root-level container padding settings.
+ *
+ * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ */
+function elodin_bridge_get_root_level_container_padding_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_root_level_container_padding_defaults();
+	}
+
+	return elodin_bridge_sanitize_root_level_container_padding_settings( $saved );
+}
+
+/**
+ * Check if root-level container padding is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_root_level_container_padding_enabled() {
+	$settings = elodin_bridge_get_root_level_container_padding_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
  * Check if heading/paragraph style overrides are enabled.
  *
  * @return bool
@@ -544,6 +1083,15 @@ function elodin_bridge_is_heading_paragraph_overrides_enabled() {
  */
 function elodin_bridge_is_balanced_text_enabled() {
 	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT, 1 );
+}
+
+/**
+ * Check if setting Paragraph as default inserter block is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_default_paragraph_block_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK, 1 );
 }
 
 /**
@@ -620,6 +1168,15 @@ function elodin_bridge_is_mobile_fixed_background_repair_enabled() {
 }
 
 /**
+ * Check if reusable block flow spacing fix is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_reusable_block_flow_spacing_fix_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX, 1 );
+}
+
+/**
  * Check if content type behavior mapping is enabled.
  *
  * @return bool
@@ -678,11 +1235,61 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS,
 		array(
 			'type'              => 'array',
 			'sanitize_callback' => 'elodin_bridge_sanitize_automatic_heading_margins_settings',
 			'default'           => elodin_bridge_get_automatic_heading_margins_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_SPACING_VARIABLES,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_spacing_variables_settings',
+			'default'           => elodin_bridge_get_spacing_variables_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_font_size_variables_settings',
+			'default'           => elodin_bridge_get_font_size_variables_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_generateblocks_layout_gap_defaults_settings',
+			'default'           => elodin_bridge_get_generateblocks_layout_gap_defaults_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_root_level_container_padding_settings',
+			'default'           => elodin_bridge_get_root_level_container_padding_defaults(),
 		)
 	);
 
@@ -759,6 +1366,16 @@ function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX,
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
@@ -849,8 +1466,29 @@ function elodin_bridge_render_admin_page() {
 	$heading_paragraph_overrides_available = elodin_bridge_is_generatepress_parent_theme();
 	$heading_paragraph_overrides_enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
 	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
+	$default_paragraph_block_enabled = elodin_bridge_is_default_paragraph_block_enabled();
 	$automatic_heading_margins_settings = elodin_bridge_get_automatic_heading_margins_settings();
 	$automatic_heading_margins_enabled = elodin_bridge_is_automatic_heading_margins_enabled();
+	$spacing_variables_settings = elodin_bridge_get_spacing_variables_settings();
+	$spacing_variable_aliases = elodin_bridge_get_spacing_variable_aliases();
+	$font_size_variables_settings = elodin_bridge_get_font_size_variables_settings();
+	$font_size_variable_aliases = elodin_bridge_get_font_size_variable_aliases();
+	$generateblocks_layout_gap_defaults_settings = elodin_bridge_get_generateblocks_layout_gap_defaults_settings();
+	$generateblocks_layout_gap_defaults_enabled = elodin_bridge_is_generateblocks_layout_gap_defaults_enabled();
+	$root_level_container_padding_settings = elodin_bridge_get_root_level_container_padding_settings();
+	$root_level_container_padding_enabled = elodin_bridge_is_root_level_container_padding_enabled();
+	$variables_theme_json_path = elodin_bridge_get_active_theme_json_path();
+	$variables_theme_json_display_path = '';
+	if ( '' !== $variables_theme_json_path ) {
+		$normalized_path = wp_normalize_path( $variables_theme_json_path );
+		$normalized_root = wp_normalize_path( ABSPATH );
+		$variables_theme_json_display_path = $normalized_path;
+		if ( 0 === strpos( $normalized_path, $normalized_root ) ) {
+			$variables_theme_json_display_path = ltrim( substr( $normalized_path, strlen( $normalized_root ) ), '/' );
+		}
+	} else {
+		$variables_theme_json_display_path = 'wp-content/themes/' . get_stylesheet() . '/theme.json';
+	}
 	$editor_ui_restrictions_enabled = elodin_bridge_is_editor_ui_restrictions_enabled();
 	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
 	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
@@ -858,6 +1496,7 @@ function elodin_bridge_render_admin_page() {
 	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
 	$last_child_margin_resets_enabled = elodin_bridge_is_last_child_margin_resets_enabled();
 	$mobile_fixed_background_repair_enabled = elodin_bridge_is_mobile_fixed_background_repair_enabled();
+	$reusable_block_flow_spacing_fix_enabled = elodin_bridge_is_reusable_block_flow_spacing_fix_enabled();
 	$block_edge_class_settings = elodin_bridge_get_block_edge_class_settings();
 	$block_edge_classes_enabled = elodin_bridge_is_block_edge_classes_enabled();
 	$image_sizes_settings = elodin_bridge_get_image_sizes_settings();
@@ -881,7 +1520,8 @@ function elodin_bridge_render_admin_page() {
 
 			<div class="elodin-bridge-admin__toolbar">
 				<div class="elodin-bridge-admin__category-nav" role="tablist" aria-label="<?php esc_attr_e( 'Bridge settings categories', 'elodin-bridge' ); ?>">
-					<button type="button" class="elodin-bridge-admin__category-button is-active" data-bridge-category="editor" aria-pressed="true"><?php esc_html_e( 'Editor Tweaks', 'elodin-bridge' ); ?></button>
+					<button type="button" class="elodin-bridge-admin__category-button is-active" data-bridge-category="variables" aria-pressed="true"><?php esc_html_e( 'Variables', 'elodin-bridge' ); ?></button>
+					<button type="button" class="elodin-bridge-admin__category-button" data-bridge-category="editor" aria-pressed="false"><?php esc_html_e( 'Editor Tweaks', 'elodin-bridge' ); ?></button>
 					<button type="button" class="elodin-bridge-admin__category-button" data-bridge-category="style" aria-pressed="false"><?php esc_html_e( 'Style Tweaks', 'elodin-bridge' ); ?></button>
 					<button type="button" class="elodin-bridge-admin__category-button" data-bridge-category="misc" aria-pressed="false"><?php esc_html_e( 'Miscellaneous', 'elodin-bridge' ); ?></button>
 				</div>
@@ -900,6 +1540,340 @@ function elodin_bridge_render_admin_page() {
 			</div>
 
 			<div class="elodin-bridge-admin__cards">
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="variables">
+				<div class="elodin-bridge-admin__feature <?php echo ! empty( $spacing_variables_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-spacing-variables-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_SPACING_VARIABLES ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-spacing-variables-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_SPACING_VARIABLES ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $spacing_variables_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable spacing variables', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Maps your theme.json spacing presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
+						</p>
+
+						<div class="elodin-bridge-admin__variables-grid">
+							<?php foreach ( $spacing_variable_aliases as $alias ) : ?>
+								<?php
+								$token = (string) ( $alias['token'] ?? '' );
+								if ( '' === $token ) {
+									continue;
+								}
+								$variable_name = '--space-' . $token;
+								$label = (string) ( $alias['label'] ?? '' );
+								$source_slug = (string) ( $alias['source_slug'] ?? '' );
+								$value = (string) ( $alias['value'] ?? '' );
+								?>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code><?php echo esc_html( $variable_name ); ?></code>
+										<small>
+											<?php
+											if ( '' !== $source_slug ) {
+												printf(
+													/* translators: 1: human label, 2: spacing preset slug */
+													esc_html__( '%1$s (%2$s)', 'elodin-bridge' ),
+													esc_html( $label ),
+													esc_html( $source_slug )
+												);
+											} else {
+												printf(
+													/* translators: %s: human label */
+													esc_html__( '%s (not found)', 'elodin-bridge' ),
+													esc_html( $label )
+												);
+											}
+											?>
+										</small>
+									</span>
+									<?php if ( '' !== $value ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'No matching spacing value found in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+							<?php endforeach; ?>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: %s: theme.json path */
+									__( 'Update values in <code>%s</code> under <code>settings.spacing.spacingSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
+									esc_html( $variables_theme_json_display_path )
+								)
+							);
+							?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="variables">
+				<div class="elodin-bridge-admin__feature <?php echo ! empty( $font_size_variables_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-font-size-variables-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-font-size-variables-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $font_size_variables_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable font-size variables', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Maps your theme.json font-size presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
+						</p>
+
+						<div class="elodin-bridge-admin__variables-grid">
+							<?php foreach ( $font_size_variable_aliases as $alias ) : ?>
+								<?php
+								$token = (string) ( $alias['token'] ?? '' );
+								if ( '' === $token ) {
+									continue;
+								}
+								$variable_name = '--font-' . $token;
+								$label = (string) ( $alias['label'] ?? '' );
+								$source_slug = (string) ( $alias['source_slug'] ?? '' );
+								$value = (string) ( $alias['value'] ?? '' );
+								?>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code><?php echo esc_html( $variable_name ); ?></code>
+										<small>
+											<?php
+											if ( '' !== $source_slug ) {
+												printf(
+													/* translators: 1: human label, 2: font-size preset slug */
+													esc_html__( '%1$s (%2$s)', 'elodin-bridge' ),
+													esc_html( $label ),
+													esc_html( $source_slug )
+												);
+											} else {
+												printf(
+													/* translators: %s: human label */
+													esc_html__( '%s (not found)', 'elodin-bridge' ),
+													esc_html( $label )
+												);
+											}
+											?>
+										</small>
+									</span>
+									<?php if ( '' !== $value ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'No matching font-size value found in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+							<?php endforeach; ?>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: %s: theme.json path */
+									__( 'Update values in <code>%s</code> under <code>settings.typography.fontSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
+									esc_html( $variables_theme_json_display_path )
+								)
+							);
+							?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_layout_gap_defaults_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-generateblocks-layout-gaps-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-generateblocks-layout-gaps-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $generateblocks_layout_gap_defaults_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable GenerateBlocks layout gap defaults', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Sets default row and column gap values for new GenerateBlocks containers.', 'elodin-bridge' ); ?>
+						</p>
+
+						<div class="elodin-bridge-admin__responsive-values">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-column-gap-desktop">
+								<span><?php esc_html_e( 'Column gap (desktop)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-column-gap-desktop"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[column_gap_desktop]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['column_gap_desktop'] ?? 'var( --space-xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-row-gap-desktop">
+								<span><?php esc_html_e( 'Row gap (desktop)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-row-gap-desktop"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[row_gap_desktop]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['row_gap_desktop'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-column-gap-tablet">
+								<span><?php esc_html_e( 'Column gap (tablet)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-column-gap-tablet"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[column_gap_tablet]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['column_gap_tablet'] ?? 'var( --space-xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-row-gap-tablet">
+								<span><?php esc_html_e( 'Row gap (tablet)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-row-gap-tablet"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[row_gap_tablet]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['row_gap_tablet'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-column-gap-mobile">
+								<span><?php esc_html_e( 'Column gap (mobile)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-column-gap-mobile"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[column_gap_mobile]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['column_gap_mobile'] ?? 'var( --space-xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-row-gap-mobile">
+								<span><?php esc_html_e( 'Row gap (mobile)', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-gb-row-gap-mobile"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[row_gap_mobile]"
+									value="<?php echo esc_attr( $generateblocks_layout_gap_defaults_settings['row_gap_mobile'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+						</div>
+
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like 1.5rem, var(--space-m), or clamp(0.75rem, 1vw, 1.5rem). Applies to newly inserted GenerateBlocks container blocks.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $root_level_container_padding_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-root-level-container-padding-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-root-level-container-padding-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $root_level_container_padding_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable root-level container padding', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in both editor and front-end contexts, including reusable block wrappers.', 'elodin-bridge' ); ?>
+						</p>
+
+						<div class="elodin-bridge-admin__responsive-values">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop">
+								<span><?php esc_html_e( 'Desktop', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-desktop"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop'] ?? 'var( --space-xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet">
+								<span><?php esc_html_e( 'Tablet', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-tablet"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet'] ?? 'var( --space-l )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile">
+								<span><?php esc_html_e( 'Mobile', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-mobile"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+						</div>
+
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like var(--space-xl), 2rem, or clamp(1rem, 2vw, 2rem).', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
 			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature has-requirement <?php echo $heading_paragraph_overrides_enabled ? 'is-enabled' : ''; ?> <?php echo ! $heading_paragraph_overrides_available ? 'is-unavailable' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header <?php echo ! $heading_paragraph_overrides_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>">
@@ -962,6 +1936,36 @@ function elodin_bridge_render_admin_page() {
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Adds a separate block toolbar button to toggle the .balanced class on paragraphs and headings. When active, that class applies text-wrap: balance.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature <?php echo $default_paragraph_block_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
+							value="1"
+							<?php checked( $default_paragraph_block_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Set Paragraph as default inserter block', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Sets core/paragraph as the default block type used when inserting a new block in the editor.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>
@@ -1057,7 +2061,7 @@ function elodin_bridge_render_admin_page() {
 									class="regular-text"
 									id="elodin-bridge-heading-margin-desktop"
 									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[desktop]"
-									value="<?php echo esc_attr( $automatic_heading_margins_settings['desktop'] ?? '3em' ); ?>"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['desktop'] ?? 'var( --space-l )' ); ?>"
 								/>
 							</label>
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-heading-margin-tablet">
@@ -1067,7 +2071,7 @@ function elodin_bridge_render_admin_page() {
 									class="regular-text"
 									id="elodin-bridge-heading-margin-tablet"
 									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[tablet]"
-									value="<?php echo esc_attr( $automatic_heading_margins_settings['tablet'] ?? '2.5em' ); ?>"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['tablet'] ?? 'var( --space-l )' ); ?>"
 								/>
 							</label>
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-heading-margin-mobile">
@@ -1077,7 +2081,7 @@ function elodin_bridge_render_admin_page() {
 									class="regular-text"
 									id="elodin-bridge-heading-margin-mobile"
 									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[mobile]"
-									value="<?php echo esc_attr( $automatic_heading_margins_settings['mobile'] ?? '2em' ); ?>"
+									value="<?php echo esc_attr( $automatic_heading_margins_settings['mobile'] ?? 'var( --space-l )' ); ?>"
 								/>
 							</label>
 						</div>
@@ -1113,6 +2117,36 @@ function elodin_bridge_render_admin_page() {
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Sets margin-bottom: 0 for last-child headings, paragraphs, lists, and button groups.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature <?php echo $reusable_block_flow_spacing_fix_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX ); ?>"
+							value="1"
+							<?php checked( $reusable_block_flow_spacing_fix_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable reusable block flow spacing fix', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Resets top and bottom flow spacing for direct children inside .editor-styles-wrapper .is-layout-flow to prevent reusable block spacing conflicts.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>

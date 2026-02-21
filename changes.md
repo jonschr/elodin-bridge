@@ -1,5 +1,39 @@
 # Elodin Bridge Changes
 
+## Version 0.6
+
+### Added
+- New `Variables` settings category with read-only theme.json mappings:
+  - Spacing aliases mapped to `:root` variables like `--space-s`, `--space-m`, `--space-l`, `--space-xl`, and beyond.
+  - Font-size aliases mapped to `:root` variables like `--font-xs`, `--font-s`, `--font-b`, `--font-m`, `--font-l`, `--font-xl`, and `--font-2xl`.
+  - Inline note and path hint so values are edited directly in active theme `theme.json`.
+- New editor tweak: `Set Paragraph as default inserter block` (default on).
+- New style tweak: `Reusable block flow spacing fix` (default on, editor-only CSS output).
+- New editor tweak: `Root-level container padding` (default on) with responsive values:
+  - Desktop: `var( --space-xl )`
+  - Tablet: `var( --space-l )`
+  - Mobile: `var( --space-m )`
+  - Includes `Requires GenerateBlocks` requirement tag.
+- New GenerateBlocks container layout gap defaults feature (default on) with responsive control values and editor variation override support.
+- New heading/paragraph block toolbar margin-top override for paragraph + heading levels `h1`-`h4`:
+  - Options: `0`, `var( --space-s )`, and `var( --space-m )`.
+  - Applies with `!important`.
+
+### Changed
+- Automatic heading margin defaults updated to `var( --space-l )` for desktop, tablet, and mobile.
+- GenerateBlocks layout gap defaults now use:
+  - Column: `var( --space-xl )` (desktop/tablet/mobile)
+  - Row: `var( --space-m )` (desktop/tablet/mobile)
+- GenerateBlocks layout gap defaults card moved under `Editor Tweaks`.
+- Heading/paragraph override toolbar updated:
+  - Type control now uses icon-style toggle (bold A + regular A).
+  - Margin-top control now uses icon dropdown with variable-name labels.
+  - Balanced text toggle is merged into the same toolbar group for consistent spacing.
+
+### Fixed
+- Page-like title editor width selector now targets only direct children:
+  - `.elodin-bridge-page-like-title .editor-styles-wrapper > .wp-block`
+
 ## Version 0.5
 
 ### Added

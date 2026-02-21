@@ -2,8 +2,10 @@
 	'use strict';
 
 	const categoryButtons = Array.from( document.querySelectorAll( '.elodin-bridge-admin__category-button[data-bridge-category]' ) );
-	const categoryCards = Array.from( document.querySelectorAll( '.elodin-bridge-admin__card[data-bridge-category]' ) );
-	if ( categoryButtons.length && categoryCards.length ) {
+	const categoryPanels = Array.from(
+		document.querySelectorAll( '.elodin-bridge-admin__card[data-bridge-category], .elodin-bridge-admin__category-section[data-bridge-category]' )
+	);
+	if ( categoryButtons.length && categoryPanels.length ) {
 		const allowedCategories = new Set(
 			categoryButtons
 				.map( ( button ) => button.getAttribute( 'data-bridge-category' ) )
@@ -21,8 +23,8 @@
 				button.setAttribute( 'aria-pressed', isActive ? 'true' : 'false' );
 			} );
 
-			categoryCards.forEach( ( card ) => {
-				card.hidden = card.getAttribute( 'data-bridge-category' ) !== category;
+			categoryPanels.forEach( ( panel ) => {
+				panel.hidden = panel.getAttribute( 'data-bridge-category' ) !== category;
 			} );
 
 			if ( updateHash && window.history && typeof window.history.replaceState === 'function' ) {
