@@ -1450,6 +1450,16 @@ function elodin_bridge_get_font_size_variable_scale() {
 			'label'        => __( '2XL', 'elodin-bridge' ),
 			'source_slugs' => array( 'xx-large', '2xl', 'xxl' ),
 		),
+		array(
+			'token'        => '3xl',
+			'label'        => __( '3XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xxx-large', '3xl', 'xxxl' ),
+		),
+		array(
+			'token'        => '4xl',
+			'label'        => __( '4XL', 'elodin-bridge' ),
+			'source_slugs' => array( 'xxxx-large', '4xl', 'xxxxl' ),
+		),
 	);
 }
 

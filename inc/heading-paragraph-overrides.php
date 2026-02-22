@@ -151,6 +151,94 @@ function elodin_bridge_get_dynamic_typography_presets() {
 }
 
 /**
+ * Build paragraph size override presets from theme.json font-size aliases.
+ *
+ * Each preset inherits paragraph typography values while using a theme.json-derived
+ * font-size value for desktop/tablet/mobile.
+ *
+ * @param array<string,mixed> $paragraph_preset Base paragraph preset.
+ * @return array<string,array<string,mixed>>
+ */
+function elodin_bridge_get_paragraph_size_override_presets( $paragraph_preset ) {
+	$base_preset = is_array( $paragraph_preset ) ? $paragraph_preset : array();
+	if ( empty( $base_preset ) ) {
+		$base_preset = elodin_bridge_get_typography_defaults();
+	}
+
+	$aliases = elodin_bridge_get_font_size_variable_aliases();
+	if ( empty( $aliases ) ) {
+		return array();
+	}
+
+	$presets = array();
+	foreach ( $aliases as $alias ) {
+		$token = sanitize_key( $alias['token'] ?? '' );
+		$value = trim( (string) ( $alias['value'] ?? '' ) );
+		if ( '' === $token || '' === $value ) {
+			continue;
+		}
+
+		$preset = $base_preset;
+		$preset['fontSize'] = $value;
+		$preset['fontSizeTablet'] = $value;
+		$preset['fontSizeMobile'] = $value;
+		$preset['fontSizeUnit'] = '';
+
+		$presets[ 'p-' . $token ] = $preset;
+	}
+
+	return $presets;
+}
+
+/**
+ * Build toolbar type override controls for heading/paragraph replacement options.
+ *
+ * @return array<int,array{className:string,label:string}>
+ */
+function elodin_bridge_get_heading_paragraph_type_override_controls() {
+	$controls = array(
+		array(
+			'className' => 'p',
+			'label'     => __( 'Paragraph style', 'elodin-bridge' ),
+		),
+		array(
+			'className' => 'h1',
+			'label'     => __( 'H1 style', 'elodin-bridge' ),
+		),
+		array(
+			'className' => 'h2',
+			'label'     => __( 'H2 style', 'elodin-bridge' ),
+		),
+		array(
+			'className' => 'h3',
+			'label'     => __( 'H3 style', 'elodin-bridge' ),
+		),
+		array(
+			'className' => 'h4',
+			'label'     => __( 'H4 style', 'elodin-bridge' ),
+		),
+	);
+
+	foreach ( elodin_bridge_get_font_size_variable_scale() as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$controls[] = array(
+			'className' => 'p-' . $token,
+			'label'     => sprintf(
+				/* translators: %s: size token, e.g. S or 2XL. */
+				__( 'Paragraph %s style', 'elodin-bridge' ),
+				strtoupper( $token )
+			),
+		);
+	}
+
+	return $controls;
+}
+
+/**
  * Build a CSS value with an optional unit.
  *
  * @param mixed  $value CSS value.
@@ -271,6 +359,12 @@ function elodin_bridge_build_css_rule( $selector, $declarations ) {
  */
 function elodin_bridge_build_typography_override_css() {
 	$presets = elodin_bridge_get_dynamic_typography_presets();
+	$paragraph_preset = isset( $presets['p'] ) && is_array( $presets['p'] ) ? $presets['p'] : array();
+	$paragraph_size_presets = elodin_bridge_get_paragraph_size_override_presets( $paragraph_preset );
+	if ( ! empty( $paragraph_size_presets ) ) {
+		$presets = array_merge( $presets, $paragraph_size_presets );
+	}
+
 	$source_selector = ':is(p,h1,h2,h3,h4,h5,h6)';
 	$css = '.h1,.h2,.h3,.h4{margin-top:0;}';
 	$tablet_css = '';
@@ -347,6 +441,7 @@ function elodin_bridge_enqueue_editor_heading_paragraph_overrides_toolbar() {
 		'window.elodinBridgeTypographyToolbar = ' . wp_json_encode(
 			array(
 				'enableTypeOverrides' => elodin_bridge_is_heading_paragraph_overrides_enabled(),
+				'typeOverrideControls' => elodin_bridge_get_heading_paragraph_type_override_controls(),
 			)
 		) . ';',
 		'before'

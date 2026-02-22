@@ -95,23 +95,33 @@
         },
         {
           "slug": "medium",
-          "size": "clamp(1.2rem, 1.2rem + ((1vw - 0.2rem) * 0.679), 1.65rem)",
+          "size": "clamp(1.1rem, 1.1rem + ((1vw - 0.2rem) * 0.464), 1.4075rem)",
           "name": "Medium"
         },
         {
           "slug": "large",
-          "size": "clamp(1.5rem, 1.5rem + ((1vw - 0.2rem) * 1.887), 2.75rem)",
+          "size": "clamp(1.2rem, 1.2rem + ((1vw - 0.2rem) * 0.679), 1.65rem)",
           "name": "Large"
         },
         {
           "slug": "x-large",
-          "size": "clamp(1.875rem, 1.875rem + ((1vw - 0.2rem) * 2.453), 3.5rem)",
+          "size": "clamp(1.5rem, 1.5rem + ((1vw - 0.2rem) * 1.887), 2.75rem)",
           "name": "X Large"
         },
         {
           "slug": "xx-large",
-          "size": "clamp(2.25rem, 2.25rem + ((1vw - 0.2rem) * 3.227), 4.3875rem)",
+          "size": "clamp(1.875rem, 1.875rem + ((1vw - 0.2rem) * 2.453), 3.5rem)",
           "name": "XX Large"
+        },
+        {
+          "slug": "xxx-large",
+          "size": "clamp(2.25rem, 2.25rem + ((1vw - 0.2rem) * 3.227), 4.3875rem)",
+          "name": "3XL"
+        },
+        {
+          "slug": "xxxx-large",
+          "size": "clamp(2.7rem, 2.7rem + ((1vw - 0.2rem) * 4.227), 5.5rem)",
+          "name": "4XL"
         }
       ]
     },

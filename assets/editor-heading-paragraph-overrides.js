@@ -25,7 +25,53 @@
 	const enableBalancedText = !! toolbarConfig.enableBalancedText;
 
 	const allowedBlocks = new Set( [ 'core/paragraph', 'core/heading' ] );
-	const managedClasses = [ 'p', 'h1', 'h2', 'h3', 'h4' ];
+	const defaultTypeOverrideControls = [
+		{
+			className: 'p',
+			label: __( 'Paragraph style', 'elodin-bridge' ),
+		},
+		{
+			className: 'h1',
+			label: __( 'H1 style', 'elodin-bridge' ),
+		},
+		{
+			className: 'h2',
+			label: __( 'H2 style', 'elodin-bridge' ),
+		},
+		{
+			className: 'h3',
+			label: __( 'H3 style', 'elodin-bridge' ),
+		},
+		{
+			className: 'h4',
+			label: __( 'H4 style', 'elodin-bridge' ),
+		},
+	];
+	const configuredTypeOverrideControls = Array.isArray( toolbarConfig.typeOverrideControls )
+		? toolbarConfig.typeOverrideControls
+				.map( ( control ) => {
+					if ( ! control || 'object' !== typeof control ) {
+						return null;
+					}
+
+					const className = String( control.className || '' ).trim();
+					const label = String( control.label || '' ).trim();
+					if ( ! className || ! label || ! /^[a-z0-9-]+$/i.test( className ) ) {
+						return null;
+					}
+
+					return {
+						className: className,
+						label: label,
+					};
+				} )
+				.filter( Boolean )
+		: [];
+	const typeOverrideControls =
+		configuredTypeOverrideControls.length > 0
+			? configuredTypeOverrideControls
+			: defaultTypeOverrideControls;
+	const managedClasses = typeOverrideControls.map( ( control ) => control.className );
 	const managedClassSet = new Set( managedClasses );
 	const balancedClass = 'balanced';
 
@@ -76,23 +122,15 @@
 		);
 	}
 
-	function getControlLabel( className ) {
-		if ( 'p' === className ) {
-			return __( 'Paragraph style', 'elodin-bridge' );
-		}
-
-		return sprintf( __( '%s style', 'elodin-bridge' ), className.toUpperCase() );
-	}
-
 	function buildControls( props ) {
 		const currentClassName = props.attributes?.className || '';
 		const activeManagedClass = getActiveManagedClass( currentClassName );
 
-		return managedClasses.map( ( className ) => ( {
-			title: getControlLabel( className ),
-			isActive: className === activeManagedClass,
+		return typeOverrideControls.map( ( control ) => ( {
+			title: control.label,
+			isActive: control.className === activeManagedClass,
 			onClick: () => {
-				const nextClassName = getNextClassName( currentClassName, className );
+				const nextClassName = getNextClassName( currentClassName, control.className );
 				dispatch( blockEditorStore ).updateBlockAttributes( props.clientId, {
 					className: nextClassName,
 				} );
@@ -110,8 +148,13 @@
 				const currentClassName = props.attributes?.className || '';
 				const activeManagedClass = getActiveManagedClass( currentClassName );
 				const isBalanced = hasClass( currentClassName, balancedClass );
+				const activeManagedControl =
+					typeOverrideControls.find( ( control ) => control.className === activeManagedClass ) ||
+					null;
 				const activeManagedClassLabel = activeManagedClass
-					? activeManagedClass.toUpperCase()
+					? activeManagedControl && activeManagedControl.label
+						? activeManagedControl.label
+						: activeManagedClass.toUpperCase()
 					: '';
 				const canShowTypeControls = enableTypeOverrides;
 				const canShowBalancedControl = enableBalancedText;

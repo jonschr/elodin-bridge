@@ -508,7 +508,7 @@
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Adds block toolbar controls for paragraph/heading typography overrides and applies those override classes using your GeneratePress typography values (desktop, tablet, and mobile).', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Adds block toolbar controls for paragraph/heading typography overrides plus paragraph size variants; heading styles use GeneratePress typography and paragraph-size variants use theme.json font-size presets (with Bridge source fallback).', 'elodin-bridge' ); ?>
 						</p>
 						<?php if ( ! $heading_paragraph_overrides_available ) : ?>
 							<p class="elodin-bridge-admin__note">
