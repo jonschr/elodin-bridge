@@ -1,5 +1,26 @@
 # Elodin Bridge Changes
 
+## Version 0.8
+
+### Added
+- New style tweak setting: `Disable GeneratePress static CSS` (default on):
+  - Dequeues static GeneratePress stylesheet handles while preserving dynamic inline CSS.
+  - Marks the feature as experimental with an in-card warning.
+  - Adds exactly one inline companion rule: `.site.grid-container { max-width: 100% }`.
+
+### Changed
+- GeneratePress list margin override setting refined:
+  - Keeps independent controls for top/right/bottom/left margins in a two-by-two field grid.
+  - Default `margin-left` is now `var( --space-m )`.
+  - Default `margin-bottom` is derived from the active GeneratePress body paragraph margin-bottom when available (with fallback handling).
+  - List override output now also resets `padding-top/right/bottom/left` to `0`.
+- Root-level container padding defaults updated to:
+  - Desktop: `var( --space-2xl )`
+  - Tablet: `var( --space-xl )`
+  - Mobile: `var( --space-m )`
+- Requirement-gated setting cards now preserve saved toggle values when unavailable, and show a dimmed unavailable state instead of forcing values off.
+- Theme.json button specificity setting now includes the `Requires GeneratePress` requirement tag in the settings UI.
+
 ## Version 0.7
 
 ### Added
