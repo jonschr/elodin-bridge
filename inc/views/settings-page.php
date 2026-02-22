@@ -722,6 +722,51 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature <?php echo $last_child_button_group_top_margin_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-last-child-button-group-top-margin-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-last-child-button-group-top-margin-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $last_child_button_group_top_margin_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Last-child button group top margin', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Adds margin-top to .wp-block-buttons when it is the last child.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__responsive-values">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-last-child-button-group-top-margin-value">
+								<span><?php esc_html_e( 'Margin top', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-last-child-button-group-top-margin-value"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN ); ?>[value]"
+									value="<?php echo esc_attr( $last_child_button_group_top_margin_settings['value'] ?? 'var( --space-l )' ); ?>"
+								/>
+							</label>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like var(--space-l), 2rem, or clamp(1rem, 3vw, 3rem).', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $reusable_block_flow_spacing_fix_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX ); ?>">
 						<input

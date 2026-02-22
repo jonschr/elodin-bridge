@@ -90,6 +90,8 @@ function elodin_bridge_render_admin_page() {
 	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();
 	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
 	$last_child_margin_resets_enabled = elodin_bridge_is_last_child_margin_resets_enabled();
+	$last_child_button_group_top_margin_settings = elodin_bridge_get_last_child_button_group_top_margin_settings();
+	$last_child_button_group_top_margin_enabled = elodin_bridge_is_last_child_button_group_top_margin_enabled();
 	$theme_json_button_padding_important_enabled = elodin_bridge_is_theme_json_button_padding_important_enabled();
 	$theme_json_button_padding_values = elodin_bridge_get_theme_button_padding_values();
 	$mobile_fixed_background_repair_enabled = elodin_bridge_is_mobile_fixed_background_repair_enabled();

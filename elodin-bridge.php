@@ -37,6 +37,7 @@ define( 'ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES', 'elodin_bridge_enable_shortcod
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS', 'elodin_bridge_enable_generateblocks_boundary_highlights' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS', 'elodin_bridge_enable_prettier_widgets' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS', 'elodin_bridge_enable_last_child_margin_resets' );
+define( 'ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN', 'elodin_bridge_last_child_button_group_top_margin' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT', 'elodin_bridge_enable_theme_json_button_padding_important' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_MOBILE_FIXED_BACKGROUND_REPAIR', 'elodin_bridge_enable_mobile_fixed_background_repair' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_REUSABLE_BLOCK_FLOW_SPACING_FIX', 'elodin_bridge_enable_reusable_block_flow_spacing_fix' );

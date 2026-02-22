@@ -13,11 +13,7 @@ h4:last-child,
 .h2:last-child,
 .h3:last-child,
 .h4:last-child,
-.wp-block-list:last-child {
-	margin-bottom: 0;
-}
-
+.wp-block-list:last-child,
 .wp-block-buttons:last-child {
-	margin-top: var(--space-l);
 	margin-bottom: 0;
 }

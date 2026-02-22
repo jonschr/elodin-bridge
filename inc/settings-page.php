@@ -525,6 +525,48 @@ function elodin_bridge_get_automatic_heading_margins_settings() {
 }
 
 /**
+ * Get default values for last-child button group top margin settings.
+ *
+ * @return array{enabled:int,value:string}
+ */
+function elodin_bridge_get_last_child_button_group_top_margin_defaults() {
+	return array(
+		'enabled' => 1,
+		'value'   => 'var( --space-l )',
+	);
+}
+
+/**
+ * Sanitize last-child button group top margin settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,value:string}
+ */
+function elodin_bridge_sanitize_last_child_button_group_top_margin_settings( $value ) {
+	$defaults = elodin_bridge_get_last_child_button_group_top_margin_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'value'   => elodin_bridge_sanitize_css_value( $value['value'] ?? $defaults['value'], $defaults['value'] ),
+	);
+}
+
+/**
+ * Get normalized last-child button group top margin settings.
+ *
+ * @return array{enabled:int,value:string}
+ */
+function elodin_bridge_get_last_child_button_group_top_margin_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_last_child_button_group_top_margin_defaults();
+	}
+
+	return elodin_bridge_sanitize_last_child_button_group_top_margin_settings( $saved );
+}
+
+/**
  * Get spacing alias tokens and their expected theme.json slugs.
  *
  * @return array<int,array{token:string,label:string,source_slugs:array<int,string>}>
@@ -1277,6 +1319,16 @@ function elodin_bridge_is_last_child_margin_resets_enabled() {
 }
 
 /**
+ * Check if last-child button group top margin styles are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_last_child_button_group_top_margin_enabled() {
+	$settings = elodin_bridge_get_last_child_button_group_top_margin_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
  * Check if theme.json button padding overrides with !important are enabled.
  *
  * @return bool
@@ -1487,6 +1539,16 @@ function elodin_bridge_register_settings() {
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
 			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_last_child_button_group_top_margin_settings',
+			'default'           => elodin_bridge_get_last_child_button_group_top_margin_defaults(),
 		)
 	);
 
