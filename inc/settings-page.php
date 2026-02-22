@@ -1454,6 +1454,79 @@ function elodin_bridge_get_font_size_variable_scale() {
 }
 
 /**
+ * Get supported CSS variable tokens for auto-wrap expansion.
+ *
+ * @return array<int,string>
+ */
+function elodin_bridge_get_css_variable_autowrap_tokens() {
+	$tokens = array();
+	$seen = array();
+
+	foreach ( elodin_bridge_get_spacing_variable_scale() as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$variable = '--space-' . $token;
+		if ( isset( $seen[ $variable ] ) ) {
+			continue;
+		}
+
+		$tokens[] = $variable;
+		$seen[ $variable ] = true;
+	}
+
+	foreach ( elodin_bridge_get_font_size_variable_scale() as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$variable = '--font-' . $token;
+		if ( isset( $seen[ $variable ] ) ) {
+			continue;
+		}
+
+		$tokens[] = $variable;
+		$seen[ $variable ] = true;
+	}
+
+	return $tokens;
+}
+
+/**
+ * Get shorthand aliases for CSS variable token auto-wrap expansion.
+ *
+ * Example: --sm => --space-m, --f2xl => --font-2xl.
+ *
+ * @return array<string,string>
+ */
+function elodin_bridge_get_css_variable_autowrap_aliases() {
+	$aliases = array();
+
+	foreach ( elodin_bridge_get_spacing_variable_scale() as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$aliases[ '--s' . $token ] = '--space-' . $token;
+	}
+
+	foreach ( elodin_bridge_get_font_size_variable_scale() as $definition ) {
+		$token = sanitize_key( $definition['token'] ?? '' );
+		if ( '' === $token ) {
+			continue;
+		}
+
+		$aliases[ '--f' . $token ] = '--font-' . $token;
+	}
+
+	return $aliases;
+}
+
+/**
  * Read font-size presets from the selected theme.json source.
  *
  * @return array<string,array{slug:string,name:string,size:string}>
@@ -1819,6 +1892,15 @@ function elodin_bridge_is_shortcodes_enabled() {
 }
 
 /**
+ * Check if CSS variable token auto-wrap is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_css_variable_autowrap_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_CSS_VARIABLE_AUTOWRAP, 1 );
+}
+
+/**
  * Check if GenerateBlocks boundary highlights are enabled.
  *
  * @return bool
@@ -2064,6 +2146,16 @@ function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_CSS_VARIABLE_AUTOWRAP,
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',

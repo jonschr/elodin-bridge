@@ -3,7 +3,7 @@
 	Plugin Name: Elodin Bridge
 	Plugin URI: https://elod.in
     Description: Just another plugin
-	Version: 0.8
+	Version: 0.9
     Author: Jon Schroeder
     Author URI: https://elod.in
 
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Plugin constants.
 define( 'ELODIN_BRIDGE_DIR', dirname( __FILE__ ) );
 define( 'ELODIN_BRIDGE_URL', plugin_dir_url( __FILE__ ) );
-define( 'ELODIN_BRIDGE_VERSION', '0.8' );
+define( 'ELODIN_BRIDGE_VERSION', '0.9' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES', 'elodin_bridge_enable_heading_paragraph_overrides' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT', 'elodin_bridge_enable_balanced_text' );
 define( 'ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR', 'elodin_bridge_content_type_behavior' );
@@ -49,6 +49,7 @@ define( 'ELODIN_BRIDGE_OPTION_BLOCK_EDGE_CLASSES', 'elodin_bridge_block_edge_cla
 define( 'ELODIN_BRIDGE_OPTION_IMAGE_SIZES', 'elodin_bridge_image_sizes' );
 define( 'ELODIN_BRIDGE_OPTION_SPACING_VARIABLES', 'elodin_bridge_spacing_variables' );
 define( 'ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES', 'elodin_bridge_font_size_variables' );
+define( 'ELODIN_BRIDGE_OPTION_ENABLE_CSS_VARIABLE_AUTOWRAP', 'elodin_bridge_enable_css_variable_autowrap' );
 define( 'ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS', 'elodin_bridge_generateblocks_layout_gap_defaults' );
 define( 'ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING', 'elodin_bridge_root_level_container_padding' );
 define( 'ELODIN_BRIDGE_TYPOGRAPHY_RESET', '__elodin_bridge_typography_reset__' );
@@ -76,6 +77,7 @@ require_once ELODIN_BRIDGE_DIR . '/inc/block-edge-classes.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/image-sizes.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/spacing-variables.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/font-size-variables.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/css-variable-autowrap.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-layout-gap-defaults.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/root-level-container-padding.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/update-checker.php';

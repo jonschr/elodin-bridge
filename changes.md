@@ -1,5 +1,22 @@
 # Elodin Bridge Changes
 
+## Version 0.9
+
+### Added
+- New miscellaneous setting: `Auto-wrap spacing/font variables with var()` (default on).
+  - Instantly expands supported tokens in backend text fields, including block editor controls.
+  - Supports direct variables (for example: `--space-m`, `--font-l`) and shorthand aliases (for example: `--sm`, `--ss`, `--fs`, `--f2xl`).
+  - Applies only to known Bridge spacing/font variable tokens to avoid unintended replacements.
+
+### Changed
+- Theme.json source selector now shows a live status badge so users can see the effective source at a glance:
+  - `Currently using: Active theme.json`
+  - `Currently using: Plugin defaults`
+  - `Currently using: Plugin defaults (automatic fallback)` (warning style)
+
+### Fixed
+- CSS variable auto-wrap now persists when tabbing out of fields (no blur-time reversion after expansion).
+
 ## Version 0.8
 
 ### Added

@@ -113,6 +113,7 @@ function elodin_bridge_render_admin_page() {
 	$editor_publish_sidebar_restriction_enabled = elodin_bridge_is_editor_publish_sidebar_restriction_enabled();
 	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
 	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
+	$css_variable_autowrap_enabled = elodin_bridge_is_css_variable_autowrap_enabled();
 	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();
 	$prettier_widgets_enabled = elodin_bridge_is_prettier_widgets_enabled();
 	$last_child_margin_resets_enabled = elodin_bridge_is_last_child_margin_resets_enabled();
