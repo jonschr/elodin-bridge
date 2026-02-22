@@ -347,7 +347,6 @@ function elodin_bridge_enqueue_editor_heading_paragraph_overrides_toolbar() {
 		'window.elodinBridgeTypographyToolbar = ' . wp_json_encode(
 			array(
 				'enableTypeOverrides' => elodin_bridge_is_heading_paragraph_overrides_enabled(),
-				'enableBalancedText'  => elodin_bridge_is_balanced_text_enabled(),
 			)
 		) . ';',
 		'before'

@@ -746,35 +746,120 @@ function elodin_bridge_get_active_theme_json_path() {
 }
 
 /**
+ * Get the plugin theme-defaults.json file path.
+ *
+ * @return string
+ */
+function elodin_bridge_get_plugin_theme_defaults_path() {
+	$path = trailingslashit( ELODIN_BRIDGE_DIR ) . 'theme-defaults.json';
+	if ( file_exists( $path ) ) {
+		return $path;
+	}
+
+	return '';
+}
+
+/**
+ * Sanitize the theme.json source mode setting.
+ *
+ * @param mixed $value Raw setting value.
+ * @return string
+ */
+function elodin_bridge_sanitize_theme_json_source_mode( $value ) {
+	$value = sanitize_key( (string) $value );
+	if ( 'plugin' === $value ) {
+		return 'plugin';
+	}
+
+	return 'theme';
+}
+
+/**
+ * Get normalized theme.json source mode.
+ *
+ * @return string theme|plugin
+ */
+function elodin_bridge_get_theme_json_source_mode() {
+	return elodin_bridge_sanitize_theme_json_source_mode(
+		get_option( ELODIN_BRIDGE_OPTION_THEME_JSON_SOURCE_MODE, 'theme' )
+	);
+}
+
+/**
+ * Check whether the active theme has a readable theme.json file.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_active_theme_json_available() {
+	$path = elodin_bridge_get_active_theme_json_path();
+	return '' !== $path && is_readable( $path );
+}
+
+/**
+ * Get effective theme.json source mode after runtime availability checks.
+ *
+ * @return string theme|plugin
+ */
+function elodin_bridge_get_effective_theme_json_source_mode() {
+	$mode = elodin_bridge_get_theme_json_source_mode();
+	if ( 'theme' === $mode && ! elodin_bridge_is_active_theme_json_available() ) {
+		return 'plugin';
+	}
+
+	return $mode;
+}
+
+/**
+ * Get decoded theme.json data from a specific path.
+ *
+ * @param string $path theme.json file path.
+ * @return array<string,mixed>
+ */
+function elodin_bridge_get_theme_json_data_from_path( $path ) {
+	static $cache = array();
+
+	$path = (string) $path;
+	if ( '' === $path ) {
+		return array();
+	}
+
+	if ( isset( $cache[ $path ] ) && is_array( $cache[ $path ] ) ) {
+		return $cache[ $path ];
+	}
+
+	if ( ! is_readable( $path ) ) {
+		$cache[ $path ] = array();
+		return $cache[ $path ];
+	}
+
+	$raw_json = file_get_contents( $path );
+	if ( false === $raw_json || '' === $raw_json ) {
+		$cache[ $path ] = array();
+		return $cache[ $path ];
+	}
+
+	$parsed = json_decode( $raw_json, true );
+	$cache[ $path ] = is_array( $parsed ) ? $parsed : array();
+
+	return $cache[ $path ];
+}
+
+/**
  * Get decoded active theme.json data.
  *
  * @return array<string,mixed>
  */
 function elodin_bridge_get_active_theme_json_data() {
-	static $loaded = false;
-	static $decoded = array();
+	return elodin_bridge_get_theme_json_data_from_path( elodin_bridge_get_active_theme_json_path() );
+}
 
-	if ( $loaded ) {
-		return $decoded;
-	}
-
-	$loaded = true;
-	$theme_json_path = elodin_bridge_get_active_theme_json_path();
-	if ( '' === $theme_json_path || ! is_readable( $theme_json_path ) ) {
-		return $decoded;
-	}
-
-	$raw_json = file_get_contents( $theme_json_path );
-	if ( false === $raw_json || '' === $raw_json ) {
-		return $decoded;
-	}
-
-	$parsed = json_decode( $raw_json, true );
-	if ( is_array( $parsed ) ) {
-		$decoded = $parsed;
-	}
-
-	return $decoded;
+/**
+ * Get decoded plugin theme-defaults.json data.
+ *
+ * @return array<string,mixed>
+ */
+function elodin_bridge_get_plugin_theme_defaults_data() {
+	return elodin_bridge_get_theme_json_data_from_path( elodin_bridge_get_plugin_theme_defaults_path() );
 }
 
 /**
@@ -995,17 +1080,17 @@ function elodin_bridge_get_theme_button_style_declarations( $raw_styles ) {
 }
 
 /**
- * Read normalized button style overrides from the active theme.json file.
+ * Read normalized button style overrides from theme.json data.
  *
+ * @param array<string,mixed> $decoded Decoded theme.json data.
  * @return array{base:array<string,string>,outline:array<string,string>}
  */
-function elodin_bridge_get_theme_button_style_overrides() {
+function elodin_bridge_get_theme_button_style_overrides_from_data( $decoded ) {
 	$overrides = array(
 		'base'    => array(),
 		'outline' => array(),
 	);
 
-	$decoded = elodin_bridge_get_active_theme_json_data();
 	if ( ! is_array( $decoded ) ) {
 		return $overrides;
 	}
@@ -1035,42 +1120,23 @@ function elodin_bridge_get_theme_button_style_overrides() {
 }
 
 /**
- * Read normalized button padding values from the active theme.json file.
+ * Check whether theme.json data includes usable button style declarations.
  *
- * @return array{all:string,top:string,right:string,bottom:string,left:string}
+ * @param array<string,mixed> $decoded Decoded theme.json data.
+ * @return bool
  */
-function elodin_bridge_get_theme_button_padding_values() {
-	$padding_values = array(
-		'all'    => '',
-		'top'    => '',
-		'right'  => '',
-		'bottom' => '',
-		'left'   => '',
-	);
-
-	$overrides = elodin_bridge_get_theme_button_style_overrides();
-	$base = isset( $overrides['base'] ) && is_array( $overrides['base'] ) ? $overrides['base'] : array();
-
-	if ( isset( $base['padding'] ) ) {
-		$padding_values['all'] = (string) $base['padding'];
-		return $padding_values;
-	}
-
-	$padding_values['top'] = isset( $base['padding-top'] ) ? (string) $base['padding-top'] : '';
-	$padding_values['right'] = isset( $base['padding-right'] ) ? (string) $base['padding-right'] : '';
-	$padding_values['bottom'] = isset( $base['padding-bottom'] ) ? (string) $base['padding-bottom'] : '';
-	$padding_values['left'] = isset( $base['padding-left'] ) ? (string) $base['padding-left'] : '';
-
-	return $padding_values;
+function elodin_bridge_theme_json_has_button_styles( $decoded ) {
+	$overrides = elodin_bridge_get_theme_button_style_overrides_from_data( $decoded );
+	return ! empty( $overrides['base'] ) || ! empty( $overrides['outline'] );
 }
 
 /**
- * Read spacing presets from the active theme.json file.
+ * Read spacing presets from theme.json data.
  *
+ * @param array<string,mixed> $decoded Decoded theme.json data.
  * @return array<string,array{slug:string,name:string,size:string}>
  */
-function elodin_bridge_get_theme_spacing_size_presets() {
-	$decoded = elodin_bridge_get_active_theme_json_data();
+function elodin_bridge_get_theme_spacing_size_presets_from_data( $decoded ) {
 	if ( ! is_array( $decoded ) ) {
 		return array();
 	}
@@ -1108,13 +1174,162 @@ function elodin_bridge_get_theme_spacing_size_presets() {
 }
 
 /**
- * Build alias mappings from theme spacing presets to short variable names.
+ * Check whether theme.json data includes usable spacing presets.
  *
+ * @param array<string,mixed> $decoded Decoded theme.json data.
+ * @return bool
+ */
+function elodin_bridge_theme_json_has_spacing_presets( $decoded ) {
+	return ! empty( elodin_bridge_get_theme_spacing_size_presets_from_data( $decoded ) );
+}
+
+/**
+ * Read font-size presets from theme.json data.
+ *
+ * @param array<string,mixed> $decoded Decoded theme.json data.
+ * @return array<string,array{slug:string,name:string,size:string}>
+ */
+function elodin_bridge_get_theme_font_size_presets_from_data( $decoded ) {
+	if ( ! is_array( $decoded ) ) {
+		return array();
+	}
+
+	$raw_presets = $decoded['settings']['typography']['fontSizes'] ?? array();
+	if ( ! is_array( $raw_presets ) ) {
+		return array();
+	}
+
+	$presets = array();
+	foreach ( $raw_presets as $preset ) {
+		if ( ! is_array( $preset ) ) {
+			continue;
+		}
+
+		$slug = sanitize_key( $preset['slug'] ?? '' );
+		$size = elodin_bridge_sanitize_css_value( $preset['size'] ?? '', '' );
+		if ( '' === $slug || '' === $size ) {
+			continue;
+		}
+
+		$name = sanitize_text_field( $preset['name'] ?? '' );
+		if ( '' === $name ) {
+			$name = $slug;
+		}
+
+		$presets[ $slug ] = array(
+			'slug' => $slug,
+			'name' => $name,
+			'size' => $size,
+		);
+	}
+
+	return $presets;
+}
+
+/**
+ * Check whether theme.json data includes usable font-size presets.
+ *
+ * @param array<string,mixed> $decoded Decoded theme.json data.
+ * @return bool
+ */
+function elodin_bridge_theme_json_has_font_size_presets( $decoded ) {
+	return ! empty( elodin_bridge_get_theme_font_size_presets_from_data( $decoded ) );
+}
+
+/**
+ * Select theme.json data for a class, with optional class-specific fallback.
+ *
+ * @param string $class buttons|spacing|font_sizes
+ * @return array<string,mixed>
+ */
+function elodin_bridge_get_theme_json_data_for_class( $class ) {
+	$mode = elodin_bridge_get_effective_theme_json_source_mode();
+	if ( 'plugin' === $mode ) {
+		return elodin_bridge_get_plugin_theme_defaults_data();
+	}
+
+	$theme_data = elodin_bridge_get_active_theme_json_data();
+	if ( ! is_array( $theme_data ) ) {
+		$theme_data = array();
+	}
+
+	$has_class_data = false;
+	if ( 'buttons' === $class ) {
+		$has_class_data = elodin_bridge_theme_json_has_button_styles( $theme_data );
+	} elseif ( 'spacing' === $class ) {
+		$has_class_data = elodin_bridge_theme_json_has_spacing_presets( $theme_data );
+	} elseif ( 'font_sizes' === $class ) {
+		$has_class_data = elodin_bridge_theme_json_has_font_size_presets( $theme_data );
+	}
+
+	if ( $has_class_data ) {
+		return $theme_data;
+	}
+
+	$defaults_data = elodin_bridge_get_plugin_theme_defaults_data();
+	return is_array( $defaults_data ) ? $defaults_data : array();
+}
+
+/**
+ * Read normalized button style overrides from the selected theme.json source.
+ *
+ * @return array{base:array<string,string>,outline:array<string,string>}
+ */
+function elodin_bridge_get_theme_button_style_overrides() {
+	return elodin_bridge_get_theme_button_style_overrides_from_data(
+		elodin_bridge_get_theme_json_data_for_class( 'buttons' )
+	);
+}
+
+/**
+ * Read normalized button padding values from the selected theme.json source.
+ *
+ * @return array{all:string,top:string,right:string,bottom:string,left:string}
+ */
+function elodin_bridge_get_theme_button_padding_values() {
+	$padding_values = array(
+		'all'    => '',
+		'top'    => '',
+		'right'  => '',
+		'bottom' => '',
+		'left'   => '',
+	);
+
+	$overrides = elodin_bridge_get_theme_button_style_overrides();
+	$base = isset( $overrides['base'] ) && is_array( $overrides['base'] ) ? $overrides['base'] : array();
+
+	if ( isset( $base['padding'] ) ) {
+		$padding_values['all'] = (string) $base['padding'];
+		return $padding_values;
+	}
+
+	$padding_values['top'] = isset( $base['padding-top'] ) ? (string) $base['padding-top'] : '';
+	$padding_values['right'] = isset( $base['padding-right'] ) ? (string) $base['padding-right'] : '';
+	$padding_values['bottom'] = isset( $base['padding-bottom'] ) ? (string) $base['padding-bottom'] : '';
+	$padding_values['left'] = isset( $base['padding-left'] ) ? (string) $base['padding-left'] : '';
+
+	return $padding_values;
+}
+
+/**
+ * Read spacing presets from the selected theme.json source.
+ *
+ * @return array<string,array{slug:string,name:string,size:string}>
+ */
+function elodin_bridge_get_theme_spacing_size_presets() {
+	return elodin_bridge_get_theme_spacing_size_presets_from_data(
+		elodin_bridge_get_theme_json_data_for_class( 'spacing' )
+	);
+}
+
+/**
+ * Build alias mappings from preset definitions.
+ *
+ * @param array<int,array{token:string,label:string,source_slugs:array<int,string>}> $definitions Alias definitions.
+ * @param array<string,array{slug:string,name:string,size:string}>                    $presets Source presets.
  * @return array<int,array{token:string,label:string,source_slug:string,source_name:string,value:string}>
  */
-function elodin_bridge_get_spacing_variable_aliases() {
-	$definitions = elodin_bridge_get_spacing_variable_scale();
-	$presets = elodin_bridge_get_theme_spacing_size_presets();
+function elodin_bridge_build_variable_aliases_from_presets( $definitions, $presets ) {
 	$aliases = array();
 
 	foreach ( $definitions as $definition ) {
@@ -1148,6 +1363,46 @@ function elodin_bridge_get_spacing_variable_aliases() {
 			'source_name' => isset( $matched_preset['name'] ) ? (string) $matched_preset['name'] : '',
 			'value'       => isset( $matched_preset['size'] ) ? (string) $matched_preset['size'] : '',
 		);
+	}
+
+	return $aliases;
+}
+
+/**
+ * Check whether any variable alias currently has a mapped value.
+ *
+ * @param array<int,array{token:string,label:string,source_slug:string,source_name:string,value:string}> $aliases Alias rows.
+ * @return bool
+ */
+function elodin_bridge_variable_aliases_have_values( $aliases ) {
+	foreach ( $aliases as $alias ) {
+		$value = trim( (string) ( $alias['value'] ?? '' ) );
+		if ( '' !== $value ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Build alias mappings from theme spacing presets to short variable names.
+ *
+ * @return array<int,array{token:string,label:string,source_slug:string,source_name:string,value:string}>
+ */
+function elodin_bridge_get_spacing_variable_aliases() {
+	$definitions = elodin_bridge_get_spacing_variable_scale();
+	$presets = elodin_bridge_get_theme_spacing_size_presets();
+	$aliases = elodin_bridge_build_variable_aliases_from_presets( $definitions, $presets );
+
+	if (
+		'theme' === elodin_bridge_get_theme_json_source_mode() &&
+		! elodin_bridge_variable_aliases_have_values( $aliases )
+	) {
+		$fallback_presets = elodin_bridge_get_theme_spacing_size_presets_from_data(
+			elodin_bridge_get_plugin_theme_defaults_data()
+		);
+		$aliases = elodin_bridge_build_variable_aliases_from_presets( $definitions, $fallback_presets );
 	}
 
 	return $aliases;
@@ -1199,46 +1454,14 @@ function elodin_bridge_get_font_size_variable_scale() {
 }
 
 /**
- * Read font-size presets from the active theme.json file.
+ * Read font-size presets from the selected theme.json source.
  *
  * @return array<string,array{slug:string,name:string,size:string}>
  */
 function elodin_bridge_get_theme_font_size_presets() {
-	$decoded = elodin_bridge_get_active_theme_json_data();
-	if ( ! is_array( $decoded ) ) {
-		return array();
-	}
-
-	$raw_presets = $decoded['settings']['typography']['fontSizes'] ?? array();
-	if ( ! is_array( $raw_presets ) ) {
-		return array();
-	}
-
-	$presets = array();
-	foreach ( $raw_presets as $preset ) {
-		if ( ! is_array( $preset ) ) {
-			continue;
-		}
-
-		$slug = sanitize_key( $preset['slug'] ?? '' );
-		$size = elodin_bridge_sanitize_css_value( $preset['size'] ?? '', '' );
-		if ( '' === $slug || '' === $size ) {
-			continue;
-		}
-
-		$name = sanitize_text_field( $preset['name'] ?? '' );
-		if ( '' === $name ) {
-			$name = $slug;
-		}
-
-		$presets[ $slug ] = array(
-			'slug' => $slug,
-			'name' => $name,
-			'size' => $size,
-		);
-	}
-
-	return $presets;
+	return elodin_bridge_get_theme_font_size_presets_from_data(
+		elodin_bridge_get_theme_json_data_for_class( 'font_sizes' )
+	);
 }
 
 /**
@@ -1249,39 +1472,16 @@ function elodin_bridge_get_theme_font_size_presets() {
 function elodin_bridge_get_font_size_variable_aliases() {
 	$definitions = elodin_bridge_get_font_size_variable_scale();
 	$presets = elodin_bridge_get_theme_font_size_presets();
-	$aliases = array();
+	$aliases = elodin_bridge_build_variable_aliases_from_presets( $definitions, $presets );
 
-	foreach ( $definitions as $definition ) {
-		$token = sanitize_key( $definition['token'] ?? '' );
-		if ( '' === $token ) {
-			continue;
-		}
-
-		$label = sanitize_text_field( $definition['label'] ?? '' );
-		$source_slugs = isset( $definition['source_slugs'] ) && is_array( $definition['source_slugs'] ) ? $definition['source_slugs'] : array();
-		$matched_preset = array();
-
-		foreach ( $source_slugs as $source_slug ) {
-			$source_slug = sanitize_key( $source_slug );
-			if ( '' === $source_slug || ! isset( $presets[ $source_slug ] ) ) {
-				continue;
-			}
-
-			$matched_preset = $presets[ $source_slug ];
-			break;
-		}
-
-		if ( empty( $matched_preset ) && isset( $presets[ $token ] ) ) {
-			$matched_preset = $presets[ $token ];
-		}
-
-		$aliases[] = array(
-			'token'       => $token,
-			'label'       => $label,
-			'source_slug' => isset( $matched_preset['slug'] ) ? (string) $matched_preset['slug'] : '',
-			'source_name' => isset( $matched_preset['name'] ) ? (string) $matched_preset['name'] : '',
-			'value'       => isset( $matched_preset['size'] ) ? (string) $matched_preset['size'] : '',
+	if (
+		'theme' === elodin_bridge_get_theme_json_source_mode() &&
+		! elodin_bridge_variable_aliases_have_values( $aliases )
+	) {
+		$fallback_presets = elodin_bridge_get_theme_font_size_presets_from_data(
+			elodin_bridge_get_plugin_theme_defaults_data()
 		);
+		$aliases = elodin_bridge_build_variable_aliases_from_presets( $definitions, $fallback_presets );
 	}
 
 	return $aliases;
@@ -1452,14 +1652,17 @@ function elodin_bridge_is_generateblocks_layout_gap_defaults_enabled() {
 /**
  * Get default values for root-level container padding settings.
  *
- * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
  */
 function elodin_bridge_get_root_level_container_padding_defaults() {
 	return array(
-		'enabled' => 1,
-		'desktop' => 'var( --space-2xl )',
-		'tablet'  => 'var( --space-xl )',
-		'mobile'  => 'var( --space-m )',
+		'enabled'            => 1,
+		'desktop_vertical'   => 'var( --space-2xl )',
+		'desktop_horizontal' => 'var( --space-m )',
+		'tablet_vertical'    => 'var( --space-xl )',
+		'tablet_horizontal'  => 'var( --space-m )',
+		'mobile_vertical'    => 'var( --space-m )',
+		'mobile_horizontal'  => 'var( --space-m )',
 	);
 }
 
@@ -1467,24 +1670,30 @@ function elodin_bridge_get_root_level_container_padding_defaults() {
  * Sanitize root-level container padding settings.
  *
  * @param mixed $value Raw setting value.
- * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
  */
 function elodin_bridge_sanitize_root_level_container_padding_settings( $value ) {
 	$defaults = elodin_bridge_get_root_level_container_padding_defaults();
 	$value = is_array( $value ) ? $value : array();
+	$desktop_legacy = $value['desktop'] ?? null;
+	$tablet_legacy = $value['tablet'] ?? null;
+	$mobile_legacy = $value['mobile'] ?? null;
 
 	return array(
-		'enabled' => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
-		'desktop' => elodin_bridge_sanitize_css_value( $value['desktop'] ?? $defaults['desktop'], $defaults['desktop'] ),
-		'tablet'  => elodin_bridge_sanitize_css_value( $value['tablet'] ?? $defaults['tablet'], $defaults['tablet'] ),
-		'mobile'  => elodin_bridge_sanitize_css_value( $value['mobile'] ?? $defaults['mobile'], $defaults['mobile'] ),
+		'enabled'            => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'desktop_vertical'   => elodin_bridge_sanitize_css_value( $value['desktop_vertical'] ?? $desktop_legacy ?? $defaults['desktop_vertical'], $defaults['desktop_vertical'] ),
+		'desktop_horizontal' => elodin_bridge_sanitize_css_value( $value['desktop_horizontal'] ?? $desktop_legacy ?? $defaults['desktop_horizontal'], $defaults['desktop_horizontal'] ),
+		'tablet_vertical'    => elodin_bridge_sanitize_css_value( $value['tablet_vertical'] ?? $tablet_legacy ?? $defaults['tablet_vertical'], $defaults['tablet_vertical'] ),
+		'tablet_horizontal'  => elodin_bridge_sanitize_css_value( $value['tablet_horizontal'] ?? $tablet_legacy ?? $defaults['tablet_horizontal'], $defaults['tablet_horizontal'] ),
+		'mobile_vertical'    => elodin_bridge_sanitize_css_value( $value['mobile_vertical'] ?? $mobile_legacy ?? $defaults['mobile_vertical'], $defaults['mobile_vertical'] ),
+		'mobile_horizontal'  => elodin_bridge_sanitize_css_value( $value['mobile_horizontal'] ?? $mobile_legacy ?? $defaults['mobile_horizontal'], $defaults['mobile_horizontal'] ),
 	);
 }
 
 /**
  * Get normalized root-level container padding settings.
  *
- * @return array{enabled:int,desktop:string,tablet:string,mobile:string}
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
  */
 function elodin_bridge_get_root_level_container_padding_settings() {
 	$saved = get_option( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING, null );
@@ -1574,12 +1783,21 @@ function elodin_bridge_is_generatepress_static_css_experiment_enabled() {
 }
 
 /**
- * Check if editor UI restrictions are enabled.
+ * Check if editor fullscreen restriction is enabled.
  *
  * @return bool
  */
 function elodin_bridge_is_editor_ui_restrictions_enabled() {
 	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS, 1 );
+}
+
+/**
+ * Check if editor publish sidebar restriction is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_editor_publish_sidebar_restriction_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION, 1 );
 }
 
 /**
@@ -1755,6 +1973,16 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_THEME_JSON_SOURCE_MODE,
+		array(
+			'type'              => 'string',
+			'sanitize_callback' => 'elodin_bridge_sanitize_theme_json_source_mode',
+			'default'           => 'theme',
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_SPACING_VARIABLES,
 		array(
 			'type'              => 'array',
@@ -1806,6 +2034,16 @@ function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION,
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',

@@ -15,6 +15,40 @@ function elodin_bridge_get_root_level_container_padding_media_query( $device ) {
 }
 
 /**
+ * Build declarations for root-level container padding axes.
+ *
+ * Uses physical sides for broad compatibility and predictable horizontal behavior.
+ *
+ * @param string $vertical Vertical padding value.
+ * @param string $horizontal Horizontal padding value.
+ * @param bool   $include_margin_reset Whether to include margin reset.
+ * @return string
+ */
+function elodin_bridge_build_root_level_container_padding_declarations( $vertical, $horizontal, $include_margin_reset = false ) {
+	$declarations = array();
+
+	if ( $include_margin_reset ) {
+		$declarations[] = 'margin:0';
+	}
+
+	if ( '' !== $vertical ) {
+		$declarations[] = 'padding-top:' . $vertical;
+		$declarations[] = 'padding-bottom:' . $vertical;
+	}
+
+	if ( '' !== $horizontal ) {
+		$declarations[] = 'padding-left:' . $horizontal;
+		$declarations[] = 'padding-right:' . $horizontal;
+	}
+
+	if ( empty( $declarations ) ) {
+		return '';
+	}
+
+	return implode( ';', $declarations ) . ';';
+}
+
+/**
  * Build root-level container padding CSS for editor and front-end.
  *
  * @return string
@@ -29,10 +63,20 @@ function elodin_bridge_build_root_level_container_padding_css() {
 		return '';
 	}
 
-	$desktop = trim( (string) ( $settings['desktop'] ?? '' ) );
-	$tablet = trim( (string) ( $settings['tablet'] ?? '' ) );
-	$mobile = trim( (string) ( $settings['mobile'] ?? '' ) );
-	if ( '' === $desktop && '' === $tablet && '' === $mobile ) {
+	$desktop_vertical = trim( (string) ( $settings['desktop_vertical'] ?? $settings['desktop'] ?? '' ) );
+	$desktop_horizontal = trim( (string) ( $settings['desktop_horizontal'] ?? $settings['desktop'] ?? '' ) );
+	$tablet_vertical = trim( (string) ( $settings['tablet_vertical'] ?? $settings['tablet'] ?? '' ) );
+	$tablet_horizontal = trim( (string) ( $settings['tablet_horizontal'] ?? $settings['tablet'] ?? '' ) );
+	$mobile_vertical = trim( (string) ( $settings['mobile_vertical'] ?? $settings['mobile'] ?? '' ) );
+	$mobile_horizontal = trim( (string) ( $settings['mobile_horizontal'] ?? $settings['mobile'] ?? '' ) );
+	if (
+		'' === $desktop_vertical &&
+		'' === $desktop_horizontal &&
+		'' === $tablet_vertical &&
+		'' === $tablet_horizontal &&
+		'' === $mobile_vertical &&
+		'' === $mobile_horizontal
+	) {
 		return '';
 	}
 
@@ -49,19 +93,19 @@ function elodin_bridge_build_root_level_container_padding_css() {
 	);
 	$selector_list = implode( ',', $selectors );
 	$css = '';
-
-	if ( '' !== $desktop ) {
-		$css .= $selector_list . '{padding:' . $desktop . ';margin:0;}';
-	} else {
-		$css .= $selector_list . '{margin:0;}';
+	$desktop_declarations = elodin_bridge_build_root_level_container_padding_declarations( $desktop_vertical, $desktop_horizontal, true );
+	if ( '' !== $desktop_declarations ) {
+		$css .= $selector_list . '{' . $desktop_declarations . '}';
 	}
 
-	if ( '' !== $tablet ) {
-		$css .= '@media ' . elodin_bridge_get_root_level_container_padding_media_query( 'tablet' ) . '{' . $selector_list . '{padding:' . $tablet . ';}}';
+	$tablet_declarations = elodin_bridge_build_root_level_container_padding_declarations( $tablet_vertical, $tablet_horizontal );
+	if ( '' !== $tablet_declarations ) {
+		$css .= '@media ' . elodin_bridge_get_root_level_container_padding_media_query( 'tablet' ) . '{' . $selector_list . '{' . $tablet_declarations . '}}';
 	}
 
-	if ( '' !== $mobile ) {
-		$css .= '@media ' . elodin_bridge_get_root_level_container_padding_media_query( 'mobile' ) . '{' . $selector_list . '{padding:' . $mobile . ';}}';
+	$mobile_declarations = elodin_bridge_build_root_level_container_padding_declarations( $mobile_vertical, $mobile_horizontal );
+	if ( '' !== $mobile_declarations ) {
+		$css .= '@media ' . elodin_bridge_get_root_level_container_padding_media_query( 'mobile' ) . '{' . $selector_list . '{' . $mobile_declarations . '}}';
 	}
 
 	return $css;

@@ -35,6 +35,73 @@
 
 			<div class="elodin-bridge-admin__cards">
 			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="variables">
+				<div class="elodin-bridge-admin__feature">
+					<div class="elodin-bridge-admin__feature-heading-row">
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Theme.json source', 'elodin-bridge' ); ?></span>
+					</div>
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Choose where Bridge reads spacing presets, font sizes, and button style values.', 'elodin-bridge' ); ?>
+						</p>
+						<p class="elodin-bridge-admin__source-mode-status">
+							<span class="elodin-bridge-admin__status-chip <?php echo ! empty( $theme_json_source_theme_fallback_active ) ? 'is-warning' : ''; ?>">
+								<?php if ( ! empty( $theme_json_source_theme_fallback_active ) ) : ?>
+									<?php esc_html_e( 'Currently using: Plugin defaults (automatic fallback)', 'elodin-bridge' ); ?>
+								<?php elseif ( 'plugin' === $theme_json_source_mode_effective ) : ?>
+									<?php esc_html_e( 'Currently using: Plugin defaults', 'elodin-bridge' ); ?>
+								<?php else : ?>
+									<?php esc_html_e( 'Currently using: Active theme.json', 'elodin-bridge' ); ?>
+								<?php endif; ?>
+							</span>
+						</p>
+						<div class="elodin-bridge-admin__source-mode-list">
+							<label class="elodin-bridge-admin__source-mode-item" for="elodin-bridge-theme-json-source-theme">
+								<input
+									type="radio"
+									id="elodin-bridge-theme-json-source-theme"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_THEME_JSON_SOURCE_MODE ); ?>"
+									value="theme"
+									<?php checked( 'theme' === $theme_json_source_mode ); ?>
+								/>
+								<span><?php esc_html_e( 'Use active theme.json (recommended)', 'elodin-bridge' ); ?></span>
+							</label>
+							<label class="elodin-bridge-admin__source-mode-item" for="elodin-bridge-theme-json-source-plugin">
+								<input
+									type="radio"
+									id="elodin-bridge-theme-json-source-plugin"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_THEME_JSON_SOURCE_MODE ); ?>"
+									value="plugin"
+									<?php checked( 'plugin' === $theme_json_source_mode ); ?>
+								/>
+								<span><?php esc_html_e( 'Use our defaults (if you don\'t have a robust theme.json file)', 'elodin-bridge' ); ?></span>
+							</label>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Bridge automatically falls back to plugin defaults when active theme.json has no button styles, no spacing presets, or no font-size presets.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! empty( $theme_json_source_theme_fallback_active ) ) : ?>
+							<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
+								<?php esc_html_e( 'Active theme has no readable theme.json file. Bridge is currently using plugin defaults automatically.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
+						<p class="elodin-bridge-admin__note <?php echo '' === $variables_theme_json_theme_display_path ? 'elodin-bridge-admin__note--warning' : ''; ?>">
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: 1: active theme.json path, 2: plugin defaults path, 3: plugin defaults download URL */
+									__( 'Theme source path: <code>%1$s</code><br />Plugin defaults path: <code>%2$s</code><br /><a href="%3$s" download="theme.json">Download plugin defaults as theme.json</a>.', 'elodin-bridge' ),
+									esc_html( '' !== $variables_theme_json_theme_display_path ? $variables_theme_json_theme_display_path : 'none found' ),
+									esc_html( $variables_theme_json_defaults_display_path ),
+									esc_url( $variables_theme_json_download_url )
+								)
+							);
+							?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="variables">
 				<div class="elodin-bridge-admin__feature <?php echo ! empty( $spacing_variables_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-spacing-variables-enabled">
 						<input
@@ -91,21 +158,33 @@
 									<?php endforeach; ?>
 								</div>
 							<?php else : ?>
-								<p class="elodin-bridge-admin__note">
+								<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
 									<?php esc_html_e( 'No spacing presets were found in theme.json for the mapped aliases.', 'elodin-bridge' ); ?>
 								</p>
 							<?php endif; ?>
 							<p class="elodin-bridge-admin__note">
-								<?php
-								echo wp_kses_post(
-								sprintf(
-									/* translators: %s: theme.json path */
-									__( 'Update values in <code>%s</code> under <code>settings.spacing.spacingSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
-									esc_html( $variables_theme_json_display_path )
-								)
-							);
-							?>
-						</p>
+								<?php if ( 'plugin' === $theme_json_source_mode_effective ) : ?>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %s: plugin defaults download URL */
+											__( 'Bridge is currently reading plugin defaults. Do not edit plugin files. <a href="%s" download="theme.json">Download plugin defaults as theme.json</a>, place it in your active theme, and edit <code>settings.spacing.spacingSizes</code> there.', 'elodin-bridge' ),
+											esc_url( $variables_theme_json_download_url )
+										)
+									);
+									?>
+								<?php else : ?>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %s: theme.json path */
+											__( 'Update values in <code>%s</code> under <code>settings.spacing.spacingSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
+											esc_html( $variables_theme_json_display_path )
+										)
+									);
+									?>
+								<?php endif; ?>
+							</p>
 					</div>
 				</div>
 			</div>
@@ -167,21 +246,33 @@
 									<?php endforeach; ?>
 								</div>
 							<?php else : ?>
-								<p class="elodin-bridge-admin__note">
+								<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
 									<?php esc_html_e( 'No font-size presets were found in theme.json for the mapped aliases.', 'elodin-bridge' ); ?>
 								</p>
 							<?php endif; ?>
 							<p class="elodin-bridge-admin__note">
-								<?php
-								echo wp_kses_post(
-								sprintf(
-									/* translators: %s: theme.json path */
-									__( 'Update values in <code>%s</code> under <code>settings.typography.fontSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
-									esc_html( $variables_theme_json_display_path )
-								)
-							);
-							?>
-						</p>
+								<?php if ( 'plugin' === $theme_json_source_mode_effective ) : ?>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %s: plugin defaults download URL */
+											__( 'Bridge is currently reading plugin defaults. Do not edit plugin files. <a href="%s" download="theme.json">Download plugin defaults as theme.json</a>, place it in your active theme, and edit <code>settings.typography.fontSizes</code> there.', 'elodin-bridge' ),
+											esc_url( $variables_theme_json_download_url )
+										)
+									);
+									?>
+								<?php else : ?>
+									<?php
+									echo wp_kses_post(
+										sprintf(
+											/* translators: %s: theme.json path */
+											__( 'Update values in <code>%s</code> under <code>settings.typography.fontSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
+											esc_html( $variables_theme_json_display_path )
+										)
+									);
+									?>
+								<?php endif; ?>
+							</p>
 					</div>
 				</div>
 			</div>
@@ -314,7 +405,7 @@
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in both editor and front-end contexts, including reusable block wrappers.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in editor and front-end contexts, including direct children inside reusable block wrappers.', 'elodin-bridge' ); ?>
 						</p>
 						<?php if ( ! $generateblocks_available ) : ?>
 							<p class="elodin-bridge-admin__note">
@@ -323,40 +414,70 @@
 						<?php endif; ?>
 
 						<div class="elodin-bridge-admin__responsive-values">
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop">
-								<span><?php esc_html_e( 'Desktop', 'elodin-bridge' ); ?></span>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop-vertical">
+								<span><?php esc_html_e( 'Desktop vertical', 'elodin-bridge' ); ?></span>
 								<input
 									type="text"
 									class="regular-text"
-									id="elodin-bridge-root-level-padding-desktop"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop'] ?? 'var( --space-2xl )' ); ?>"
+									id="elodin-bridge-root-level-padding-desktop-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop_vertical]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop_vertical'] ?? 'var( --space-2xl )' ); ?>"
 								/>
 							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet">
-								<span><?php esc_html_e( 'Tablet', 'elodin-bridge' ); ?></span>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet-vertical">
+								<span><?php esc_html_e( 'Tablet vertical', 'elodin-bridge' ); ?></span>
 								<input
 									type="text"
 									class="regular-text"
-									id="elodin-bridge-root-level-padding-tablet"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet'] ?? 'var( --space-xl )' ); ?>"
+									id="elodin-bridge-root-level-padding-tablet-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet_vertical]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet_vertical'] ?? 'var( --space-xl )' ); ?>"
 								/>
 							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile">
-								<span><?php esc_html_e( 'Mobile', 'elodin-bridge' ); ?></span>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile-vertical">
+								<span><?php esc_html_e( 'Mobile vertical', 'elodin-bridge' ); ?></span>
 								<input
 									type="text"
 									class="regular-text"
-									id="elodin-bridge-root-level-padding-mobile"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile'] ?? 'var( --space-m )' ); ?>"
+									id="elodin-bridge-root-level-padding-mobile-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile_vertical]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile_vertical'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop-horizontal">
+								<span><?php esc_html_e( 'Desktop horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-desktop-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop_horizontal]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop_horizontal'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet-horizontal">
+								<span><?php esc_html_e( 'Tablet horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-tablet-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet_horizontal]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet_horizontal'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile-horizontal">
+								<span><?php esc_html_e( 'Mobile horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-padding-mobile-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile_horizontal]"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile_horizontal'] ?? 'var( --space-m )' ); ?>"
 								/>
 							</label>
 						</div>
 
 						<p class="elodin-bridge-admin__note">
-							<?php esc_html_e( 'Supports CSS values like var(--space-2xl), 2rem, or clamp(1rem, 2vw, 2rem).', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Supports CSS values like var(--space-m), 2rem, or clamp(1rem, 2vw, 2rem). Applies axis-specific values as top/bottom and left/right padding.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>
@@ -607,20 +728,32 @@
 								<?php endforeach; ?>
 							</div>
 						<?php else : ?>
-							<p class="elodin-bridge-admin__note">
+							<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
 								<?php esc_html_e( 'No button style values were found in active theme.json.', 'elodin-bridge' ); ?>
 							</p>
 						<?php endif; ?>
 						<p class="elodin-bridge-admin__note">
-							<?php
-							echo wp_kses_post(
-								sprintf(
-									/* translators: %s: theme.json path */
-									__( 'Update values in <code>%s</code> under <code>styles.blocks.core/button</code> (fallback: <code>styles.elements.button</code>; variation support: <code>styles.blocks.core/button.variations.outline</code>). Values shown here are read-only. Per-button overrides remain possible.', 'elodin-bridge' ),
-									esc_html( $variables_theme_json_display_path )
-								)
-							);
-							?>
+							<?php if ( 'plugin' === $theme_json_source_mode_effective ) : ?>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+										/* translators: %s: plugin defaults download URL */
+										__( 'Bridge is currently reading plugin defaults. Do not edit plugin files. <a href="%s" download="theme.json">Download plugin defaults as theme.json</a>, place it in your active theme, then edit <code>styles.blocks.core/button</code> (fallback: <code>styles.elements.button</code>; variation support: <code>styles.blocks.core/button.variations.outline</code>). Values shown here are read-only. Per-button overrides remain possible.', 'elodin-bridge' ),
+										esc_url( $variables_theme_json_download_url )
+									)
+								);
+								?>
+							<?php else : ?>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+										/* translators: %s: theme.json path */
+										__( 'Update values in <code>%s</code> under <code>styles.blocks.core/button</code> (fallback: <code>styles.elements.button</code>; variation support: <code>styles.blocks.core/button.variations.outline</code>). Values shown here are read-only. Per-button overrides remain possible.', 'elodin-bridge' ),
+										esc_html( $variables_theme_json_display_path )
+									)
+								);
+								?>
+							<?php endif; ?>
 						</p>
 					</div>
 				</div>
@@ -914,12 +1047,42 @@
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
 						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable fullscreen mode and publish sidebar in the editor', 'elodin-bridge' ); ?></span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable fullscreen mode in the editor', 'elodin-bridge' ); ?></span>
 					</label>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Injects inline JS to disable fullscreen mode and disable the publish sidebar in the block editor.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Turns fullscreen mode off in the block editor.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature <?php echo $editor_publish_sidebar_restriction_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION ); ?>"
+							value="1"
+							<?php checked( $editor_publish_sidebar_restriction_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable publish sidebar in the editor', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Disables the publish sidebar in the block editor.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>

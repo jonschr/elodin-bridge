@@ -37,11 +37,6 @@ function elodin_bridge_enqueue_editor_balanced_text_toolbar() {
 		return;
 	}
 
-	// When heading/paragraph toolbar overrides are enabled, balanced text is injected there.
-	if ( elodin_bridge_is_heading_paragraph_overrides_enabled() ) {
-		return;
-	}
-
 	$script_path = ELODIN_BRIDGE_DIR . '/assets/editor-balanced-text-toggle.js';
 	$script_url = ELODIN_BRIDGE_URL . 'assets/editor-balanced-text-toggle.js';
 

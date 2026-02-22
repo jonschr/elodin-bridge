@@ -77,19 +77,40 @@ function elodin_bridge_render_admin_page() {
 	$generateblocks_layout_gap_defaults_enabled = elodin_bridge_is_generateblocks_layout_gap_defaults_enabled();
 	$root_level_container_padding_settings = elodin_bridge_get_root_level_container_padding_settings();
 	$root_level_container_padding_enabled = elodin_bridge_is_root_level_container_padding_enabled();
-	$variables_theme_json_path = elodin_bridge_get_active_theme_json_path();
-	$variables_theme_json_display_path = '';
-	if ( '' !== $variables_theme_json_path ) {
-		$normalized_path = wp_normalize_path( $variables_theme_json_path );
+	$theme_json_source_mode = elodin_bridge_get_theme_json_source_mode();
+	$theme_json_source_mode_effective = elodin_bridge_get_effective_theme_json_source_mode();
+	$theme_json_source_theme_fallback_active = 'theme' === $theme_json_source_mode && 'plugin' === $theme_json_source_mode_effective;
+	$variables_theme_json_theme_path = elodin_bridge_get_active_theme_json_path();
+	$variables_theme_json_defaults_path = elodin_bridge_get_plugin_theme_defaults_path();
+	$variables_theme_json_theme_display_path = '';
+	if ( '' !== $variables_theme_json_theme_path ) {
+		$normalized_path = wp_normalize_path( $variables_theme_json_theme_path );
 		$normalized_root = wp_normalize_path( ABSPATH );
-		$variables_theme_json_display_path = $normalized_path;
+		$variables_theme_json_theme_display_path = $normalized_path;
 		if ( 0 === strpos( $normalized_path, $normalized_root ) ) {
-			$variables_theme_json_display_path = ltrim( substr( $normalized_path, strlen( $normalized_root ) ), '/' );
+			$variables_theme_json_theme_display_path = ltrim( substr( $normalized_path, strlen( $normalized_root ) ), '/' );
 		}
-	} else {
-		$variables_theme_json_display_path = 'wp-content/themes/' . get_stylesheet() . '/theme.json';
+	}
+	$variables_theme_json_defaults_display_path = '';
+	if ( '' !== $variables_theme_json_defaults_path ) {
+		$normalized_path = wp_normalize_path( $variables_theme_json_defaults_path );
+		$normalized_root = wp_normalize_path( ABSPATH );
+		$variables_theme_json_defaults_display_path = $normalized_path;
+		if ( 0 === strpos( $normalized_path, $normalized_root ) ) {
+			$variables_theme_json_defaults_display_path = ltrim( substr( $normalized_path, strlen( $normalized_root ) ), '/' );
+		}
+	}
+	$variables_theme_json_download_url = trailingslashit( ELODIN_BRIDGE_URL ) . 'theme-defaults.json';
+	$variables_theme_json_display_path = 'plugin' === $theme_json_source_mode_effective
+		? $variables_theme_json_defaults_display_path
+		: $variables_theme_json_theme_display_path;
+	if ( '' === $variables_theme_json_display_path ) {
+		$variables_theme_json_display_path = '' !== $variables_theme_json_defaults_display_path
+			? $variables_theme_json_defaults_display_path
+			: 'wp-content/plugins/elodin-bridge/theme-defaults.json';
 	}
 	$editor_ui_restrictions_enabled = elodin_bridge_is_editor_ui_restrictions_enabled();
+	$editor_publish_sidebar_restriction_enabled = elodin_bridge_is_editor_publish_sidebar_restriction_enabled();
 	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
 	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
 	$generateblocks_boundary_highlights_enabled = elodin_bridge_is_generateblocks_boundary_highlights_enabled();

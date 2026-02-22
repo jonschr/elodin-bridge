@@ -32,12 +32,14 @@ define( 'ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT', 'elodin_bridge_enable_balan
 define( 'ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR', 'elodin_bridge_content_type_behavior' );
 define( 'ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS', 'elodin_bridge_automatic_heading_margins' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS', 'elodin_bridge_enable_editor_ui_restrictions' );
+define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION', 'elodin_bridge_enable_editor_publish_sidebar_restriction' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING', 'elodin_bridge_enable_media_library_infinite_scrolling' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES', 'elodin_bridge_enable_shortcodes' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS', 'elodin_bridge_enable_generateblocks_boundary_highlights' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_PRETTIER_WIDGETS', 'elodin_bridge_enable_prettier_widgets' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS', 'elodin_bridge_enable_last_child_margin_resets' );
 define( 'ELODIN_BRIDGE_OPTION_LAST_CHILD_BUTTON_GROUP_TOP_MARGIN', 'elodin_bridge_last_child_button_group_top_margin' );
+define( 'ELODIN_BRIDGE_OPTION_THEME_JSON_SOURCE_MODE', 'elodin_bridge_theme_json_source_mode' );
 define( 'ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS', 'elodin_bridge_generatepress_list_margins' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT', 'elodin_bridge_enable_generatepress_static_css_experiment' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT', 'elodin_bridge_enable_theme_json_button_padding_important' );

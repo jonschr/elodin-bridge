@@ -372,6 +372,50 @@
 	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
+.elodin-bridge-admin__source-mode-list {
+	margin-top: 12px;
+	display: grid;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__source-mode-status {
+	margin: 10px 0 0;
+}
+
+.elodin-bridge-admin__status-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	border-radius: 999px;
+	border: 1px solid #c5d9ed;
+	background: #f0f6fc;
+	color: #1d2327;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.elodin-bridge-admin__status-chip.is-warning {
+	border-color: #f1c4c6;
+	background: #fcf0f1;
+	color: #8a2424;
+}
+
+.elodin-bridge-admin__source-mode-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 10px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	background: #f6f7f7;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__source-mode-item input[type="radio"] {
+	margin: 2px 0 0;
+}
+
 .elodin-bridge-admin__content-type-item {
 	display: flex;
 	align-items: center;
