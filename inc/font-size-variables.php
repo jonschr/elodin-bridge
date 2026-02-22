@@ -6,8 +6,7 @@
  * @return string
  */
 function elodin_bridge_build_font_size_variables_css() {
-	$settings = elodin_bridge_get_font_size_variables_settings();
-	if ( empty( $settings['enabled'] ) ) {
+	if ( ! elodin_bridge_is_font_size_variables_enabled() ) {
 		return '';
 	}
 

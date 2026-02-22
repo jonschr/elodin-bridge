@@ -48,7 +48,8 @@ define( 'ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS', 'elodin_bridg
 define( 'ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING', 'elodin_bridge_root_level_container_padding' );
 define( 'ELODIN_BRIDGE_TYPOGRAPHY_RESET', '__elodin_bridge_typography_reset__' );
 define( 'ELODIN_BRIDGE_UPDATE_REPOSITORY', 'https://github.com/jonschr/elodin-bridge' );
-define( 'ELODIN_BRIDGE_UPDATE_BRANCH', 'master' );
+// Empty branch means update checks are tag/release-based by default.
+define( 'ELODIN_BRIDGE_UPDATE_BRANCH', '' );
 
 require_once ELODIN_BRIDGE_DIR . '/inc/settings-page.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/heading-paragraph-overrides.php';

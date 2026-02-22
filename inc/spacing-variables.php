@@ -6,8 +6,7 @@
  * @return string
  */
 function elodin_bridge_build_spacing_variables_css() {
-	$settings = elodin_bridge_get_spacing_variables_settings();
-	if ( empty( $settings['enabled'] ) ) {
+	if ( ! elodin_bridge_is_spacing_variables_enabled() ) {
 		return '';
 	}
 

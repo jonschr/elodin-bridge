@@ -15,6 +15,8 @@
 		? window.requestAnimationFrame.bind( window )
 		: ( callback ) => window.setTimeout( callback, 16 );
 	let queued = false;
+	let needsFullScan = true;
+	const pendingRoots = new Set();
 
 	const isMobileView = () => mediaQueryList.matches;
 
@@ -80,17 +82,43 @@
 		} );
 	};
 
-	const patchAllCandidates = () => {
-		// Only real elements are patched; pseudo-elements are intentionally excluded.
-		if ( document.documentElement instanceof HTMLElement ) {
-			patchElement( document.documentElement );
-		}
-		if ( document.body instanceof HTMLElement ) {
-			patchElement( document.body );
+	const patchSubtree = ( root ) => {
+		if ( ! ( root instanceof HTMLElement ) ) {
+			return;
 		}
 
-		const allElements = document.querySelectorAll( '*' );
-		allElements.forEach( ( element ) => patchElement( element ) );
+		patchElement( root );
+		if ( typeof document.createTreeWalker !== 'function' || ! window.NodeFilter ) {
+			root.querySelectorAll( '*' ).forEach( ( element ) => patchElement( element ) );
+			return;
+		}
+
+		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_ELEMENT );
+		let current = walker.nextNode();
+		while ( current ) {
+			patchElement( current );
+			current = walker.nextNode();
+		}
+	};
+
+	const getPendingRoots = () => {
+		const roots = Array.from( pendingRoots );
+		pendingRoots.clear();
+		if ( roots.length < 2 ) {
+			return roots;
+		}
+
+		return roots.filter( ( candidate, index ) => {
+			return ! roots.some( ( other, otherIndex ) => {
+				return otherIndex !== index && other.contains( candidate );
+			} );
+		} );
+	};
+
+	const markRootForScan = ( node ) => {
+		if ( node instanceof HTMLElement ) {
+			pendingRoots.add( node );
+		}
 	};
 
 	const applyRepairPass = () => {
@@ -98,13 +126,27 @@
 
 		if ( ! isMobileView() ) {
 			restorePatchedElements();
+			pendingRoots.clear();
 			return;
 		}
 
-		patchAllCandidates();
+		if ( needsFullScan ) {
+			if ( document.documentElement instanceof HTMLElement ) {
+				patchSubtree( document.documentElement );
+			}
+			needsFullScan = false;
+			pendingRoots.clear();
+			return;
+		}
+
+		getPendingRoots().forEach( ( root ) => patchSubtree( root ) );
 	};
 
-	const queueRepairPass = () => {
+	const queueRepairPass = ( forceFullScan = false ) => {
+		if ( forceFullScan ) {
+			needsFullScan = true;
+		}
+
 		if ( queued ) {
 			return;
 		}
@@ -114,8 +156,15 @@
 	};
 
 	if ( typeof MutationObserver === 'function' ) {
-		const observer = new MutationObserver( () => {
+		const observer = new MutationObserver( ( mutations ) => {
 			if ( isMobileView() ) {
+				mutations.forEach( ( mutation ) => {
+					markRootForScan( mutation.target );
+
+					if ( mutation.addedNodes && mutation.addedNodes.length ) {
+						mutation.addedNodes.forEach( ( node ) => markRootForScan( node ) );
+					}
+				} );
 				queueRepairPass();
 			}
 		} );
@@ -128,15 +177,24 @@
 		} );
 	}
 
+	const handleMediaQueryChange = () => {
+		if ( isMobileView() ) {
+			queueRepairPass( true );
+			return;
+		}
+
+		queueRepairPass();
+	};
+
 	if ( typeof mediaQueryList.addEventListener === 'function' ) {
-		mediaQueryList.addEventListener( 'change', queueRepairPass );
+		mediaQueryList.addEventListener( 'change', handleMediaQueryChange );
 	} else if ( typeof mediaQueryList.addListener === 'function' ) {
-		mediaQueryList.addListener( queueRepairPass );
+		mediaQueryList.addListener( handleMediaQueryChange );
 	}
 
-	window.addEventListener( 'load', queueRepairPass, { passive: true } );
+	window.addEventListener( 'load', () => queueRepairPass( true ), { passive: true } );
 	window.addEventListener( 'orientationchange', queueRepairPass, { passive: true } );
-	document.addEventListener( 'DOMContentLoaded', queueRepairPass );
+	document.addEventListener( 'DOMContentLoaded', () => queueRepairPass( true ) );
 
-	queueRepairPass();
+	queueRepairPass( true );
 } )();
