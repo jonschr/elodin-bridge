@@ -27,9 +27,6 @@
 	const allowedBlocks = new Set( [ 'core/paragraph', 'core/heading' ] );
 	const managedClasses = [ 'p', 'h1', 'h2', 'h3', 'h4' ];
 	const managedClassSet = new Set( managedClasses );
-	const marginTopClasses = [ 'elodin-mt-0', 'elodin-mt-s', 'elodin-mt-m' ];
-	const legacyMarginTopClass = 'elodin-mt';
-	const marginTopClassSet = new Set( marginTopClasses.concat( legacyMarginTopClass ) );
 	const balancedClass = 'balanced';
 
 	function parseClasses( className ) {
@@ -65,43 +62,6 @@
 	function getActiveManagedClass( className ) {
 		const classes = parseClasses( className );
 		return managedClasses.find( ( candidate ) => classes.includes( candidate ) ) || '';
-	}
-
-	function getActiveMarginTopClass( className ) {
-		const classes = parseClasses( className );
-		const matchedClass = marginTopClasses.find( ( candidate ) => classes.includes( candidate ) );
-		if ( matchedClass ) {
-			return matchedClass;
-		}
-
-		return classes.includes( legacyMarginTopClass ) ? 'elodin-mt-0' : '';
-	}
-
-	function getNextMarginTopClassName( currentClassName, targetClass ) {
-		const currentClasses = parseClasses( currentClassName );
-		const activeMarginTopClass =
-			marginTopClasses.find( ( className ) => currentClasses.includes( className ) ) ||
-			( currentClasses.includes( legacyMarginTopClass ) ? legacyMarginTopClass : '' );
-		const preservedClasses = currentClasses.filter(
-			( className ) => ! marginTopClassSet.has( className )
-		);
-		const nextClasses = activeMarginTopClass === targetClass
-			? preservedClasses
-			: preservedClasses.concat( targetClass );
-
-		return nextClasses.length ? nextClasses.join( ' ' ) : undefined;
-	}
-
-	function getMarginTopLabel( className ) {
-		if ( 'elodin-mt-0' === className ) {
-			return __( '0', 'elodin-bridge' );
-		}
-
-		if ( 'elodin-mt-s' === className ) {
-			return 'var( --space-s )';
-		}
-
-		return 'var( --space-m )';
 	}
 
 	function getTypeIcon( isActive ) {
@@ -140,52 +100,6 @@
 		} ) );
 	}
 
-	function buildMarginTopControls( props ) {
-		const currentClassName = props.attributes?.className || '';
-		const activeMarginTopClass = getActiveMarginTopClass( currentClassName );
-		const clearControl = {
-			title: __( 'No margin-top override', 'elodin-bridge' ),
-			isActive: '' === activeMarginTopClass,
-			onClick: () => {
-				const nextClasses = parseClasses( currentClassName ).filter(
-					( className ) => ! marginTopClassSet.has( className )
-				);
-				dispatch( blockEditorStore ).updateBlockAttributes( props.clientId, {
-					className: nextClasses.length ? nextClasses.join( ' ' ) : undefined,
-				} );
-			},
-		};
-
-		return [
-			clearControl,
-			...marginTopClasses.map( ( className ) => ( {
-				title: sprintf(
-					__( 'Margin top: %s', 'elodin-bridge' ),
-					getMarginTopLabel( className )
-				),
-				isActive: className === activeMarginTopClass,
-				onClick: () => {
-					dispatch( blockEditorStore ).updateBlockAttributes( props.clientId, {
-						className: getNextMarginTopClassName( currentClassName, className ),
-					} );
-				},
-			} ) ),
-		];
-	}
-
-	function isMarginTopControlAvailable( props ) {
-		if ( 'core/paragraph' === props.name ) {
-			return true;
-		}
-
-		if ( 'core/heading' !== props.name ) {
-			return false;
-		}
-
-		const headingLevel = Number( props.attributes?.level || 2 );
-		return headingLevel >= 1 && headingLevel <= 4;
-	}
-
 	const withElodinHeadingParagraphToolbar = createHigherOrderComponent(
 		( BlockEdit ) => {
 			return function WrappedBlockEdit( props ) {
@@ -195,15 +109,13 @@
 
 				const currentClassName = props.attributes?.className || '';
 				const activeManagedClass = getActiveManagedClass( currentClassName );
-				const activeMarginTopClass = getActiveMarginTopClass( currentClassName );
 				const isBalanced = hasClass( currentClassName, balancedClass );
 				const activeManagedClassLabel = activeManagedClass
 					? activeManagedClass.toUpperCase()
 					: '';
 				const canShowTypeControls = enableTypeOverrides;
-				const canShowMarginTopControl = enableTypeOverrides && isMarginTopControlAvailable( props );
 				const canShowBalancedControl = enableBalancedText;
-				if ( ! canShowTypeControls && ! canShowMarginTopControl && ! canShowBalancedControl ) {
+				if ( ! canShowTypeControls && ! canShowBalancedControl ) {
 					return el( BlockEdit, props );
 				}
 
@@ -213,12 +125,6 @@
 							activeManagedClassLabel
 					  )
 					: __( 'Typography override', 'elodin-bridge' );
-				const marginTopDropdownLabel = activeMarginTopClass
-					? sprintf(
-							__( 'Margin-top override: %s', 'elodin-bridge' ),
-							getMarginTopLabel( activeMarginTopClass )
-					  )
-					: __( 'Margin-top override', 'elodin-bridge' );
 
 				return el(
 					Fragment,
@@ -243,21 +149,6 @@
 										isPressed: !! activeManagedClass,
 										showTooltip: true,
 										className: 'elodin-bridge-toolbar-toggle elodin-bridge-toolbar-toggle--type',
-									},
-								} ),
-							canShowMarginTopControl &&
-								el( ToolbarDropdownMenu, {
-									icon: 'arrow-up-alt2',
-									label: marginTopDropdownLabel,
-									text: null,
-									controls: buildMarginTopControls( props ),
-									popoverProps: {
-										className: 'elodin-bridge-type-menu',
-									},
-									toggleProps: {
-										isPressed: !! activeMarginTopClass,
-										showTooltip: true,
-										className: 'elodin-bridge-toolbar-toggle elodin-bridge-toolbar-toggle--margin',
 									},
 								} ),
 							canShowBalancedControl &&
