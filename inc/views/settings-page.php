@@ -587,6 +587,111 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature <?php echo $theme_json_button_padding_important_enabled ? 'is-enabled' : ''; ?>">
+					<?php
+					$button_padding_values = is_array( $theme_json_button_padding_values ) ? $theme_json_button_padding_values : array();
+					$button_padding_all = (string) ( $button_padding_values['all'] ?? '' );
+					$button_padding_top = (string) ( $button_padding_values['top'] ?? '' );
+					$button_padding_right = (string) ( $button_padding_values['right'] ?? '' );
+					$button_padding_bottom = (string) ( $button_padding_values['bottom'] ?? '' );
+					$button_padding_left = (string) ( $button_padding_values['left'] ?? '' );
+					?>
+					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT ); ?>"
+							value="1"
+							<?php checked( $theme_json_button_padding_important_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Force theme.json button padding with !important', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Outputs !important padding declarations on .wp-block-button__link using your active theme.json button padding values so parent-theme button styles cannot override them.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__variables-grid">
+							<?php if ( '' !== $button_padding_all ) : ?>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code>padding</code>
+										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
+									</span>
+									<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_all ); ?></code>
+								</div>
+							<?php else : ?>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code>padding-top</code>
+										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
+									</span>
+									<?php if ( '' !== $button_padding_top ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_top ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code>padding-right</code>
+										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
+									</span>
+									<?php if ( '' !== $button_padding_right ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_right ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code>padding-bottom</code>
+										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
+									</span>
+									<?php if ( '' !== $button_padding_bottom ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_bottom ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+								<div class="elodin-bridge-admin__variable-field">
+									<span class="elodin-bridge-admin__variable-name">
+										<code>padding-left</code>
+										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
+									</span>
+									<?php if ( '' !== $button_padding_left ) : ?>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_left ); ?></code>
+									<?php else : ?>
+										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
+									<?php endif; ?>
+								</div>
+							<?php endif; ?>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php
+							echo wp_kses_post(
+								sprintf(
+									/* translators: %s: theme.json path */
+									__( 'Update button padding in <code>%s</code> under <code>styles.blocks.core/button.spacing.padding</code> (fallback: <code>styles.elements.button.spacing.padding</code>). Values shown here are read-only; if no padding is defined there, no CSS is output.', 'elodin-bridge' ),
+									esc_html( $variables_theme_json_display_path )
+								)
+							);
+							?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $last_child_margin_resets_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_LAST_CHILD_MARGIN_RESETS ); ?>">
 						<input

@@ -623,6 +623,124 @@ function elodin_bridge_get_active_theme_json_data() {
 }
 
 /**
+ * Normalize a theme.json CSS value into a value safe for inline output.
+ *
+ * Supports `var:preset|...` and `var:custom|...` shorthands.
+ *
+ * @param mixed $value Raw theme.json value.
+ * @return string
+ */
+function elodin_bridge_normalize_theme_json_css_value( $value ) {
+	$value = trim( (string) $value );
+	if ( '' === $value ) {
+		return '';
+	}
+
+	$value = preg_replace_callback(
+		'/var:preset\|([a-zA-Z0-9-]+)\|([a-zA-Z0-9-]+)/',
+		static function ( $matches ) {
+			$group = sanitize_key( $matches[1] ?? '' );
+			$slug = sanitize_key( $matches[2] ?? '' );
+			if ( '' === $group || '' === $slug ) {
+				return '';
+			}
+
+			return 'var(--wp--preset--' . $group . '--' . $slug . ')';
+		},
+		$value
+	);
+
+	$value = preg_replace_callback(
+		'/var:custom\|([a-zA-Z0-9|_-]+)/',
+		static function ( $matches ) {
+			$raw_path = trim( (string) ( $matches[1] ?? '' ) );
+			if ( '' === $raw_path ) {
+				return '';
+			}
+
+			$path_segments = explode( '|', $raw_path );
+			$sanitized_segments = array();
+			foreach ( $path_segments as $segment ) {
+				$segment = sanitize_key( $segment );
+				if ( '' !== $segment ) {
+					$sanitized_segments[] = $segment;
+				}
+			}
+
+			if ( empty( $sanitized_segments ) ) {
+				return '';
+			}
+
+			return 'var(--wp--custom--' . implode( '--', $sanitized_segments ) . ')';
+		},
+		$value
+	);
+
+	return elodin_bridge_sanitize_css_value( $value, '' );
+}
+
+/**
+ * Read normalized button padding values from the active theme.json file.
+ *
+ * @return array{all:string,top:string,right:string,bottom:string,left:string}
+ */
+function elodin_bridge_get_theme_button_padding_values() {
+	$padding_values = array(
+		'all'    => '',
+		'top'    => '',
+		'right'  => '',
+		'bottom' => '',
+		'left'   => '',
+	);
+
+	$decoded = elodin_bridge_get_active_theme_json_data();
+	if ( ! is_array( $decoded ) ) {
+		return $padding_values;
+	}
+
+	$raw_padding = $decoded['styles']['blocks']['core/button']['spacing']['padding'] ?? null;
+	if ( null === $raw_padding ) {
+		$raw_padding = $decoded['styles']['elements']['button']['spacing']['padding'] ?? null;
+	}
+
+	if ( is_scalar( $raw_padding ) ) {
+		$padding_values['all'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding );
+		return $padding_values;
+	}
+
+	if ( ! is_array( $raw_padding ) ) {
+		return $padding_values;
+	}
+
+	$padding_values['top'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['top'] ?? '' );
+	$padding_values['right'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['right'] ?? '' );
+	$padding_values['bottom'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['bottom'] ?? '' );
+	$padding_values['left'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['left'] ?? '' );
+
+	$vertical = elodin_bridge_normalize_theme_json_css_value( $raw_padding['vertical'] ?? '' );
+	if ( '' !== $vertical ) {
+		if ( '' === $padding_values['top'] ) {
+			$padding_values['top'] = $vertical;
+		}
+		if ( '' === $padding_values['bottom'] ) {
+			$padding_values['bottom'] = $vertical;
+		}
+	}
+
+	$horizontal = elodin_bridge_normalize_theme_json_css_value( $raw_padding['horizontal'] ?? '' );
+	if ( '' !== $horizontal ) {
+		if ( '' === $padding_values['right'] ) {
+			$padding_values['right'] = $horizontal;
+		}
+		if ( '' === $padding_values['left'] ) {
+			$padding_values['left'] = $horizontal;
+		}
+	}
+
+	return $padding_values;
+}
+
+/**
  * Read spacing presets from the active theme.json file.
  *
  * @return array<string,array{slug:string,name:string,size:string}>
@@ -1159,6 +1277,15 @@ function elodin_bridge_is_last_child_margin_resets_enabled() {
 }
 
 /**
+ * Check if theme.json button padding overrides with !important are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_theme_json_button_padding_important_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT, 0 );
+}
+
+/**
  * Check if mobile fixed-background repair is enabled.
  *
  * @return bool
@@ -1360,6 +1487,16 @@ function elodin_bridge_register_settings() {
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
 			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 0,
 		)
 	);
 
