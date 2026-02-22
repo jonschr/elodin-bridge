@@ -187,8 +187,8 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_layout_gap_defaults_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-generateblocks-layout-gaps-enabled">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_layout_gap_defaults_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-generateblocks-layout-gaps-enabled">
 						<input
 							type="hidden"
 							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS ); ?>[enabled]"
@@ -213,6 +213,11 @@
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Sets default row and column gap values for new GenerateBlocks containers.', 'elodin-bridge' ); ?>
 						</p>
+						<?php if ( ! $generateblocks_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GenerateBlocks is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 
 						<div class="elodin-bridge-admin__responsive-values">
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-gb-column-gap-desktop">
@@ -285,8 +290,8 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature has-requirement <?php echo $root_level_container_padding_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-root-level-container-padding-enabled">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $root_level_container_padding_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-root-level-container-padding-enabled">
 						<input
 							type="hidden"
 							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
@@ -311,6 +316,11 @@
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in both editor and front-end contexts, including reusable block wrappers.', 'elodin-bridge' ); ?>
 						</p>
+						<?php if ( ! $generateblocks_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GenerateBlocks is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 
 						<div class="elodin-bridge-admin__responsive-values">
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop">
@@ -320,7 +330,7 @@
 									class="regular-text"
 									id="elodin-bridge-root-level-padding-desktop"
 									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop'] ?? 'var( --space-xl )' ); ?>"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop'] ?? 'var( --space-2xl )' ); ?>"
 								/>
 							</label>
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet">
@@ -330,7 +340,7 @@
 									class="regular-text"
 									id="elodin-bridge-root-level-padding-tablet"
 									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet'] ?? 'var( --space-l )' ); ?>"
+									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet'] ?? 'var( --space-xl )' ); ?>"
 								/>
 							</label>
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile">
@@ -346,7 +356,7 @@
 						</div>
 
 						<p class="elodin-bridge-admin__note">
-							<?php esc_html_e( 'Supports CSS values like var(--space-xl), 2rem, or clamp(1rem, 2vw, 2rem).', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Supports CSS values like var(--space-2xl), 2rem, or clamp(1rem, 2vw, 2rem).', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>
@@ -367,7 +377,6 @@
 							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>"
 							value="1"
 							<?php checked( $heading_paragraph_overrides_enabled ); ?>
-							<?php disabled( ! $heading_paragraph_overrides_available ); ?>
 						/>
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
@@ -414,36 +423,6 @@
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Adds a separate block toolbar button to toggle the .balanced class on paragraphs and headings. When active, that class applies text-wrap: balance.', 'elodin-bridge' ); ?>
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature <?php echo $default_paragraph_block_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>">
-						<input
-							type="hidden"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
-							value="0"
-						/>
-						<input
-							type="checkbox"
-							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
-							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK ); ?>"
-							value="1"
-							<?php checked( $default_paragraph_block_enabled ); ?>
-						/>
-						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
-							<span class="elodin-bridge-admin__toggle-thumb"></span>
-						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Set Paragraph as default inserter block', 'elodin-bridge' ); ?></span>
-					</label>
-
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Sets core/paragraph as the default block type used when inserting a new block in the editor.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>
@@ -571,7 +550,7 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="style">
-				<div class="elodin-bridge-admin__feature <?php echo $theme_json_button_padding_important_enabled ? 'is-enabled' : ''; ?>">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $theme_json_button_padding_important_enabled ? 'is-enabled' : ''; ?>">
 					<?php
 					$button_style_overrides = is_array( $theme_json_button_style_overrides ) ? $theme_json_button_style_overrides : array();
 					$button_base_declarations = isset( $button_style_overrides['base'] ) && is_array( $button_style_overrides['base'] )
@@ -600,6 +579,7 @@
 						</span>
 						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Apply theme.json button styles with higher specificity', 'elodin-bridge' ); ?></span>
 					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GeneratePress', 'elodin-bridge' ); ?></span>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
@@ -642,6 +622,129 @@
 							);
 							?>
 						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generatepress_list_margins_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generatepress_list_margins_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generatepress_list_margins_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-generatepress-list-margins-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-generatepress-list-margins-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $generatepress_list_margins_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Override GeneratePress list margins', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GeneratePress', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'GeneratePress parent theme does not respect theme.json values and has no setting for this in its settings.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! $generatepress_list_margins_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GeneratePress is your active parent theme.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
+						<div class="elodin-bridge-admin__responsive-values elodin-bridge-admin__responsive-values--two-by-two">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-generatepress-list-margin-top">
+								<span><?php esc_html_e( 'Margin top', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-generatepress-list-margin-top"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[margin_top]"
+									value="<?php echo esc_attr( $generatepress_list_margins_settings['margin_top'] ?? '0' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-generatepress-list-margin-right">
+								<span><?php esc_html_e( 'Margin right', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-generatepress-list-margin-right"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[margin_right]"
+									value="<?php echo esc_attr( $generatepress_list_margins_settings['margin_right'] ?? '0' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-generatepress-list-margin-bottom">
+								<span><?php esc_html_e( 'Margin bottom', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-generatepress-list-margin-bottom"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[margin_bottom]"
+									value="<?php echo esc_attr( $generatepress_list_margins_settings['margin_bottom'] ?? elodin_bridge_get_generatepress_body_margin_bottom_default() ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-generatepress-list-margin-left">
+								<span><?php esc_html_e( 'Margin left', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-generatepress-list-margin-left"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS ); ?>[margin_left]"
+									value="<?php echo esc_attr( $generatepress_list_margins_settings['margin_left'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like 0, 1.5em, var(--space-m), or clamp(1rem, 2vw, 2rem).', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generatepress_static_css_experiment_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generatepress_static_css_experiment_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generatepress_static_css_experiment_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT ); ?>"
+							value="1"
+							<?php checked( $generatepress_static_css_experiment_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Disable GeneratePress static CSS', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GeneratePress', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Dequeues GeneratePress static stylesheet files while preserving dynamic inline CSS generated from settings.', 'elodin-bridge' ); ?>
+						</p>
+						<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
+							<?php esc_html_e( 'Experimental: this can cause unexpected visual regressions.', 'elodin-bridge' ); ?>
+						</p>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Also applies .site.grid-container { max-width: 100% }.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! $generatepress_static_css_experiment_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GeneratePress is your active parent theme.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
@@ -883,8 +986,8 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_boundary_highlights_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_boundary_highlights_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>">
 						<input
 							type="hidden"
 							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS ); ?>"
@@ -909,6 +1012,11 @@
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Adds dashed outlines around GenerateBlocks containers/elements in the block editor to make block boundaries easier to identify while editing.', 'elodin-bridge' ); ?>
 						</p>
+						<?php if ( ! $generateblocks_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GenerateBlocks is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

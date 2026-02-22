@@ -4,6 +4,10 @@
  * Enqueue GenerateBlocks boundary highlight styles in the block editor.
  */
 function elodin_bridge_enqueue_generateblocks_boundary_highlight_styles() {
+	if ( ! elodin_bridge_is_generateblocks_available() ) {
+		return;
+	}
+
 	if ( ! elodin_bridge_is_generateblocks_boundary_highlights_enabled() ) {
 		return;
 	}

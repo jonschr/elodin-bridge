@@ -11,7 +11,7 @@
 - New spacing alias mappings for Theme.json spacing presets:
   - `--space-2xs` maps to `xx-small` / `2xs` / `xxs`.
   - `--space-xs` maps to `x-small` / `xs`.
-  - `--space-r` maps to `regular` / `r` (positioned between small and medium).
+  - `--space-b` maps to `base` / `b` (positioned between small and medium).
 
 ### Changed
 - Theme.json button override output no longer uses `!important`:

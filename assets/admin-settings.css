@@ -322,6 +322,15 @@
 	border-color: #b8bcc2;
 }
 
+.elodin-bridge-admin__feature.is-unavailable {
+	opacity: 0.55;
+}
+
+.elodin-bridge-admin__feature.is-unavailable .elodin-bridge-admin__feature-header,
+.elodin-bridge-admin__feature.is-unavailable .elodin-bridge-admin__feature-body {
+	pointer-events: none;
+}
+
 .elodin-bridge-admin__description {
 	margin: 0;
 	color: #50575e;
@@ -388,12 +397,26 @@
 	color: #646970;
 }
 
+.elodin-bridge-admin__note--warning {
+	color: #8a2424;
+	background: #fcf0f1;
+	border: 1px solid #f1c4c6;
+	border-left: 4px solid #d63638;
+	padding: 8px 10px;
+	border-radius: 6px;
+}
+
 .elodin-bridge-admin__responsive-values {
 	margin-top: 12px;
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 10px;
 	max-width: 680px;
+}
+
+.elodin-bridge-admin__responsive-values.elodin-bridge-admin__responsive-values--two-by-two {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: 520px;
 }
 
 .elodin-bridge-admin__variables-grid {
@@ -651,6 +674,10 @@
 
 	.elodin-bridge-admin__responsive-values {
 		grid-template-columns: 1fr;
+	}
+
+	.elodin-bridge-admin__responsive-values.elodin-bridge-admin__responsive-values--two-by-two {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.elodin-bridge-admin__variables-grid {

@@ -20,6 +20,10 @@ function elodin_bridge_apply_generateblocks_layout_gap_defaults( $defaults ) {
 		return $defaults;
 	}
 
+	if ( ! elodin_bridge_is_generateblocks_available() ) {
+		return $defaults;
+	}
+
 	if ( ! elodin_bridge_is_generateblocks_layout_gap_defaults_enabled() ) {
 		return $defaults;
 	}

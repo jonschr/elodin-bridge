@@ -59,11 +59,16 @@ function elodin_bridge_render_admin_page() {
 	}
 
 	$heading_paragraph_overrides_available = elodin_bridge_is_generatepress_parent_theme();
-	$heading_paragraph_overrides_enabled = elodin_bridge_is_heading_paragraph_overrides_enabled();
+	$heading_paragraph_overrides_enabled = ! empty( get_option( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES, 1 ) );
 	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
-	$default_paragraph_block_enabled = elodin_bridge_is_default_paragraph_block_enabled();
 	$automatic_heading_margins_settings = elodin_bridge_get_automatic_heading_margins_settings();
 	$automatic_heading_margins_enabled = elodin_bridge_is_automatic_heading_margins_enabled();
+	$generateblocks_available = elodin_bridge_is_generateblocks_available();
+	$generatepress_list_margins_available = elodin_bridge_is_generatepress_parent_theme();
+	$generatepress_list_margins_settings = elodin_bridge_get_generatepress_list_margins_settings();
+	$generatepress_list_margins_enabled = ! empty( $generatepress_list_margins_settings['enabled'] );
+	$generatepress_static_css_experiment_available = elodin_bridge_is_generatepress_parent_theme();
+	$generatepress_static_css_experiment_enabled = elodin_bridge_is_generatepress_static_css_experiment_setting_enabled();
 	$spacing_variables_settings = elodin_bridge_get_spacing_variables_settings();
 	$spacing_variable_aliases = elodin_bridge_get_spacing_variable_aliases();
 	$font_size_variables_settings = elodin_bridge_get_font_size_variables_settings();

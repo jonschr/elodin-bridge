@@ -20,6 +20,10 @@ function elodin_bridge_get_root_level_container_padding_media_query( $device ) {
  * @return string
  */
 function elodin_bridge_build_root_level_container_padding_css() {
+	if ( ! elodin_bridge_is_generateblocks_available() ) {
+		return '';
+	}
+
 	$settings = elodin_bridge_get_root_level_container_padding_settings();
 	if ( empty( $settings['enabled'] ) ) {
 		return '';

@@ -53,16 +53,12 @@ function elodin_bridge_is_generatepress_parent_theme() {
 }
 
 /**
- * Sanitize heading/paragraph override toggle with theme requirement.
+ * Sanitize heading/paragraph override toggle.
  *
  * @param mixed $value Raw setting value.
  * @return int
  */
 function elodin_bridge_sanitize_heading_paragraph_overrides_toggle( $value ) {
-	if ( ! elodin_bridge_is_generatepress_parent_theme() ) {
-		return 0;
-	}
-
 	return elodin_bridge_sanitize_toggle( $value );
 }
 
@@ -525,6 +521,108 @@ function elodin_bridge_get_automatic_heading_margins_settings() {
 }
 
 /**
+ * Get the GeneratePress body paragraph margin-bottom value.
+ *
+ * @return string
+ */
+function elodin_bridge_get_generatepress_body_margin_bottom_default() {
+	$fallback = '1.5em';
+
+	if ( ! function_exists( 'generate_get_option' ) ) {
+		return $fallback;
+	}
+
+	if ( function_exists( 'generate_is_using_dynamic_typography' ) && generate_is_using_dynamic_typography() ) {
+		$typography_settings = generate_get_option( 'typography' );
+		if ( is_array( $typography_settings ) ) {
+			$body_typography = array();
+			foreach ( $typography_settings as $item ) {
+				if ( ! is_array( $item ) || 'body' !== (string) ( $item['selector'] ?? '' ) ) {
+					continue;
+				}
+
+				$body_typography = $item;
+			}
+
+			if ( ! empty( $body_typography ) ) {
+				$margin_bottom = trim( (string) ( $body_typography['marginBottom'] ?? '' ) );
+				$margin_unit = trim( (string) ( $body_typography['marginBottomUnit'] ?? 'px' ) );
+				if ( '' !== $margin_bottom && '' !== $margin_unit && preg_match( '/^-?\d*\.?\d+$/', $margin_bottom ) ) {
+					$margin_bottom .= $margin_unit;
+				}
+
+				$margin_bottom = elodin_bridge_sanitize_css_value( $margin_bottom, '' );
+				if ( '' !== $margin_bottom ) {
+					return $margin_bottom;
+				}
+			}
+		}
+	}
+
+	$paragraph_margin = trim( (string) generate_get_option( 'paragraph_margin' ) );
+	if ( '' !== $paragraph_margin ) {
+		if ( preg_match( '/^-?\d*\.?\d+$/', $paragraph_margin ) ) {
+			$paragraph_margin .= 'em';
+		}
+
+		$paragraph_margin = elodin_bridge_sanitize_css_value( $paragraph_margin, '' );
+		if ( '' !== $paragraph_margin ) {
+			return $paragraph_margin;
+		}
+	}
+
+	return $fallback;
+}
+
+/**
+ * Get default values for GeneratePress list margin overrides.
+ *
+ * @return array{enabled:int,margin_top:string,margin_right:string,margin_bottom:string,margin_left:string}
+ */
+function elodin_bridge_get_generatepress_list_margins_defaults() {
+	return array(
+		'enabled'       => 1,
+		'margin_top'    => '0',
+		'margin_right'  => '0',
+		'margin_bottom' => elodin_bridge_get_generatepress_body_margin_bottom_default(),
+		'margin_left'   => 'var( --space-m )',
+	);
+}
+
+/**
+ * Sanitize GeneratePress list margin override settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,margin_top:string,margin_right:string,margin_bottom:string,margin_left:string}
+ */
+function elodin_bridge_sanitize_generatepress_list_margins_settings( $value ) {
+	$defaults = elodin_bridge_get_generatepress_list_margins_defaults();
+	$value = is_array( $value ) ? $value : array();
+
+	return array(
+		'enabled'       => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'margin_top'    => elodin_bridge_sanitize_css_value( $value['margin_top'] ?? $defaults['margin_top'], $defaults['margin_top'] ),
+		'margin_right'  => elodin_bridge_sanitize_css_value( $value['margin_right'] ?? $defaults['margin_right'], $defaults['margin_right'] ),
+		'margin_bottom' => elodin_bridge_sanitize_css_value( $value['margin_bottom'] ?? $defaults['margin_bottom'], $defaults['margin_bottom'] ),
+		'margin_left'   => elodin_bridge_sanitize_css_value( $value['margin_left'] ?? $defaults['margin_left'], $defaults['margin_left'] ),
+	);
+}
+
+/**
+ * Get normalized GeneratePress list margin override settings.
+ *
+ * @return array{enabled:int,margin_top:string,margin_right:string,margin_bottom:string,margin_left:string}
+ */
+function elodin_bridge_get_generatepress_list_margins_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_generatepress_list_margins_defaults();
+	}
+
+	return elodin_bridge_sanitize_generatepress_list_margins_settings( $saved );
+}
+
+/**
  * Get default values for last-child button group top margin settings.
  *
  * @return array{enabled:int,value:string}
@@ -589,9 +687,9 @@ function elodin_bridge_get_spacing_variable_scale() {
 			'source_slugs' => array( 'small', 's' ),
 		),
 		array(
-			'token'        => 'r',
-			'label'        => __( 'Regular', 'elodin-bridge' ),
-			'source_slugs' => array( 'regular', 'r' ),
+			'token'        => 'b',
+			'label'        => __( 'Base', 'elodin-bridge' ),
+			'source_slugs' => array( 'base', 'b' ),
 		),
 		array(
 			'token'        => 'm',
@@ -1359,8 +1457,8 @@ function elodin_bridge_is_generateblocks_layout_gap_defaults_enabled() {
 function elodin_bridge_get_root_level_container_padding_defaults() {
 	return array(
 		'enabled' => 1,
-		'desktop' => 'var( --space-xl )',
-		'tablet'  => 'var( --space-l )',
+		'desktop' => 'var( --space-2xl )',
+		'tablet'  => 'var( --space-xl )',
 		'mobile'  => 'var( --space-m )',
 	);
 }
@@ -1430,15 +1528,6 @@ function elodin_bridge_is_balanced_text_enabled() {
 }
 
 /**
- * Check if setting Paragraph as default inserter block is enabled.
- *
- * @return bool
- */
-function elodin_bridge_is_default_paragraph_block_enabled() {
-	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK, 1 );
-}
-
-/**
  * Check if automatic heading margins are enabled.
  *
  * @return bool
@@ -1446,6 +1535,42 @@ function elodin_bridge_is_default_paragraph_block_enabled() {
 function elodin_bridge_is_automatic_heading_margins_enabled() {
 	$settings = elodin_bridge_get_automatic_heading_margins_settings();
 	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Check if GeneratePress list margin overrides are enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_generatepress_list_margins_enabled() {
+	if ( ! elodin_bridge_is_generatepress_parent_theme() ) {
+		return false;
+	}
+
+	$settings = elodin_bridge_get_generatepress_list_margins_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Check if GeneratePress static CSS experiment is enabled in settings.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_generatepress_static_css_experiment_setting_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT, 1 );
+}
+
+/**
+ * Check if GeneratePress static CSS experiment should run.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_generatepress_static_css_experiment_enabled() {
+	if ( ! elodin_bridge_is_generatepress_parent_theme() ) {
+		return false;
+	}
+
+	return elodin_bridge_is_generatepress_static_css_experiment_setting_enabled();
 }
 
 /**
@@ -1600,21 +1725,31 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
-		ELODIN_BRIDGE_OPTION_ENABLE_DEFAULT_PARAGRAPH_BLOCK,
-		array(
-			'type'              => 'boolean',
-			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
-			'default'           => 1,
-		)
-	);
-
-	register_setting(
-		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS,
 		array(
 			'type'              => 'array',
 			'sanitize_callback' => 'elodin_bridge_sanitize_automatic_heading_margins_settings',
 			'default'           => elodin_bridge_get_automatic_heading_margins_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_GENERATEPRESS_LIST_MARGINS,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_generatepress_list_margins_settings',
+			'default'           => elodin_bridge_get_generatepress_list_margins_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
 		)
 	);
 
