@@ -574,9 +574,24 @@ function elodin_bridge_get_last_child_button_group_top_margin_settings() {
 function elodin_bridge_get_spacing_variable_scale() {
 	return array(
 		array(
+			'token'        => '2xs',
+			'label'        => __( '2XS', 'elodin-bridge' ),
+			'source_slugs' => array( 'xx-small', '2xs', 'xxs' ),
+		),
+		array(
+			'token'        => 'xs',
+			'label'        => __( 'Extra Small', 'elodin-bridge' ),
+			'source_slugs' => array( 'x-small', 'xs' ),
+		),
+		array(
 			'token'        => 's',
 			'label'        => __( 'Small', 'elodin-bridge' ),
 			'source_slugs' => array( 'small', 's' ),
+		),
+		array(
+			'token'        => 'r',
+			'label'        => __( 'Regular', 'elodin-bridge' ),
+			'source_slugs' => array( 'regular', 'r' ),
 		),
 		array(
 			'token'        => 'm',
@@ -665,6 +680,29 @@ function elodin_bridge_get_active_theme_json_data() {
 }
 
 /**
+ * Sanitize a theme.json CSS value used for read-only style output.
+ *
+ * @param mixed $value Raw theme.json value.
+ * @return string
+ */
+function elodin_bridge_sanitize_theme_json_css_value( $value ) {
+	$value = trim( wp_strip_all_tags( (string) $value ) );
+	if ( '' === $value ) {
+		return '';
+	}
+
+	if ( false !== strpbrk( $value, ';{}\\' ) ) {
+		return '';
+	}
+
+	if ( ! preg_match( '/^[a-zA-Z0-9#%().,_+*\/\-\s\'"]+$/', $value ) ) {
+		return '';
+	}
+
+	return preg_replace( '/\s+/', ' ', $value );
+}
+
+/**
  * Normalize a theme.json CSS value into a value safe for inline output.
  *
  * Supports `var:preset|...` and `var:custom|...` shorthands.
@@ -718,7 +756,184 @@ function elodin_bridge_normalize_theme_json_css_value( $value ) {
 		$value
 	);
 
-	return elodin_bridge_sanitize_css_value( $value, '' );
+	return elodin_bridge_sanitize_theme_json_css_value( $value );
+}
+
+/**
+ * Build CSS declarations for theme.json spacing padding data.
+ *
+ * @param mixed $raw_padding Raw spacing padding data.
+ * @return array<string,string>
+ */
+function elodin_bridge_get_theme_json_padding_declarations( $raw_padding ) {
+	$declarations = array();
+
+	if ( is_scalar( $raw_padding ) ) {
+		$padding = elodin_bridge_normalize_theme_json_css_value( $raw_padding );
+		if ( '' !== $padding ) {
+			$declarations['padding'] = $padding;
+		}
+		return $declarations;
+	}
+
+	if ( ! is_array( $raw_padding ) ) {
+		return $declarations;
+	}
+
+	$top = elodin_bridge_normalize_theme_json_css_value( $raw_padding['top'] ?? '' );
+	$right = elodin_bridge_normalize_theme_json_css_value( $raw_padding['right'] ?? '' );
+	$bottom = elodin_bridge_normalize_theme_json_css_value( $raw_padding['bottom'] ?? '' );
+	$left = elodin_bridge_normalize_theme_json_css_value( $raw_padding['left'] ?? '' );
+
+	$vertical = elodin_bridge_normalize_theme_json_css_value( $raw_padding['vertical'] ?? '' );
+	if ( '' !== $vertical ) {
+		if ( '' === $top ) {
+			$top = $vertical;
+		}
+		if ( '' === $bottom ) {
+			$bottom = $vertical;
+		}
+	}
+
+	$horizontal = elodin_bridge_normalize_theme_json_css_value( $raw_padding['horizontal'] ?? '' );
+	if ( '' !== $horizontal ) {
+		if ( '' === $right ) {
+			$right = $horizontal;
+		}
+		if ( '' === $left ) {
+			$left = $horizontal;
+		}
+	}
+
+	if ( '' !== $top ) {
+		$declarations['padding-top'] = $top;
+	}
+	if ( '' !== $right ) {
+		$declarations['padding-right'] = $right;
+	}
+	if ( '' !== $bottom ) {
+		$declarations['padding-bottom'] = $bottom;
+	}
+	if ( '' !== $left ) {
+		$declarations['padding-left'] = $left;
+	}
+
+	return $declarations;
+}
+
+/**
+ * Build normalized CSS declarations for button styles from a theme.json style node.
+ *
+ * @param mixed $raw_styles Raw style node.
+ * @return array<string,string>
+ */
+function elodin_bridge_get_theme_button_style_declarations( $raw_styles ) {
+	if ( ! is_array( $raw_styles ) ) {
+		return array();
+	}
+
+	$declarations = array();
+
+	if ( isset( $raw_styles['spacing'] ) && is_array( $raw_styles['spacing'] ) && array_key_exists( 'padding', $raw_styles['spacing'] ) ) {
+		$declarations = array_merge( $declarations, elodin_bridge_get_theme_json_padding_declarations( $raw_styles['spacing']['padding'] ) );
+	}
+
+	$color = isset( $raw_styles['color'] ) && is_array( $raw_styles['color'] ) ? $raw_styles['color'] : array();
+	$background_color = elodin_bridge_normalize_theme_json_css_value( $color['background'] ?? '' );
+	$background_gradient = elodin_bridge_normalize_theme_json_css_value( $color['gradient'] ?? '' );
+	$text_color = elodin_bridge_normalize_theme_json_css_value( $color['text'] ?? '' );
+	$link_color = elodin_bridge_normalize_theme_json_css_value( $color['link'] ?? '' );
+
+	if ( '' !== $background_color ) {
+		$declarations['background-color'] = $background_color;
+	}
+	if ( '' !== $background_gradient ) {
+		$declarations['background-image'] = $background_gradient;
+	}
+	if ( '' !== $text_color ) {
+		$declarations['color'] = $text_color;
+	} elseif ( '' !== $link_color ) {
+		$declarations['color'] = $link_color;
+	}
+
+	$border = isset( $raw_styles['border'] ) && is_array( $raw_styles['border'] ) ? $raw_styles['border'] : array();
+	$border_map = array(
+		'radius' => 'border-radius',
+		'width'  => 'border-width',
+		'style'  => 'border-style',
+		'color'  => 'border-color',
+	);
+	foreach ( $border_map as $source_key => $property ) {
+		$value = elodin_bridge_normalize_theme_json_css_value( $border[ $source_key ] ?? '' );
+		if ( '' !== $value ) {
+			$declarations[ $property ] = $value;
+		}
+	}
+
+	$typography = isset( $raw_styles['typography'] ) && is_array( $raw_styles['typography'] ) ? $raw_styles['typography'] : array();
+	$typography_map = array(
+		'fontSize'       => 'font-size',
+		'fontFamily'     => 'font-family',
+		'fontStyle'      => 'font-style',
+		'fontWeight'     => 'font-weight',
+		'lineHeight'     => 'line-height',
+		'letterSpacing'  => 'letter-spacing',
+		'textTransform'  => 'text-transform',
+		'textDecoration' => 'text-decoration',
+	);
+	foreach ( $typography_map as $source_key => $property ) {
+		$value = elodin_bridge_normalize_theme_json_css_value( $typography[ $source_key ] ?? '' );
+		if ( '' !== $value ) {
+			$declarations[ $property ] = $value;
+		}
+	}
+
+	$shadow = elodin_bridge_normalize_theme_json_css_value( $raw_styles['shadow'] ?? '' );
+	if ( '' !== $shadow ) {
+		$declarations['box-shadow'] = $shadow;
+	}
+
+	return $declarations;
+}
+
+/**
+ * Read normalized button style overrides from the active theme.json file.
+ *
+ * @return array{base:array<string,string>,outline:array<string,string>}
+ */
+function elodin_bridge_get_theme_button_style_overrides() {
+	$overrides = array(
+		'base'    => array(),
+		'outline' => array(),
+	);
+
+	$decoded = elodin_bridge_get_active_theme_json_data();
+	if ( ! is_array( $decoded ) ) {
+		return $overrides;
+	}
+
+	$element_button_styles = isset( $decoded['styles']['elements']['button'] ) && is_array( $decoded['styles']['elements']['button'] )
+		? $decoded['styles']['elements']['button']
+		: array();
+	$block_button_styles = isset( $decoded['styles']['blocks']['core/button'] ) && is_array( $decoded['styles']['blocks']['core/button'] )
+		? $decoded['styles']['blocks']['core/button']
+		: array();
+
+	$base_styles = array_replace_recursive( $element_button_styles, $block_button_styles );
+	if ( isset( $base_styles['variations'] ) ) {
+		unset( $base_styles['variations'] );
+	}
+	$overrides['base'] = elodin_bridge_get_theme_button_style_declarations( $base_styles );
+
+	$outline_styles = array();
+	if ( isset( $block_button_styles['variations']['outline'] ) && is_array( $block_button_styles['variations']['outline'] ) ) {
+		$outline_styles = $block_button_styles['variations']['outline'];
+	} elseif ( isset( $element_button_styles['variations']['outline'] ) && is_array( $element_button_styles['variations']['outline'] ) ) {
+		$outline_styles = $element_button_styles['variations']['outline'];
+	}
+	$overrides['outline'] = elodin_bridge_get_theme_button_style_declarations( $outline_styles );
+
+	return $overrides;
 }
 
 /**
@@ -735,49 +950,18 @@ function elodin_bridge_get_theme_button_padding_values() {
 		'left'   => '',
 	);
 
-	$decoded = elodin_bridge_get_active_theme_json_data();
-	if ( ! is_array( $decoded ) ) {
+	$overrides = elodin_bridge_get_theme_button_style_overrides();
+	$base = isset( $overrides['base'] ) && is_array( $overrides['base'] ) ? $overrides['base'] : array();
+
+	if ( isset( $base['padding'] ) ) {
+		$padding_values['all'] = (string) $base['padding'];
 		return $padding_values;
 	}
 
-	$raw_padding = $decoded['styles']['blocks']['core/button']['spacing']['padding'] ?? null;
-	if ( null === $raw_padding ) {
-		$raw_padding = $decoded['styles']['elements']['button']['spacing']['padding'] ?? null;
-	}
-
-	if ( is_scalar( $raw_padding ) ) {
-		$padding_values['all'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding );
-		return $padding_values;
-	}
-
-	if ( ! is_array( $raw_padding ) ) {
-		return $padding_values;
-	}
-
-	$padding_values['top'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['top'] ?? '' );
-	$padding_values['right'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['right'] ?? '' );
-	$padding_values['bottom'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['bottom'] ?? '' );
-	$padding_values['left'] = elodin_bridge_normalize_theme_json_css_value( $raw_padding['left'] ?? '' );
-
-	$vertical = elodin_bridge_normalize_theme_json_css_value( $raw_padding['vertical'] ?? '' );
-	if ( '' !== $vertical ) {
-		if ( '' === $padding_values['top'] ) {
-			$padding_values['top'] = $vertical;
-		}
-		if ( '' === $padding_values['bottom'] ) {
-			$padding_values['bottom'] = $vertical;
-		}
-	}
-
-	$horizontal = elodin_bridge_normalize_theme_json_css_value( $raw_padding['horizontal'] ?? '' );
-	if ( '' !== $horizontal ) {
-		if ( '' === $padding_values['right'] ) {
-			$padding_values['right'] = $horizontal;
-		}
-		if ( '' === $padding_values['left'] ) {
-			$padding_values['left'] = $horizontal;
-		}
-	}
+	$padding_values['top'] = isset( $base['padding-top'] ) ? (string) $base['padding-top'] : '';
+	$padding_values['right'] = isset( $base['padding-right'] ) ? (string) $base['padding-right'] : '';
+	$padding_values['bottom'] = isset( $base['padding-bottom'] ) ? (string) $base['padding-bottom'] : '';
+	$padding_values['left'] = isset( $base['padding-left'] ) ? (string) $base['padding-left'] : '';
 
 	return $padding_values;
 }
@@ -1329,12 +1513,14 @@ function elodin_bridge_is_last_child_button_group_top_margin_enabled() {
 }
 
 /**
- * Check if theme.json button padding overrides with !important are enabled.
+ * Check if theme.json button style specificity overrides are enabled.
+ *
+ * Uses a legacy option key name for backward compatibility.
  *
  * @return bool
  */
 function elodin_bridge_is_theme_json_button_padding_important_enabled() {
-	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT, 0 );
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT, 1 );
 }
 
 /**
@@ -1558,7 +1744,7 @@ function elodin_bridge_register_settings() {
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
-			'default'           => 0,
+			'default'           => 1,
 		)
 	);
 

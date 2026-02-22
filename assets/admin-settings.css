@@ -403,6 +403,14 @@
 	gap: 10px;
 }
 
+.elodin-bridge-admin__variables-grid.elodin-bridge-admin__variables-grid--spacing-compact {
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.elodin-bridge-admin__variables-grid.elodin-bridge-admin__variables-grid--button-styles {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .elodin-bridge-admin__variable-field {
 	display: grid;
 	gap: 6px;
@@ -649,6 +657,14 @@
 		grid-template-columns: 1fr;
 	}
 
+	.elodin-bridge-admin__variables-grid.elodin-bridge-admin__variables-grid--spacing-compact {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.elodin-bridge-admin__variables-grid.elodin-bridge-admin__variables-grid--button-styles {
+		grid-template-columns: 1fr;
+	}
+
 	.elodin-bridge-admin__image-size-field--slug,
 	.elodin-bridge-admin__image-size-field--label,
 	.elodin-bridge-admin__image-size-field--width,
@@ -677,6 +693,10 @@
 
 	.elodin-bridge-admin__variables-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.elodin-bridge-admin__variables-grid.elodin-bridge-admin__variables-grid--spacing-compact {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 }
 

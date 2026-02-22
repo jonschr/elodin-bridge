@@ -1,5 +1,33 @@
 # Elodin Bridge Changes
 
+## Version 0.7
+
+### Added
+- New style tweak setting to apply Theme.json button styles with higher specificity (default on):
+  - Reads button styles from `styles.blocks.core/button` (with fallback to `styles.elements.button`).
+  - Includes variation support for `styles.blocks.core/button.variations.outline`.
+  - Applies front-end and backend/editor overrides for GeneratePress button style conflicts.
+- Post editor (all CPTs using `core/edit-post`) style injection path for Theme.json button overrides via `block_editor_settings_all`.
+- New spacing alias mappings for Theme.json spacing presets:
+  - `--space-2xs` maps to `xx-small` / `2xs` / `xxs`.
+  - `--space-xs` maps to `x-small` / `xs`.
+  - `--space-r` maps to `regular` / `r` (positioned between small and medium).
+
+### Changed
+- Theme.json button override output no longer uses `!important`:
+  - Now relies on higher specificity selectors and late enqueue priority, preserving per-button overrides.
+- Theme.json button override setting card updated:
+  - Renamed to reflect specificity-based behavior.
+  - Expanded read-only preview to show all detected button declarations (not just padding).
+  - Clarified that values are edited in `theme.json`, not in Bridge settings.
+- Spacing and font-size variable cards now render only aliases that exist in active Theme.json values.
+- Spacing and font-size variable cards now display only variable name + value (label/slug metadata removed).
+- Spacing variable grid layout refined for denser but readable display in admin.
+- Last-child button group top margin feature now also always sets `.wp-block-buttons:first-child { margin-top: 0; }` when enabled.
+
+### Fixed
+- Theme.json button override styles now load more reliably in backend editor contexts, including post editor canvases where button styles previously differed from front-end output.
+
 ## Version 0.6
 
 ### Added

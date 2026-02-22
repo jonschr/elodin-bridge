@@ -56,56 +56,48 @@
 						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable spacing variables', 'elodin-bridge' ); ?></span>
 					</label>
 
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Maps your theme.json spacing presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
-						</p>
-
-						<div class="elodin-bridge-admin__variables-grid">
-							<?php foreach ( $spacing_variable_aliases as $alias ) : ?>
-								<?php
-								$token = (string) ( $alias['token'] ?? '' );
-								if ( '' === $token ) {
-									continue;
-								}
-								$variable_name = '--space-' . $token;
-								$label = (string) ( $alias['label'] ?? '' );
-								$source_slug = (string) ( $alias['source_slug'] ?? '' );
-								$value = (string) ( $alias['value'] ?? '' );
-								?>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code><?php echo esc_html( $variable_name ); ?></code>
-										<small>
-											<?php
-											if ( '' !== $source_slug ) {
-												printf(
-													/* translators: 1: human label, 2: spacing preset slug */
-													esc_html__( '%1$s (%2$s)', 'elodin-bridge' ),
-													esc_html( $label ),
-													esc_html( $source_slug )
-												);
-											} else {
-												printf(
-													/* translators: %s: human label */
-													esc_html__( '%s (not found)', 'elodin-bridge' ),
-													esc_html( $label )
-												);
-											}
-											?>
-										</small>
-									</span>
-									<?php if ( '' !== $value ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'No matching spacing value found in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-							<?php endforeach; ?>
-						</div>
-						<p class="elodin-bridge-admin__note">
+						<div class="elodin-bridge-admin__feature-body">
+							<p class="elodin-bridge-admin__description">
+								<?php esc_html_e( 'Maps your theme.json spacing presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
+							</p>
 							<?php
-							echo wp_kses_post(
+							$visible_spacing_aliases = array_values(
+								array_filter(
+									$spacing_variable_aliases,
+									static function ( $alias ) {
+										$value = is_array( $alias ) ? (string) ( $alias['value'] ?? '' ) : '';
+										return '' !== $value;
+									}
+								)
+							);
+							?>
+							<?php if ( ! empty( $visible_spacing_aliases ) ) : ?>
+								<div class="elodin-bridge-admin__variables-grid elodin-bridge-admin__variables-grid--spacing-compact">
+									<?php foreach ( $visible_spacing_aliases as $alias ) : ?>
+										<?php
+										$token = (string) ( $alias['token'] ?? '' );
+										if ( '' === $token ) {
+											continue;
+										}
+										$variable_name = '--space-' . $token;
+										$value = (string) ( $alias['value'] ?? '' );
+										?>
+										<div class="elodin-bridge-admin__variable-field">
+											<span class="elodin-bridge-admin__variable-name">
+												<code><?php echo esc_html( $variable_name ); ?></code>
+											</span>
+											<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							<?php else : ?>
+								<p class="elodin-bridge-admin__note">
+									<?php esc_html_e( 'No spacing presets were found in theme.json for the mapped aliases.', 'elodin-bridge' ); ?>
+								</p>
+							<?php endif; ?>
+							<p class="elodin-bridge-admin__note">
+								<?php
+								echo wp_kses_post(
 								sprintf(
 									/* translators: %s: theme.json path */
 									__( 'Update values in <code>%s</code> under <code>settings.spacing.spacingSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
@@ -140,56 +132,48 @@
 						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable font-size variables', 'elodin-bridge' ); ?></span>
 					</label>
 
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Maps your theme.json font-size presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
-						</p>
-
-						<div class="elodin-bridge-admin__variables-grid">
-							<?php foreach ( $font_size_variable_aliases as $alias ) : ?>
-								<?php
-								$token = (string) ( $alias['token'] ?? '' );
-								if ( '' === $token ) {
-									continue;
-								}
-								$variable_name = '--font-' . $token;
-								$label = (string) ( $alias['label'] ?? '' );
-								$source_slug = (string) ( $alias['source_slug'] ?? '' );
-								$value = (string) ( $alias['value'] ?? '' );
-								?>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code><?php echo esc_html( $variable_name ); ?></code>
-										<small>
-											<?php
-											if ( '' !== $source_slug ) {
-												printf(
-													/* translators: 1: human label, 2: font-size preset slug */
-													esc_html__( '%1$s (%2$s)', 'elodin-bridge' ),
-													esc_html( $label ),
-													esc_html( $source_slug )
-												);
-											} else {
-												printf(
-													/* translators: %s: human label */
-													esc_html__( '%s (not found)', 'elodin-bridge' ),
-													esc_html( $label )
-												);
-											}
-											?>
-										</small>
-									</span>
-									<?php if ( '' !== $value ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'No matching font-size value found in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-							<?php endforeach; ?>
-						</div>
-						<p class="elodin-bridge-admin__note">
+						<div class="elodin-bridge-admin__feature-body">
+							<p class="elodin-bridge-admin__description">
+								<?php esc_html_e( 'Maps your theme.json font-size presets to short CSS aliases on :root for easier typing.', 'elodin-bridge' ); ?>
+							</p>
 							<?php
-							echo wp_kses_post(
+							$visible_font_size_aliases = array_values(
+								array_filter(
+									$font_size_variable_aliases,
+									static function ( $alias ) {
+										$value = is_array( $alias ) ? (string) ( $alias['value'] ?? '' ) : '';
+										return '' !== $value;
+									}
+								)
+							);
+							?>
+							<?php if ( ! empty( $visible_font_size_aliases ) ) : ?>
+								<div class="elodin-bridge-admin__variables-grid">
+									<?php foreach ( $visible_font_size_aliases as $alias ) : ?>
+										<?php
+										$token = (string) ( $alias['token'] ?? '' );
+										if ( '' === $token ) {
+											continue;
+										}
+										$variable_name = '--font-' . $token;
+										$value = (string) ( $alias['value'] ?? '' );
+										?>
+										<div class="elodin-bridge-admin__variable-field">
+											<span class="elodin-bridge-admin__variable-name">
+												<code><?php echo esc_html( $variable_name ); ?></code>
+											</span>
+											<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $value ); ?></code>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							<?php else : ?>
+								<p class="elodin-bridge-admin__note">
+									<?php esc_html_e( 'No font-size presets were found in theme.json for the mapped aliases.', 'elodin-bridge' ); ?>
+								</p>
+							<?php endif; ?>
+							<p class="elodin-bridge-admin__note">
+								<?php
+								echo wp_kses_post(
 								sprintf(
 									/* translators: %s: theme.json path */
 									__( 'Update values in <code>%s</code> under <code>settings.typography.fontSizes</code>. These mappings are read-only here.', 'elodin-bridge' ),
@@ -586,15 +570,16 @@
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card" data-bridge-category="style">
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $theme_json_button_padding_important_enabled ? 'is-enabled' : ''; ?>">
 					<?php
-					$button_padding_values = is_array( $theme_json_button_padding_values ) ? $theme_json_button_padding_values : array();
-					$button_padding_all = (string) ( $button_padding_values['all'] ?? '' );
-					$button_padding_top = (string) ( $button_padding_values['top'] ?? '' );
-					$button_padding_right = (string) ( $button_padding_values['right'] ?? '' );
-					$button_padding_bottom = (string) ( $button_padding_values['bottom'] ?? '' );
-					$button_padding_left = (string) ( $button_padding_values['left'] ?? '' );
+					$button_style_overrides = is_array( $theme_json_button_style_overrides ) ? $theme_json_button_style_overrides : array();
+					$button_base_declarations = isset( $button_style_overrides['base'] ) && is_array( $button_style_overrides['base'] )
+						? $button_style_overrides['base']
+						: array();
+					$button_outline_declarations = isset( $button_style_overrides['outline'] ) && is_array( $button_style_overrides['outline'] )
+						? $button_style_overrides['outline']
+						: array();
 					?>
 					<label class="elodin-bridge-admin__feature-header" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_THEME_JSON_BUTTON_PADDING_IMPORTANT ); ?>">
 						<input
@@ -613,75 +598,45 @@
 						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
 							<span class="elodin-bridge-admin__toggle-thumb"></span>
 						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Force theme.json button padding with !important', 'elodin-bridge' ); ?></span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Apply theme.json button styles with higher specificity', 'elodin-bridge' ); ?></span>
 					</label>
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Outputs !important padding declarations on .wp-block-button__link using your active theme.json button padding values so parent-theme button styles cannot override them.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Outputs declarations for .wp-block-button__link using your active theme.json values (spacing, typography, border, color, and shadow) with selectors specific enough to out-rank parent-theme defaults, without using !important.', 'elodin-bridge' ); ?>
 						</p>
-						<div class="elodin-bridge-admin__variables-grid">
-							<?php if ( '' !== $button_padding_all ) : ?>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code>padding</code>
-										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
-									</span>
-									<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_all ); ?></code>
-								</div>
-							<?php else : ?>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code>padding-top</code>
-										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
-									</span>
-									<?php if ( '' !== $button_padding_top ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_top ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code>padding-right</code>
-										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
-									</span>
-									<?php if ( '' !== $button_padding_right ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_right ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code>padding-bottom</code>
-										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
-									</span>
-									<?php if ( '' !== $button_padding_bottom ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_bottom ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-								<div class="elodin-bridge-admin__variable-field">
-									<span class="elodin-bridge-admin__variable-name">
-										<code>padding-left</code>
-										<small><?php esc_html_e( 'theme.json', 'elodin-bridge' ); ?></small>
-									</span>
-									<?php if ( '' !== $button_padding_left ) : ?>
-										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( $button_padding_left ); ?></code>
-									<?php else : ?>
-										<span class="elodin-bridge-admin__variable-missing"><?php esc_html_e( 'Not set in theme.json.', 'elodin-bridge' ); ?></span>
-									<?php endif; ?>
-								</div>
-							<?php endif; ?>
-						</div>
+						<?php if ( ! empty( $button_base_declarations ) || ! empty( $button_outline_declarations ) ) : ?>
+							<div class="elodin-bridge-admin__variables-grid elodin-bridge-admin__variables-grid--button-styles">
+								<?php foreach ( $button_base_declarations as $property => $value ) : ?>
+									<div class="elodin-bridge-admin__variable-field">
+										<span class="elodin-bridge-admin__variable-name">
+											<code><?php echo esc_html( (string) $property ); ?></code>
+											<small><?php esc_html_e( 'Default button', 'elodin-bridge' ); ?></small>
+										</span>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( (string) $value ); ?></code>
+									</div>
+								<?php endforeach; ?>
+								<?php foreach ( $button_outline_declarations as $property => $value ) : ?>
+									<div class="elodin-bridge-admin__variable-field">
+										<span class="elodin-bridge-admin__variable-name">
+											<code><?php echo esc_html( (string) $property ); ?></code>
+											<small><?php esc_html_e( 'Outline variation', 'elodin-bridge' ); ?></small>
+										</span>
+										<code class="elodin-bridge-admin__variable-value"><?php echo esc_html( (string) $value ); ?></code>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						<?php else : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'No button style values were found in active theme.json.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 						<p class="elodin-bridge-admin__note">
 							<?php
 							echo wp_kses_post(
 								sprintf(
 									/* translators: %s: theme.json path */
-									__( 'Update button padding in <code>%s</code> under <code>styles.blocks.core/button.spacing.padding</code> (fallback: <code>styles.elements.button.spacing.padding</code>). Values shown here are read-only; if no padding is defined there, no CSS is output.', 'elodin-bridge' ),
+									__( 'Update values in <code>%s</code> under <code>styles.blocks.core/button</code> (fallback: <code>styles.elements.button</code>; variation support: <code>styles.blocks.core/button.variations.outline</code>). Values shown here are read-only. Per-button overrides remain possible.', 'elodin-bridge' ),
 									esc_html( $variables_theme_json_display_path )
 								)
 							);
@@ -745,7 +700,7 @@
 
 					<div class="elodin-bridge-admin__feature-body">
 						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Adds margin-top to .wp-block-buttons when it is the last child.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Adds margin-top to .wp-block-buttons when it is the last child, and always sets margin-top: 0 when it is the first child.', 'elodin-bridge' ); ?>
 						</p>
 						<div class="elodin-bridge-admin__responsive-values">
 							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-last-child-button-group-top-margin-value">
@@ -760,7 +715,7 @@
 							</label>
 						</div>
 						<p class="elodin-bridge-admin__note">
-							<?php esc_html_e( 'Supports CSS values like var(--space-l), 2rem, or clamp(1rem, 3vw, 3rem).', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'Supports CSS values like var(--space-l), 2rem, or clamp(1rem, 3vw, 3rem). First-child button groups always use margin-top: 0 when this setting is enabled.', 'elodin-bridge' ); ?>
 						</p>
 					</div>
 				</div>

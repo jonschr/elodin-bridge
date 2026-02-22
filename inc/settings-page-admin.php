@@ -93,7 +93,7 @@ function elodin_bridge_render_admin_page() {
 	$last_child_button_group_top_margin_settings = elodin_bridge_get_last_child_button_group_top_margin_settings();
 	$last_child_button_group_top_margin_enabled = elodin_bridge_is_last_child_button_group_top_margin_enabled();
 	$theme_json_button_padding_important_enabled = elodin_bridge_is_theme_json_button_padding_important_enabled();
-	$theme_json_button_padding_values = elodin_bridge_get_theme_button_padding_values();
+	$theme_json_button_style_overrides = elodin_bridge_get_theme_button_style_overrides();
 	$mobile_fixed_background_repair_enabled = elodin_bridge_is_mobile_fixed_background_repair_enabled();
 	$reusable_block_flow_spacing_fix_enabled = elodin_bridge_is_reusable_block_flow_spacing_fix_enabled();
 	$block_edge_class_settings = elodin_bridge_get_block_edge_class_settings();

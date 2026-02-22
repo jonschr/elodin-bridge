@@ -35,12 +35,15 @@ function elodin_bridge_build_last_child_button_group_top_margin_css() {
 		return '';
 	}
 
+	$css = '.wp-block-buttons:first-child{margin-top:0;}';
 	$margin_top = trim( (string) ( $settings['value'] ?? '' ) );
 	if ( '' === $margin_top ) {
-		return '';
+		return $css;
 	}
 
-	return '.wp-block-buttons:last-child{margin-top:' . $margin_top . ';}';
+	$css .= '.wp-block-buttons:last-child{margin-top:' . $margin_top . ';}';
+
+	return $css;
 }
 
 /**
