@@ -1,5 +1,20 @@
 # Elodin Bridge Changes
 
+## Version 1.0
+
+### Changed
+- Settings page hero content and layout were overhauled:
+  - Updated plugin description copy.
+  - Added expandable context panel beside the version badge.
+  - Added GeneratePress/GenerateBlocks, Ollie, and Etch spotlight cards with logos and outbound links.
+- Settings UI polish for the hero area:
+  - Description now sits above the card row.
+  - Refined spacing, logo sizing behavior, and responsive card presentation.
+- `Disable GeneratePress static CSS` now defaults to off (unchecked) for new installs.
+
+### Fixed
+- Radio option controls in source-mode groups were simplified to native-style presentation for cleaner alignment and improved readability.
+
 ## Version 0.11
 
 ### Changed
