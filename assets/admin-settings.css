@@ -27,10 +27,157 @@
 	line-height: 1;
 }
 
+.elodin-bridge-admin__hero-info-toggle {
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid #c3c4c7;
+	border-radius: 999px;
+	background: #fff;
+	color: #1d2327;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.elodin-bridge-admin__hero-info-toggle:hover {
+	border-color: #8c8f94;
+	background: #f0f0f1;
+}
+
+.elodin-bridge-admin__hero-info-toggle[aria-expanded="true"] {
+	border-color: #3858e9;
+	background: #eef2ff;
+	color: #2a3ea8;
+}
+
+.elodin-bridge-admin__hero-info-toggle:focus-visible {
+	outline: 2px solid #72aee6;
+	outline-offset: 1px;
+}
+
+.elodin-bridge-admin__hero-context {
+	margin-top: 12px;
+}
+
 .elodin-bridge-admin__intro {
 	color: #50575e;
-	margin: 8px 0 18px;
-	max-width: 72ch;
+	margin: 0;
+	max-width: 900px;
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.elodin-bridge-admin__hero-overview {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	align-items: stretch;
+}
+
+.elodin-bridge-admin__hero-actions {
+	margin: 10px 0 0;
+}
+
+.elodin-bridge-admin__origin-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+	margin: 0;
+}
+
+.elodin-bridge-admin__origin-card {
+	box-sizing: border-box;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	background: #fff;
+	padding: 9px 10px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+}
+
+.elodin-bridge-admin__origin-logo-wrap {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 46px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	background: #f6f7f7;
+	overflow: hidden;
+}
+
+.elodin-bridge-admin__origin-card--gp .elodin-bridge-admin__origin-logo-wrap {
+	background: #1d2327;
+}
+
+.elodin-bridge-admin__origin-card--ollie .elodin-bridge-admin__origin-logo-wrap {
+	background: linear-gradient(135deg, #f1edff 0%, #f8f3ff 100%);
+}
+
+.elodin-bridge-admin__origin-card--etch .elodin-bridge-admin__origin-logo-wrap {
+	background: #eff3f8;
+}
+
+.elodin-bridge-admin__origin-logo {
+	box-sizing: border-box;
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: 20px;
+	max-height: 100%;
+	margin: 0 auto;
+	object-fit: contain;
+	object-position: center;
+}
+
+.elodin-bridge-admin__origin-card--ollie .elodin-bridge-admin__origin-logo {
+	height: 22px;
+}
+
+.elodin-bridge-admin__origin-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #1d2327;
+}
+
+.elodin-bridge-admin__origin-copy {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #50575e;
+}
+
+.elodin-bridge-admin__origin-links {
+	margin-top: auto;
+	padding-top: 2px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.elodin-bridge-admin__origin-link {
+	font-size: 12px;
+	font-weight: 600;
+	color: #3858e9;
+	text-decoration: none;
+}
+
+.elodin-bridge-admin__origin-link:hover,
+.elodin-bridge-admin__origin-link:focus-visible {
+	text-decoration: underline;
 }
 
 .elodin-bridge-admin__toolbar {
@@ -225,6 +372,7 @@
 	font-size: 15px;
 	font-weight: 600;
 	line-height: 1.4;
+	color: #1d2327;
 	padding-top: 1px;
 }
 
@@ -435,18 +583,52 @@
 }
 
 .elodin-bridge-admin__source-mode-item {
-	display: flex;
-	align-items: flex-start;
+	display: grid;
+	grid-template-columns: 16px minmax(0, 1fr);
+	align-items: start;
 	gap: 8px;
-	padding: 10px 12px;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	background: #f6f7f7;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
 	color: #1d2327;
+	cursor: pointer;
 }
 
 .elodin-bridge-admin__source-mode-item input[type="radio"] {
 	margin: 2px 0 0;
+	width: 16px;
+	height: 16px;
+	padding: 0;
+	accent-color: #3858e9;
+	background: transparent;
+	box-shadow: none;
+}
+
+.elodin-bridge-admin__source-mode-item input[type="radio"]:focus-visible {
+	outline: 2px solid #72aee6;
+	outline-offset: 2px;
+}
+
+.elodin-bridge-admin__source-mode-item input[type="radio"]:disabled {
+	cursor: not-allowed;
+}
+
+.elodin-bridge-admin__source-mode-item > span {
+	display: block;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.elodin-bridge-admin__source-mode-item > span code {
+	display: block;
+	margin-top: 4px;
+	padding: 0;
+	border-radius: 6px;
+	background: transparent;
+	font-size: 12px;
+	line-height: 1.35;
+	word-break: break-word;
 }
 
 .elodin-bridge-admin__content-type-item {
@@ -749,6 +931,15 @@
 		column-count: 1;
 	}
 
+	.elodin-bridge-admin__intro {
+		font-size: 14px;
+		max-width: none;
+	}
+
+	.elodin-bridge-admin__origin-grid {
+		grid-template-columns: 1fr;
+	}
+
 	.elodin-bridge-admin__responsive-values {
 		grid-template-columns: 1fr;
 	}
@@ -793,6 +984,10 @@
 @media (min-width: 783px) and (max-width: 1199px) {
 	.elodin-bridge-admin__cards {
 		column-count: 2;
+	}
+
+	.elodin-bridge-admin__origin-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	.elodin-bridge-admin__variables-grid {

@@ -1,6 +1,16 @@
 ( function () {
 	'use strict';
 
+	const heroToggle = document.querySelector( '[data-bridge-hero-toggle]' );
+	const heroContext = document.querySelector( '[data-bridge-hero-context]' );
+	if ( heroToggle && heroContext ) {
+		heroToggle.addEventListener( 'click', () => {
+			const expanded = 'true' === heroToggle.getAttribute( 'aria-expanded' );
+			heroToggle.setAttribute( 'aria-expanded', expanded ? 'false' : 'true' );
+			heroContext.hidden = expanded;
+		} );
+	}
+
 	const form = document.querySelector( '.elodin-bridge-admin__form' );
 	if ( ! form ) {
 		return;

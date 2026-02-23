@@ -1849,7 +1849,7 @@ function elodin_bridge_is_generatepress_list_margins_enabled() {
  * @return bool
  */
 function elodin_bridge_is_generatepress_static_css_experiment_setting_enabled() {
-	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT, 1 );
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_GENERATEPRESS_STATIC_CSS_EXPERIMENT, 0 );
 }
 
 /**
@@ -2059,7 +2059,7 @@ function elodin_bridge_register_settings() {
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
-			'default'           => 1,
+			'default'           => 0,
 		)
 	);
 

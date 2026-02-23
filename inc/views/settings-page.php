@@ -1,18 +1,100 @@
-	<div class="wrap elodin-bridge-admin">
-		<div class="elodin-bridge-admin__hero">
-			<h1 class="elodin-bridge-admin__title">
-				<?php esc_html_e( 'Elodin Bridge', 'elodin-bridge' ); ?>
-				<span class="elodin-bridge-admin__version"><?php echo esc_html( sprintf( 'v%s', ELODIN_BRIDGE_VERSION ) ); ?></span>
-			</h1>
-			<p class="elodin-bridge-admin__intro">
-				<?php esc_html_e( 'Bridging the gap between WordPress\'s extensive capabilities for hybrid themes and the few extra items we need on just about every site, so that backend editing is faster and more intuitive.', 'elodin-bridge' ); ?>
-			</p>
-			<p>
-				<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
-					<?php esc_html_e( 'Open Setup Wizard', 'elodin-bridge' ); ?>
-				</a>
-			</p>
+<div class="wrap elodin-bridge-admin">
+	<div class="elodin-bridge-admin__hero">
+		<h1 class="elodin-bridge-admin__title">
+			<?php esc_html_e( 'Elodin Bridge', 'elodin-bridge' ); ?>
+			<span class="elodin-bridge-admin__version"><?php echo esc_html( sprintf( 'v%s', ELODIN_BRIDGE_VERSION ) ); ?></span>
+			<button
+				type="button"
+				class="elodin-bridge-admin__hero-info-toggle"
+				data-bridge-hero-toggle
+				aria-expanded="false"
+				aria-controls="elodin-bridge-hero-context"
+				title="<?php esc_attr_e( 'Show plugin context', 'elodin-bridge' ); ?>"
+			>
+				<span aria-hidden="true">i</span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Show plugin context', 'elodin-bridge' ); ?></span>
+			</button>
+		</h1>
+
+		<div id="elodin-bridge-hero-context" class="elodin-bridge-admin__hero-context" data-bridge-hero-context hidden>
+			<div class="elodin-bridge-admin__hero-overview">
+				<p class="elodin-bridge-admin__intro">
+					<?php esc_html_e( 'Using the GeneratePress parent theme as our base, this helper plugin smooths rough edges for faster development and layers in some of the best ideas from Ollie and Etch. It pulls recurring child-theme tasks into centralized settings so site builds stay faster and easier to maintain across our network. This use case and plugin are independent and are not endorsed by Kevin Geary, Mike McAlister, or Tom Usborne.', 'elodin-bridge' ); ?>
+				</p>
+
+				<div class="elodin-bridge-admin__origin-grid" aria-label="<?php esc_attr_e( 'Core systems used by Bridge', 'elodin-bridge' ); ?>">
+					<article class="elodin-bridge-admin__origin-card elodin-bridge-admin__origin-card--gp">
+						<div class="elodin-bridge-admin__origin-logo-wrap">
+							<img
+								class="elodin-bridge-admin__origin-logo"
+								src="<?php echo esc_url( ELODIN_BRIDGE_URL . 'assets/logos/generatepress-generateblocks.svg' ); ?>"
+								alt="<?php esc_attr_e( 'GeneratePress and GenerateBlocks logo', 'elodin-bridge' ); ?>"
+							/>
+						</div>
+						<h2 class="elodin-bridge-admin__origin-title"><?php esc_html_e( 'GeneratePress + GenerateBlocks', 'elodin-bridge' ); ?></h2>
+						<p class="elodin-bridge-admin__origin-copy">
+							<?php esc_html_e( 'Hybrid-theme workflow with fast Element-driven headers, footers, and reusable sections without constant block duplication.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__origin-links">
+							<a class="elodin-bridge-admin__origin-link" href="<?php echo esc_url( 'https://generatepress.com/' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Go buy their stuff - GeneratePress', 'elodin-bridge' ); ?>">
+								<?php esc_html_e( 'Go buy their stuff', 'elodin-bridge' ); ?>
+							</a>
+							<a class="elodin-bridge-admin__origin-link" href="<?php echo esc_url( 'https://generateblocks.com/' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Go buy their stuff - GenerateBlocks', 'elodin-bridge' ); ?>">
+								<?php esc_html_e( 'Go buy their stuff', 'elodin-bridge' ); ?>
+							</a>
+						</div>
+					</article>
+
+					<article class="elodin-bridge-admin__origin-card elodin-bridge-admin__origin-card--ollie">
+						<div class="elodin-bridge-admin__origin-logo-wrap">
+							<img
+								class="elodin-bridge-admin__origin-logo"
+								src="<?php echo esc_url( ELODIN_BRIDGE_URL . 'assets/logos/ollie.svg' ); ?>"
+								alt="<?php esc_attr_e( 'Ollie logo', 'elodin-bridge' ); ?>"
+							/>
+						</div>
+						<h2 class="elodin-bridge-admin__origin-title"><?php esc_html_e( 'Ollie', 'elodin-bridge' ); ?></h2>
+						<p class="elodin-bridge-admin__origin-copy">
+							<?php esc_html_e( 'Best-in-class color, spacing, and type scales imported into theme.json and aligned with GeneratePress settings.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__origin-links">
+							<a class="elodin-bridge-admin__origin-link" href="<?php echo esc_url( 'https://olliewp.com/' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Go buy their stuff - Ollie', 'elodin-bridge' ); ?>">
+								<?php esc_html_e( 'Go buy their stuff', 'elodin-bridge' ); ?>
+							</a>
+						</div>
+					</article>
+
+					<article class="elodin-bridge-admin__origin-card elodin-bridge-admin__origin-card--etch">
+						<div class="elodin-bridge-admin__origin-logo-wrap">
+							<img
+								class="elodin-bridge-admin__origin-logo"
+								src="<?php echo esc_url( ELODIN_BRIDGE_URL . 'assets/logos/etch.svg' ); ?>"
+								alt="<?php esc_attr_e( 'Etch logo', 'elodin-bridge' ); ?>"
+							/>
+						</div>
+						<h2 class="elodin-bridge-admin__origin-title"><?php esc_html_e( 'Etch', 'elodin-bridge' ); ?></h2>
+						<p class="elodin-bridge-admin__origin-copy">
+							<?php esc_html_e( 'Variable-first ergonomics, including shorthand token entry that auto-expands to full CSS variable syntax.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__origin-links">
+							<a class="elodin-bridge-admin__origin-link" href="<?php echo esc_url( 'https://etchwp.com/' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Go buy their stuff - Etch', 'elodin-bridge' ); ?>">
+								<?php esc_html_e( 'Go buy their stuff', 'elodin-bridge' ); ?>
+							</a>
+							<a class="elodin-bridge-admin__origin-link" href="<?php echo esc_url( 'https://automaticcss.com/' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Go buy their stuff - ACSS', 'elodin-bridge' ); ?>">
+								<?php esc_html_e( 'Go buy their stuff', 'elodin-bridge' ); ?>
+							</a>
+						</div>
+					</article>
+				</div>
+			</div>
 		</div>
+
+		<p class="elodin-bridge-admin__hero-actions">
+			<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
+				<?php esc_html_e( 'Open Setup Wizard', 'elodin-bridge' ); ?>
+			</a>
+		</p>
+	</div>
 
 		<form action="options.php" method="post" class="elodin-bridge-admin__form">
 			<?php settings_fields( 'elodin_bridge_settings' ); ?>
