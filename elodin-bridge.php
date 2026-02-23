@@ -3,7 +3,7 @@
 	Plugin Name: Elodin Bridge
 	Plugin URI: https://elod.in
     Description: Just another plugin
-	Version: 0.10
+	Version: 0.11
     Author: Jon Schroeder
     Author URI: https://elod.in
 
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'ELODIN_BRIDGE_PLUGIN_FILE', __FILE__ );
 define( 'ELODIN_BRIDGE_DIR', dirname( __FILE__ ) );
 define( 'ELODIN_BRIDGE_URL', plugin_dir_url( __FILE__ ) );
-define( 'ELODIN_BRIDGE_VERSION', '0.10' );
+define( 'ELODIN_BRIDGE_VERSION', '0.11' );
 define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_REDIRECT', 'elodin_bridge_setup_wizard_redirect' );
 define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_BACKUP', 'elodin_bridge_setup_wizard_backup' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES', 'elodin_bridge_enable_heading_paragraph_overrides' );

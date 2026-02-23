@@ -238,7 +238,7 @@ $elements_button_label = $elements_is_locked
 						</p>
 					<?php elseif ( $global_colors_is_locked ) : ?>
 						<p class="elodin-bridge-admin__note elodin-bridge-admin__note--warning">
-							<?php esc_html_e( 'All bundled global color slugs already exist, so this step is locked to avoid accidental overwrites.', 'elodin-bridge' ); ?>
+							<?php esc_html_e( 'All bundled global color slugs were already present before this run, so this step is locked to avoid accidental overwrites.', 'elodin-bridge' ); ?>
 						</p>
 					<?php else : ?>
 						<?php $missing_global_color_slugs = isset( $global_colors_completion['missing_slugs'] ) && is_array( $global_colors_completion['missing_slugs'] ) ? $global_colors_completion['missing_slugs'] : array(); ?>

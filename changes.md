@@ -1,5 +1,18 @@
 # Elodin Bridge Changes
 
+## Version 0.11
+
+### Changed
+- Setup wizard Step 3 completion messaging now clarifies that immediate lock/complete status can occur when bundled slugs were already present before running the step.
+
+### Fixed
+- Setup wizard element import now normalizes GeneratePress condition meta before save:
+  - `_generate_element_display_conditions` and `_generate_element_exclude_conditions` are stored as proper condition arrays.
+  - `_generate_element_user_conditions` is stored as a proper user-rule array.
+- Setup wizard exact-match detection for bundled elements now compares normalized meta shapes instead of raw serialized strings.
+- Added automatic repair of previously imported bundled elements with malformed condition meta so existing broken imports are corrected in place.
+- Moved automatic element-meta repair to a later `init` priority so it runs after GeneratePress registers element post types.
+
 ## Version 0.10
 
 ### Added

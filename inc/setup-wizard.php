@@ -200,6 +200,158 @@ function elodin_bridge_get_setup_wizard_element_post_type() {
 }
 
 /**
+ * Unserialize element meta values when they are stored as serialized strings.
+ *
+ * @param mixed $value Raw meta value.
+ * @return mixed
+ */
+function elodin_bridge_setup_wizard_unserialize_element_meta_value( $value ) {
+	$remaining_passes = 3;
+	while ( $remaining_passes > 0 && is_string( $value ) && is_serialized( $value ) ) {
+		$decoded = maybe_unserialize( $value );
+		if ( $decoded === $value ) {
+			break;
+		}
+
+		$value = $decoded;
+		--$remaining_passes;
+	}
+
+	return $value;
+}
+
+/**
+ * Normalize GeneratePress element condition rows.
+ *
+ * @param mixed $value Raw condition rows.
+ * @return array<int,array{rule:string,object:string}>
+ */
+function elodin_bridge_setup_wizard_normalize_element_condition_rows( $value ) {
+	$value = elodin_bridge_setup_wizard_unserialize_element_meta_value( $value );
+	if ( ! is_array( $value ) ) {
+		return array();
+	}
+
+	if ( isset( $value['rule'] ) && ! isset( $value[0] ) ) {
+		$value = array( $value );
+	}
+
+	$normalized = array();
+	foreach ( $value as $row ) {
+		if ( ! is_array( $row ) ) {
+			continue;
+		}
+
+		$rule = sanitize_text_field( (string) ( $row['rule'] ?? '' ) );
+		if ( '' === $rule ) {
+			continue;
+		}
+
+		$normalized[] = array(
+			'rule'   => $rule,
+			'object' => sanitize_key( (string) ( $row['object'] ?? '' ) ),
+		);
+	}
+
+	return $normalized;
+}
+
+/**
+ * Normalize GeneratePress element user condition rows.
+ *
+ * @param mixed $value Raw user condition rows.
+ * @return array<int,string>
+ */
+function elodin_bridge_setup_wizard_normalize_element_user_conditions( $value ) {
+	$value = elodin_bridge_setup_wizard_unserialize_element_meta_value( $value );
+	if ( ! is_array( $value ) ) {
+		return array();
+	}
+
+	$normalized = array();
+	foreach ( $value as $row ) {
+		$rule = sanitize_text_field( (string) $row );
+		if ( '' === $rule ) {
+			continue;
+		}
+
+		$normalized[] = $rule;
+	}
+
+	return $normalized;
+}
+
+/**
+ * Normalize an imported element meta value to GP-compatible storage shape.
+ *
+ * @param string $meta_key Meta key.
+ * @param mixed  $meta_value Raw meta value.
+ * @return mixed
+ */
+function elodin_bridge_setup_wizard_normalize_element_meta_value( $meta_key, $meta_value ) {
+	$meta_key = (string) $meta_key;
+	if ( '' === $meta_key ) {
+		return '';
+	}
+
+	if ( in_array( $meta_key, array( '_generate_element_display_conditions', '_generate_element_exclude_conditions' ), true ) ) {
+		return elodin_bridge_setup_wizard_normalize_element_condition_rows( $meta_value );
+	}
+
+	if ( '_generate_element_user_conditions' === $meta_key ) {
+		return elodin_bridge_setup_wizard_normalize_element_user_conditions( $meta_value );
+	}
+
+	$meta_value = elodin_bridge_setup_wizard_unserialize_element_meta_value( $meta_value );
+	if ( is_array( $meta_value ) ) {
+		return $meta_value;
+	}
+
+	if ( is_bool( $meta_value ) ) {
+		return $meta_value ? '1' : '';
+	}
+
+	if ( null === $meta_value ) {
+		return '';
+	}
+
+	return (string) $meta_value;
+}
+
+/**
+ * Check if imported element meta key is expected to store arrays.
+ *
+ * @param string $meta_key Meta key.
+ * @return bool
+ */
+function elodin_bridge_setup_wizard_element_meta_key_requires_array( $meta_key ) {
+	return in_array(
+		(string) $meta_key,
+		array(
+			'_generate_element_display_conditions',
+			'_generate_element_exclude_conditions',
+			'_generate_element_user_conditions',
+		),
+		true
+	);
+}
+
+/**
+ * Compare normalized element meta values.
+ *
+ * @param mixed $left First normalized value.
+ * @param mixed $right Second normalized value.
+ * @return bool
+ */
+function elodin_bridge_setup_wizard_element_meta_values_match( $left, $right ) {
+	if ( is_array( $left ) || is_array( $right ) ) {
+		return is_array( $left ) && is_array( $right ) && $left === $right;
+	}
+
+	return (string) $left === (string) $right;
+}
+
+/**
  * Normalize setup wizard element content for strict equality checks.
  *
  * @param string $content Raw content.
@@ -383,9 +535,10 @@ function elodin_bridge_get_setup_wizard_global_colors_completion() {
  * @param string              $post_type Element post type.
  * @param array<string,mixed> $template Element template row.
  * @param array<int,string>   $source_hosts First-party hosts.
+ * @param bool                $repair_meta Whether to repair malformed matching meta rows in place.
  * @return bool
  */
-function elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts ) {
+function elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts, $repair_meta = false ) {
 	global $wpdb;
 
 	$post_type = sanitize_key( (string) $post_type );
@@ -441,10 +594,22 @@ function elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $templa
 				continue;
 			}
 
-			$current_meta = (string) get_post_meta( $candidate_id, $meta_key, true );
-			if ( $current_meta !== (string) $meta_value ) {
+			$expected_meta_value = elodin_bridge_setup_wizard_normalize_element_meta_value( $meta_key, $meta_value );
+			$current_meta = get_post_meta( $candidate_id, $meta_key, true );
+			$current_normalized_meta = elodin_bridge_setup_wizard_normalize_element_meta_value( $meta_key, $current_meta );
+
+			if ( ! elodin_bridge_setup_wizard_element_meta_values_match( $current_normalized_meta, $expected_meta_value ) ) {
 				$all_meta_match = false;
 				break;
+			}
+
+			if (
+				$repair_meta &&
+				elodin_bridge_setup_wizard_element_meta_key_requires_array( $meta_key ) &&
+				is_array( $expected_meta_value ) &&
+				! is_array( $current_meta )
+			) {
+				update_post_meta( $candidate_id, $meta_key, $expected_meta_value );
 			}
 		}
 
@@ -482,7 +647,7 @@ function elodin_bridge_get_setup_wizard_elements_completion( $post_type = '' ) {
 		}
 
 		++$total;
-		if ( '' !== $post_type && elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts ) ) {
+		if ( '' !== $post_type && elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts, true ) ) {
 			++$matched;
 		} else {
 			$missing_titles[] = $title;
@@ -496,6 +661,26 @@ function elodin_bridge_get_setup_wizard_elements_completion( $post_type = '' ) {
 		'missing_titles' => $missing_titles,
 	);
 }
+
+/**
+ * Repair previously imported element meta that was stored in an invalid shape.
+ *
+ * @return void
+ */
+function elodin_bridge_maybe_repair_setup_wizard_elements_meta() {
+	$repair_version = (string) ELODIN_BRIDGE_VERSION;
+
+	$post_type = elodin_bridge_get_setup_wizard_element_post_type();
+	if ( '' === $post_type ) {
+		return;
+	}
+
+	// This normalization pass is idempotent and lightweight (two bundled templates).
+	// Run whenever the post type is available so previously missed repairs can self-heal.
+	elodin_bridge_get_setup_wizard_elements_completion( $post_type );
+	update_option( 'elodin_bridge_setup_wizard_elements_meta_repaired_version', $repair_version, false );
+}
+add_action( 'init', 'elodin_bridge_maybe_repair_setup_wizard_elements_meta', 50 );
 
 /**
  * Mark setup wizard redirect on plugin activation.
@@ -701,7 +886,7 @@ function elodin_bridge_handle_setup_wizard_action() {
 		if ( elodin_bridge_is_generatepress_parent_theme() && ! empty( $global_colors_completion['complete'] ) ) {
 			elodin_bridge_set_setup_wizard_notice(
 				'warning',
-				__( 'Step 3 is already complete. All bundled global color slugs are already present, so no changes were made.', 'elodin-bridge' )
+				__( 'Step 3 is already complete. All bundled global color slugs were already present before this run, so no changes were made.', 'elodin-bridge' )
 			);
 			elodin_bridge_redirect_to_setup_wizard( 'step-global-colors' );
 		}
@@ -1374,7 +1559,7 @@ function elodin_bridge_run_setup_wizard_elements_step() {
 			continue;
 		}
 
-		if ( elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts ) ) {
+		if ( elodin_bridge_setup_wizard_element_has_exact_match( $post_type, $template, $source_hosts, true ) ) {
 			continue;
 		}
 
@@ -1407,7 +1592,8 @@ function elodin_bridge_run_setup_wizard_elements_step() {
 				continue;
 			}
 
-			update_post_meta( $inserted_id, $meta_key, (string) $meta_value );
+			$meta_value = elodin_bridge_setup_wizard_normalize_element_meta_value( $meta_key, $meta_value );
+			update_post_meta( $inserted_id, $meta_key, $meta_value );
 		}
 
 		$inserted_ids[] = $inserted_id;
