@@ -7,6 +7,11 @@
 			<p class="elodin-bridge-admin__intro">
 				<?php esc_html_e( 'Bridging the gap between WordPress\'s extensive capabilities for hybrid themes and the few extra items we need on just about every site, so that backend editing is faster and more intuitive.', 'elodin-bridge' ); ?>
 			</p>
+			<p>
+				<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
+					<?php esc_html_e( 'Open Setup Wizard', 'elodin-bridge' ); ?>
+				</a>
+			</p>
 		</div>
 
 		<form action="options.php" method="post" class="elodin-bridge-admin__form">

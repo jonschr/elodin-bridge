@@ -3,7 +3,7 @@
 	Plugin Name: Elodin Bridge
 	Plugin URI: https://elod.in
     Description: Just another plugin
-	Version: 0.9
+	Version: 0.10
     Author: Jon Schroeder
     Author URI: https://elod.in
 
@@ -24,9 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
+define( 'ELODIN_BRIDGE_PLUGIN_FILE', __FILE__ );
 define( 'ELODIN_BRIDGE_DIR', dirname( __FILE__ ) );
 define( 'ELODIN_BRIDGE_URL', plugin_dir_url( __FILE__ ) );
-define( 'ELODIN_BRIDGE_VERSION', '0.9' );
+define( 'ELODIN_BRIDGE_VERSION', '0.10' );
+define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_REDIRECT', 'elodin_bridge_setup_wizard_redirect' );
+define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_BACKUP', 'elodin_bridge_setup_wizard_backup' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES', 'elodin_bridge_enable_heading_paragraph_overrides' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_BALANCED_TEXT', 'elodin_bridge_enable_balanced_text' );
 define( 'ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR', 'elodin_bridge_content_type_behavior' );
@@ -80,4 +83,7 @@ require_once ELODIN_BRIDGE_DIR . '/inc/font-size-variables.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/css-variable-autowrap.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-layout-gap-defaults.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/root-level-container-padding.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/setup-wizard.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/update-checker.php';
+
+register_activation_hook( ELODIN_BRIDGE_PLUGIN_FILE, 'elodin_bridge_mark_setup_wizard_redirect' );

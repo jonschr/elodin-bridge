@@ -157,6 +157,18 @@
 	column-gap: 12px;
 }
 
+.elodin-bridge-setup-wizard .elodin-bridge-admin__cards {
+	column-count: 1;
+}
+
+.elodin-bridge-setup-wizard .elodin-bridge-admin__card {
+	max-width: 980px;
+}
+
+.elodin-bridge-setup-wizard__step-form {
+	margin-top: 14px;
+}
+
 .elodin-bridge-admin__category-section {
 	background: #fff;
 	border: 1px solid #dcdcde;
@@ -217,7 +229,10 @@
 }
 
 .elodin-bridge-admin__feature-heading-row {
-	display: block;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
 }
 
 .elodin-bridge-admin__requirement-tag {
@@ -378,6 +393,17 @@
 	gap: 8px;
 }
 
+.elodin-bridge-admin__source-mode-group {
+	margin: 14px 0 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.elodin-bridge-admin__source-mode-group .elodin-bridge-admin__subheading {
+	margin-bottom: 8px;
+}
+
 .elodin-bridge-admin__source-mode-status {
 	margin: 10px 0 0;
 }
@@ -393,6 +419,13 @@
 	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.2;
+	flex-shrink: 0;
+}
+
+.elodin-bridge-admin__status-chip.is-success {
+	border-color: #b8e6bf;
+	background: #effcf2;
+	color: #1f5f29;
 }
 
 .elodin-bridge-admin__status-chip.is-warning {

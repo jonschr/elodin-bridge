@@ -1,5 +1,48 @@
 # Elodin Bridge Changes
 
+## Version 0.10
+
+### Added
+- New setup wizard view inside `Appearance > Elodin Bridge`.
+- One-time activation redirect into the setup wizard so first-time setup starts immediately.
+- Step-by-step setup workflow with independent actions:
+  - `Step 1`: Theme.json setup with target selection and `merge` or `replace` mode.
+  - `Step 2`: GeneratePress typography import from bundled defaults.
+  - `Step 3`: GeneratePress global color palette merge from bundled defaults.
+  - `Step 4`: GeneratePress Elements import (layout `Default` and block `Header`) from bundled templates.
+- Setup wizard completion detection and step status badges:
+  - Steps now display `Pending`/`Complete` state.
+  - Step 3 locks when all bundled global-color slugs already exist.
+  - Step 4 locks when exact bundled element matches already exist.
+- Automatic backup of current `generate_settings` before typography and global color imports.
+- Bundled setup data fixtures:
+  - `data/setup-wizard-typography.json`
+  - `data/setup-wizard-global-colors.json`
+  - `data/setup-wizard-elements.json`
+
+### Changed
+- `theme-defaults.json` now includes:
+  - Ollie-derived 11-color palette mapped to Bridge slugs.
+  - Additional block styles for `core/quote`, `core/separator`, `core/list`, `core/code`, and `core/table`.
+- Settings page hero now includes an `Open Setup Wizard` shortcut button.
+- Setup wizard is now accessed through `Appearance > Elodin Bridge` (no separate Appearance submenu item).
+- Step 1 and Step 2 remain rerunnable; Step 3 and Step 4 are guarded against redundant reruns when complete.
+- Setup wizard copy/UX refinements:
+  - Theme.json download guidance moved into the Theme.json setup step card.
+  - Theme.json mode and target controls now use clearly labeled groups.
+  - Global color step description clarified to explain merge behavior and next migration task.
+
+### Notes
+- Typography import intentionally preserves existing `fontFamily` values and does not import `font-manager` data.
+- Global color import merges by slug and preserves non-default existing colors.
+- Setup wizard hardening:
+  - Wizard notices are now scoped per-user.
+  - Setup actions now require `POST` requests.
+  - Theme.json merge mode now refuses to run against invalid existing JSON.
+  - Existing theme.json files are backed up to `theme.json.elodin-bridge.bak` before wizard writes.
+- Element imports now convert first-party absolute URLs to relative paths.
+  - Element imports now skip templates that already exist as exact matches.
+
 ## Version 0.9
 
 ### Added

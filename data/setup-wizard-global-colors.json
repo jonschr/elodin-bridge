@@ -1,0 +1,59 @@
+{
+    "global-colors": [
+        {
+            "name": "brand",
+            "slug": "brand",
+            "color": "#5344F4"
+        },
+        {
+            "name": "brand-accent",
+            "slug": "brand-accent",
+            "color": "#e9e7ff"
+        },
+        {
+            "name": "brand-alt",
+            "slug": "brand-alt",
+            "color": "#DEC9FF"
+        },
+        {
+            "name": "brand-alt-accent",
+            "slug": "brand-alt-accent",
+            "color": "#3d386b"
+        },
+        {
+            "name": "contrast",
+            "slug": "contrast",
+            "color": "#1E1E26"
+        },
+        {
+            "name": "contrast-accent",
+            "slug": "contrast-accent",
+            "color": "#d4d4ec"
+        },
+        {
+            "name": "base",
+            "slug": "base",
+            "color": "#fff"
+        },
+        {
+            "name": "base-accent",
+            "slug": "base-accent",
+            "color": "#545473"
+        },
+        {
+            "name": "tint",
+            "slug": "tint",
+            "color": "#f8f7fc"
+        },
+        {
+            "name": "border-base",
+            "slug": "border-base",
+            "color": "#E3E3F0"
+        },
+        {
+            "name": "border-contrast",
+            "slug": "border-contrast",
+            "color": "#4E4E60"
+        }
+    ]
+}

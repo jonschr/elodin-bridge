@@ -3,6 +3,66 @@
   "settings": {
     "appearanceTools": true,
     "useRootPaddingAwareAlignments": true,
+    "color": {
+      "defaultPalette": false,
+      "palette": [
+        {
+          "name": "Brand",
+          "slug": "brand",
+          "color": "#5344F4"
+        },
+        {
+          "name": "Brand Accent",
+          "slug": "brand-accent",
+          "color": "#e9e7ff"
+        },
+        {
+          "name": "Brand Alt",
+          "slug": "brand-alt",
+          "color": "#DEC9FF"
+        },
+        {
+          "name": "Brand Alt Accent",
+          "slug": "brand-alt-accent",
+          "color": "#3d386b"
+        },
+        {
+          "name": "Contrast",
+          "slug": "contrast",
+          "color": "#1E1E26"
+        },
+        {
+          "name": "Contrast Accent",
+          "slug": "contrast-accent",
+          "color": "#d4d4ec"
+        },
+        {
+          "name": "Base",
+          "slug": "base",
+          "color": "#fff"
+        },
+        {
+          "name": "Base Accent",
+          "slug": "base-accent",
+          "color": "#545473"
+        },
+        {
+          "name": "Tint",
+          "slug": "tint",
+          "color": "#f8f7fc"
+        },
+        {
+          "name": "Border Base",
+          "slug": "border-base",
+          "color": "#E3E3F0"
+        },
+        {
+          "name": "Border Contrast",
+          "slug": "border-contrast",
+          "color": "#4E4E60"
+        }
+      ]
+    },
     "spacing": {
       "spacingSizes": [
         {
@@ -178,6 +238,77 @@
           }
         }
       },
+      "core/code": {
+        "border": {
+          "radius": "5px",
+          "width": "0px"
+        },
+        "color": {
+          "background": "var:preset|color|tint",
+          "text": "var:preset|color|contrast"
+        },
+        "spacing": {
+          "padding": {
+            "top": "var:preset|spacing|medium",
+            "right": "var:preset|spacing|medium",
+            "bottom": "var:preset|spacing|medium",
+            "left": "var:preset|spacing|medium"
+          }
+        },
+        "typography": {
+          "fontFamily": "monospace",
+          "fontSize": "var:preset|font-size|small"
+        }
+      },
+      "core/list": {
+        "spacing": {
+          "margin": {
+            "top": "var(--space-s)",
+            "bottom": "var(--space-s)"
+          }
+        },
+        "typography": {
+          "lineHeight": "1.6"
+        }
+      },
+      "core/paragraph": {
+        "typography": {
+          "lineHeight": "1.6"
+        }
+      },
+      "core/quote": {
+        "elements": {
+          "cite": {
+            "typography": {
+              "fontSize": "var:preset|font-size|small"
+            },
+            "color": {
+              "text": "var:preset|color|base-accent"
+            }
+          }
+        },
+        "css": "& :where(cite) { display: block }",
+        "border": {
+          "radius": "0",
+          "style": "solid",
+          "width": "0 0 0 5px",
+          "color": "var:preset|color|brand"
+        },
+        "spacing": {
+          "padding": {
+            "left": "var:preset|spacing|large",
+            "right": "var:preset|spacing|large"
+          },
+          "margin": {
+            "left": "0"
+          }
+        },
+        "typography": {
+          "lineHeight": "1.6",
+          "fontSize": "var:preset|font-size|medium",
+          "fontWeight": "500"
+        }
+      },
       "core/separator": {
         "spacing": {
           "margin": {
@@ -191,9 +322,9 @@
           "width": "1px"
         }
       },
-      "core/paragraph": {
+      "core/table": {
         "typography": {
-          "lineHeight": "1.6"
+          "fontSize": "var:preset|font-size|small"
         }
       }
     }

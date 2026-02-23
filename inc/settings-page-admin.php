@@ -58,6 +58,12 @@ function elodin_bridge_render_admin_page() {
 		return;
 	}
 
+	$bridge_view = sanitize_key( wp_unslash( $_GET['bridge_view'] ?? '' ) );
+	if ( 'setup' === $bridge_view ) {
+		elodin_bridge_render_setup_wizard_page();
+		return;
+	}
+
 	$heading_paragraph_overrides_available = elodin_bridge_is_generatepress_parent_theme();
 	$heading_paragraph_overrides_enabled = ! empty( get_option( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES, 1 ) );
 	$balanced_text_enabled = elodin_bridge_is_balanced_text_enabled();
