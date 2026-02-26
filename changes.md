@@ -1,5 +1,24 @@
 # Elodin Bridge Changes
 
+## Version 1.2
+
+### Added
+- New editor tweak setting: `Default Show template to on in block themes` (default on).
+  - Forces `Show template` on at editor load for block themes.
+  - Skips template editing contexts (`wp_template`, `wp_template_part`, `wp_navigation`) to avoid interfering with template editor workflows.
+
+### Changed
+- Editor style delivery for iframe-based block editors was updated for these features:
+  - Reusable block flow spacing fix.
+  - GenerateBlocks boundary highlights.
+  - Editor Group block border helper.
+  - Prettier widgets styles.
+- Those styles now inject through `block_editor_settings_all` (`settings.styles`) instead of compatibility-style cloning.
+- Prettier widgets editor CSS is now scoped to widget editor contexts only (`core/edit-widgets`, `core/customize-widgets`) and no longer loads while editing posts/pages.
+
+### Fixed
+- Resolved block editor iframe warnings for Bridge-owned style handles that were previously reported as added incorrectly.
+
 ## Version 1.1
 
 ### Changed
