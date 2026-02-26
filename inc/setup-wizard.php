@@ -1,7 +1,28 @@
 <?php
 
 /**
- * Build setup wizard URL on the main Elodin Bridge admin page.
+ * Build main settings page URL.
+ *
+ * @param string $anchor Optional hash anchor.
+ * @return string
+ */
+function elodin_bridge_get_settings_page_url( $anchor = '' ) {
+	$url = add_query_arg(
+		array(
+			'page' => 'elodin-bridge',
+		),
+		admin_url( 'themes.php' )
+	);
+
+	if ( '' !== $anchor ) {
+		$url .= '#' . rawurlencode( ltrim( (string) $anchor, '#' ) );
+	}
+
+	return $url;
+}
+
+/**
+ * Build setup wizard URL.
  *
  * @param string $anchor Optional hash anchor.
  * @return string
@@ -9,8 +30,7 @@
 function elodin_bridge_get_setup_wizard_url( $anchor = '' ) {
 	$url = add_query_arg(
 		array(
-			'page'        => 'elodin-bridge',
-			'bridge_view' => 'setup',
+			'page' => 'elodin-bridge-setup',
 		),
 		admin_url( 'themes.php' )
 	);
@@ -683,7 +703,7 @@ function elodin_bridge_maybe_repair_setup_wizard_elements_meta() {
 add_action( 'init', 'elodin_bridge_maybe_repair_setup_wizard_elements_meta', 50 );
 
 /**
- * Mark setup wizard redirect on plugin activation.
+ * Mark one-time post-activation redirect.
  *
  * @return void
  */
@@ -692,7 +712,7 @@ function elodin_bridge_mark_setup_wizard_redirect() {
 }
 
 /**
- * Redirect users to setup wizard after activation.
+ * Redirect users to the main settings page after activation.
  *
  * @return void
  */
@@ -720,7 +740,7 @@ function elodin_bridge_maybe_redirect_to_setup_wizard() {
 		return;
 	}
 
-	wp_safe_redirect( elodin_bridge_get_setup_wizard_url() );
+	wp_safe_redirect( elodin_bridge_get_settings_page_url() );
 	exit;
 }
 add_action( 'admin_init', 'elodin_bridge_maybe_redirect_to_setup_wizard', 5 );

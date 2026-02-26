@@ -82,6 +82,13 @@
 
 .elodin-bridge-admin__hero-actions {
 	margin: 10px 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.elodin-bridge-admin__hero-actions .button {
+	margin: 0;
 }
 
 .elodin-bridge-admin__origin-grid {
@@ -584,7 +591,7 @@
 
 .elodin-bridge-admin__source-mode-item {
 	display: grid;
-	grid-template-columns: 16px minmax(0, 1fr);
+	grid-template-columns: 18px minmax(0, 1fr);
 	align-items: start;
 	gap: 8px;
 	padding: 0;
@@ -597,12 +604,15 @@
 
 .elodin-bridge-admin__source-mode-item input[type="radio"] {
 	margin: 2px 0 0;
-	width: 16px;
-	height: 16px;
+	appearance: auto;
+	-webkit-appearance: radio;
+	accent-color: #2271b1;
 	padding: 0;
-	accent-color: #3858e9;
-	background: transparent;
-	box-shadow: none;
+}
+
+.elodin-bridge-admin input[type="radio"]:checked::before {
+	background: #2271b1;
+	background-color: #2271b1;
 }
 
 .elodin-bridge-admin__source-mode-item input[type="radio"]:focus-visible {

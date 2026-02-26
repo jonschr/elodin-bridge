@@ -33,6 +33,14 @@ $elements_button_label = $elements_is_locked
 		<p class="elodin-bridge-admin__intro">
 			<?php esc_html_e( 'Run setup steps in order. Step 1 and Step 2 are rerunnable; Step 3 and Step 4 lock when defaults are already in place.', 'elodin-bridge' ); ?>
 		</p>
+		<nav class="elodin-bridge-admin__hero-actions" aria-label="<?php esc_attr_e( 'Bridge page navigation', 'elodin-bridge' ); ?>">
+			<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_settings_page_url() ); ?>">
+				<?php esc_html_e( 'Main Settings', 'elodin-bridge' ); ?>
+			</a>
+			<a class="button button-primary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
+				<?php esc_html_e( 'Setup Wizard', 'elodin-bridge' ); ?>
+			</a>
+		</nav>
 	</div>
 
 	<?php if ( ! empty( $notice['message'] ) ) : ?>

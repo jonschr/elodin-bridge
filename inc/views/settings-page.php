@@ -89,11 +89,14 @@
 			</div>
 		</div>
 
-		<p class="elodin-bridge-admin__hero-actions">
-			<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
-				<?php esc_html_e( 'Open Setup Wizard', 'elodin-bridge' ); ?>
+		<nav class="elodin-bridge-admin__hero-actions" aria-label="<?php esc_attr_e( 'Bridge page navigation', 'elodin-bridge' ); ?>">
+			<a class="button button-primary" href="<?php echo esc_url( elodin_bridge_get_settings_page_url() ); ?>">
+				<?php esc_html_e( 'Main Settings', 'elodin-bridge' ); ?>
 			</a>
-		</p>
+			<a class="button button-secondary" href="<?php echo esc_url( elodin_bridge_get_setup_wizard_url() ); ?>">
+				<?php esc_html_e( 'Setup Wizard', 'elodin-bridge' ); ?>
+			</a>
+		</nav>
 	</div>
 
 		<form action="options.php" method="post" class="elodin-bridge-admin__form">
@@ -365,6 +368,176 @@
 			</div>
 
 			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature <?php echo $root_level_group_padding_enabled ? 'is-enabled' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-root-level-group-padding-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-root-level-group-padding-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $root_level_group_padding_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable root-level group block padding', 'elodin-bridge' ); ?></span>
+					</label>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Defines shared root-level padding values. In block themes, it applies to direct child Group blocks in editor and front-end post content. These values are also inherited by the root-level GenerateBlocks container padding setting below.', 'elodin-bridge' ); ?>
+						</p>
+						<div class="elodin-bridge-admin__responsive-values">
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-desktop-vertical">
+								<span><?php esc_html_e( 'Desktop vertical', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-desktop-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[desktop_vertical]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['desktop_vertical'] ?? 'var( --space-2xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-tablet-vertical">
+								<span><?php esc_html_e( 'Tablet vertical', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-tablet-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[tablet_vertical]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['tablet_vertical'] ?? 'var( --space-xl )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-mobile-vertical">
+								<span><?php esc_html_e( 'Mobile vertical', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-mobile-vertical"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[mobile_vertical]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['mobile_vertical'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-desktop-horizontal">
+								<span><?php esc_html_e( 'Desktop horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-desktop-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[desktop_horizontal]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['desktop_horizontal'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-tablet-horizontal">
+								<span><?php esc_html_e( 'Tablet horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-tablet-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[tablet_horizontal]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['tablet_horizontal'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-group-padding-mobile-horizontal">
+								<span><?php esc_html_e( 'Mobile horizontal', 'elodin-bridge' ); ?></span>
+								<input
+									type="text"
+									class="regular-text"
+									id="elodin-bridge-root-level-group-padding-mobile-horizontal"
+									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING ); ?>[mobile_horizontal]"
+									value="<?php echo esc_attr( $root_level_group_padding_settings['mobile_horizontal'] ?? 'var( --space-m )' ); ?>"
+								/>
+							</label>
+						</div>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Supports CSS values like var(--space-m), 2rem, or clamp(1rem, 2vw, 2rem). Applies axis-specific values as top/bottom and left/right padding.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $root_level_container_padding_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-root-level-container-padding-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-root-level-container-padding-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
+							value="1"
+							<?php checked( ! empty( $root_level_container_padding_settings['enabled'] ) ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable root-level container padding', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in editor and front-end contexts, including direct children inside reusable block wrappers.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! $generateblocks_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when GenerateBlocks is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
+						<p class="elodin-bridge-admin__note">
+							<?php esc_html_e( 'Padding values are inherited from the root-level group block padding setting above.', 'elodin-bridge' ); ?>
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $fse_gb_container_width_override_enabled ? 'is-enabled' : ''; ?> <?php echo ! $fse_gb_container_width_override_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $fse_gb_container_width_override_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-fse-gb-container-width-override-enabled">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_FSE_GB_CONTAINER_WIDTH_OVERRIDE ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="elodin-bridge-fse-gb-container-width-override-enabled"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_FSE_GB_CONTAINER_WIDTH_OVERRIDE ); ?>"
+							value="1"
+							<?php checked( $fse_gb_container_width_override_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable FSE GenerateBlocks container width override', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires Block Theme', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'For block themes only: overrides --gb-container-width to use the active FSE wide width so GenerateBlocks container width matches template layout settings in editor and front-end.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! $fse_gb_container_width_override_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when a block theme is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature has-requirement <?php echo $generateblocks_layout_gap_defaults_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-generateblocks-layout-gaps-enabled">
 						<input
@@ -467,109 +640,6 @@
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature has-requirement <?php echo $root_level_container_padding_enabled ? 'is-enabled' : ''; ?> <?php echo ! $generateblocks_available ? 'is-unavailable' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header <?php echo ! $generateblocks_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-root-level-container-padding-enabled">
-						<input
-							type="hidden"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
-							value="0"
-						/>
-						<input
-							type="checkbox"
-							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
-							id="elodin-bridge-root-level-container-padding-enabled"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[enabled]"
-							value="1"
-							<?php checked( ! empty( $root_level_container_padding_settings['enabled'] ) ); ?>
-						/>
-						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
-							<span class="elodin-bridge-admin__toggle-thumb"></span>
-						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable root-level container padding', 'elodin-bridge' ); ?></span>
-					</label>
-					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires GenerateBlocks', 'elodin-bridge' ); ?></span>
-
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Applies consistent padding and margin resets to root-level GenerateBlocks containers in editor and front-end contexts, including direct children inside reusable block wrappers.', 'elodin-bridge' ); ?>
-						</p>
-						<?php if ( ! $generateblocks_available ) : ?>
-							<p class="elodin-bridge-admin__note">
-								<?php esc_html_e( 'This setting is only available when GenerateBlocks is active.', 'elodin-bridge' ); ?>
-							</p>
-						<?php endif; ?>
-
-						<div class="elodin-bridge-admin__responsive-values">
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop-vertical">
-								<span><?php esc_html_e( 'Desktop vertical', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-desktop-vertical"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop_vertical]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop_vertical'] ?? 'var( --space-2xl )' ); ?>"
-								/>
-							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet-vertical">
-								<span><?php esc_html_e( 'Tablet vertical', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-tablet-vertical"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet_vertical]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet_vertical'] ?? 'var( --space-xl )' ); ?>"
-								/>
-							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile-vertical">
-								<span><?php esc_html_e( 'Mobile vertical', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-mobile-vertical"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile_vertical]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile_vertical'] ?? 'var( --space-m )' ); ?>"
-								/>
-							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-desktop-horizontal">
-								<span><?php esc_html_e( 'Desktop horizontal', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-desktop-horizontal"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[desktop_horizontal]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['desktop_horizontal'] ?? 'var( --space-m )' ); ?>"
-								/>
-							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-tablet-horizontal">
-								<span><?php esc_html_e( 'Tablet horizontal', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-tablet-horizontal"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[tablet_horizontal]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['tablet_horizontal'] ?? 'var( --space-m )' ); ?>"
-								/>
-							</label>
-							<label class="elodin-bridge-admin__responsive-field" for="elodin-bridge-root-level-padding-mobile-horizontal">
-								<span><?php esc_html_e( 'Mobile horizontal', 'elodin-bridge' ); ?></span>
-								<input
-									type="text"
-									class="regular-text"
-									id="elodin-bridge-root-level-padding-mobile-horizontal"
-									name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING ); ?>[mobile_horizontal]"
-									value="<?php echo esc_attr( $root_level_container_padding_settings['mobile_horizontal'] ?? 'var( --space-m )' ); ?>"
-								/>
-							</label>
-						</div>
-
-						<p class="elodin-bridge-admin__note">
-							<?php esc_html_e( 'Supports CSS values like var(--space-m), 2rem, or clamp(1rem, 2vw, 2rem). Applies axis-specific values as top/bottom and left/right padding.', 'elodin-bridge' ); ?>
-						</p>
-					</div>
-				</div>
-			</div>
-
 			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
 				<div class="elodin-bridge-admin__feature has-requirement <?php echo $heading_paragraph_overrides_enabled ? 'is-enabled' : ''; ?> <?php echo ! $heading_paragraph_overrides_available ? 'is-unavailable' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header <?php echo ! $heading_paragraph_overrides_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES ); ?>">
@@ -636,65 +706,9 @@
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
-				<div class="elodin-bridge-admin__feature <?php echo ! empty( $content_type_behavior_settings['enabled'] ) ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-content-type-behavior-enabled">
-						<input
-							type="hidden"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
-							value="0"
-						/>
-						<input
-							type="checkbox"
-							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
-							id="elodin-bridge-content-type-behavior-enabled"
-							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
-							value="1"
-							<?php checked( ! empty( $content_type_behavior_settings['enabled'] ) ); ?>
-						/>
-						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
-							<span class="elodin-bridge-admin__toggle-thumb"></span>
-						</span>
-						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable page-like vs post-like content type mapping', 'elodin-bridge' ); ?></span>
-					</label>
-
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'The only behavior this changes on your site is in the backend editor: enabled content types get a black title background with strike-through styling on the title when not being interacted with.', 'elodin-bridge' ); ?>
-						</p>
-
-						<?php if ( ! empty( $content_type_behavior_post_types ) ) : ?>
-							<div class="elodin-bridge-admin__content-type-list">
-								<?php foreach ( $content_type_behavior_post_types as $post_type => $label ) : ?>
-									<label class="elodin-bridge-admin__content-type-item" for="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>">
-										<input
-											type="hidden"
-											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
-											value="0"
-										/>
-										<input
-											type="checkbox"
-											class="elodin-bridge-admin__content-type-checkbox"
-											id="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>"
-											name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
-											value="1"
-											<?php checked( ! empty( $content_type_behavior_settings['post_types'][ $post_type ] ) ); ?>
-										/>
-										<span class="elodin-bridge-admin__content-type-label"><?php echo esc_html( $label ); ?></span>
-									</label>
-								<?php endforeach; ?>
-							</div>
-							<p class="elodin-bridge-admin__note">
-								<?php esc_html_e( 'Checked content types receive that backend title styling; unchecked content types do not.', 'elodin-bridge' ); ?>
-							</p>
-						<?php endif; ?>
-					</div>
-				</div>
-			</div>
-
-			<div class="elodin-bridge-admin__card" data-bridge-category="style">
-				<div class="elodin-bridge-admin__feature <?php echo $automatic_heading_margins_enabled ? 'is-enabled' : ''; ?>">
-					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-automatic-heading-margins-enabled">
+				<div class="elodin-bridge-admin__card" data-bridge-category="style">
+					<div class="elodin-bridge-admin__feature <?php echo $automatic_heading_margins_enabled ? 'is-enabled' : ''; ?>">
+						<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-automatic-heading-margins-enabled">
 						<input
 							type="hidden"
 							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS ); ?>[enabled]"
@@ -991,13 +1005,13 @@
 						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable last-child margin resets', 'elodin-bridge' ); ?></span>
 					</label>
 
-					<div class="elodin-bridge-admin__feature-body">
-						<p class="elodin-bridge-admin__description">
-							<?php esc_html_e( 'Sets margin-bottom: 0 for last-child headings, paragraphs, lists, and button groups.', 'elodin-bridge' ); ?>
-						</p>
+						<div class="elodin-bridge-admin__feature-body">
+							<p class="elodin-bridge-admin__description">
+								<?php esc_html_e( 'Sets margin-bottom: 0 for last-child headings, paragraphs, lists, and button groups, and margin-top: 0 for those same elements when they are first-child.', 'elodin-bridge' ); ?>
+							</p>
+						</div>
 					</div>
 				</div>
-			</div>
 
 			<div class="elodin-bridge-admin__card" data-bridge-category="style">
 				<div class="elodin-bridge-admin__feature <?php echo $last_child_button_group_top_margin_enabled ? 'is-enabled' : ''; ?>">
@@ -1171,6 +1185,42 @@
 						<p class="elodin-bridge-admin__description">
 							<?php esc_html_e( 'Disables the publish sidebar in the block editor.', 'elodin-bridge' ); ?>
 						</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="elodin-bridge-admin__card" data-bridge-category="editor">
+				<div class="elodin-bridge-admin__feature has-requirement <?php echo $editor_show_template_default_enabled ? 'is-enabled' : ''; ?> <?php echo ! $editor_show_template_default_available ? 'is-unavailable' : ''; ?>">
+					<label class="elodin-bridge-admin__feature-header <?php echo ! $editor_show_template_default_available ? 'is-disabled' : ''; ?>" for="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT ); ?>">
+						<input
+							type="hidden"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT ); ?>"
+							value="0"
+						/>
+						<input
+							type="checkbox"
+							class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+							id="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT ); ?>"
+							name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT ); ?>"
+							value="1"
+							<?php checked( $editor_show_template_default_enabled ); ?>
+						/>
+						<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+							<span class="elodin-bridge-admin__toggle-thumb"></span>
+						</span>
+						<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Default Show template to on in block themes', 'elodin-bridge' ); ?></span>
+					</label>
+					<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires Block Theme', 'elodin-bridge' ); ?></span>
+
+					<div class="elodin-bridge-admin__feature-body">
+						<p class="elodin-bridge-admin__description">
+							<?php esc_html_e( 'For block themes, forces the editor to load with Show template on for each editor load. Users can still switch it off while editing.', 'elodin-bridge' ); ?>
+						</p>
+						<?php if ( ! $editor_show_template_default_available ) : ?>
+							<p class="elodin-bridge-admin__note">
+								<?php esc_html_e( 'This setting is only available when a block theme is active.', 'elodin-bridge' ); ?>
+							</p>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>
@@ -1521,8 +1571,8 @@
 				</div>
 			</div>
 
-			<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="style">
-				<div class="elodin-bridge-admin__feature <?php echo $block_edge_classes_enabled ? 'is-enabled' : ''; ?>">
+				<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="style">
+					<div class="elodin-bridge-admin__feature <?php echo $block_edge_classes_enabled ? 'is-enabled' : ''; ?>">
 					<label class="elodin-bridge-admin__feature-header" for="elodin-bridge-block-edge-classes-enabled">
 						<input
 							type="hidden"
@@ -1593,9 +1643,72 @@
 						<p class="elodin-bridge-admin__note">
 							<?php esc_html_e( 'Enter one block name per line (example: core/group or generateblocks/container).', 'elodin-bridge' ); ?>
 						</p>
+						</div>
 					</div>
 				</div>
-			</div>
+
+				<div class="elodin-bridge-admin__card elodin-bridge-admin__card--wide" data-bridge-category="editor">
+					<div class="elodin-bridge-admin__feature has-requirement <?php echo ! empty( $content_type_behavior_settings['enabled'] ) ? 'is-enabled' : ''; ?> <?php echo ! $content_type_behavior_available ? 'is-unavailable' : ''; ?>">
+						<label class="elodin-bridge-admin__feature-header <?php echo ! $content_type_behavior_available ? 'is-disabled' : ''; ?>" for="elodin-bridge-content-type-behavior-enabled">
+							<input
+								type="hidden"
+								name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
+								value="0"
+							/>
+							<input
+								type="checkbox"
+								class="elodin-bridge-admin__toggle-input elodin-bridge-admin__feature-toggle"
+								id="elodin-bridge-content-type-behavior-enabled"
+								name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[enabled]"
+								value="1"
+								<?php checked( ! empty( $content_type_behavior_settings['enabled'] ) ); ?>
+							/>
+							<span class="elodin-bridge-admin__toggle-track" aria-hidden="true">
+								<span class="elodin-bridge-admin__toggle-thumb"></span>
+							</span>
+							<span class="elodin-bridge-admin__feature-title"><?php esc_html_e( 'Enable page-like vs post-like content type mapping', 'elodin-bridge' ); ?></span>
+						</label>
+						<span class="elodin-bridge-admin__requirement-tag elodin-bridge-admin__requirement-tag--corner"><?php esc_html_e( 'Requires Hybrid Theme', 'elodin-bridge' ); ?></span>
+
+						<div class="elodin-bridge-admin__feature-body">
+							<p class="elodin-bridge-admin__description">
+								<?php esc_html_e( 'For hybrid/classic themes: checked content types use the page-like editor title treatment (black title background + strike-through when not interacting).', 'elodin-bridge' ); ?>
+							</p>
+
+							<?php if ( ! $content_type_behavior_available ) : ?>
+								<p class="elodin-bridge-admin__note">
+									<?php esc_html_e( 'This mapping group is inactive while a block theme is active.', 'elodin-bridge' ); ?>
+								</p>
+							<?php endif; ?>
+
+							<?php if ( ! empty( $content_type_behavior_post_types ) ) : ?>
+								<div class="elodin-bridge-admin__content-type-list">
+									<?php foreach ( $content_type_behavior_post_types as $post_type => $label ) : ?>
+										<label class="elodin-bridge-admin__content-type-item" for="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>">
+											<input
+												type="hidden"
+												name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
+												value="0"
+											/>
+											<input
+												type="checkbox"
+												class="elodin-bridge-admin__content-type-checkbox"
+												id="<?php echo esc_attr( 'elodin-bridge-content-type-behavior-' . $post_type ); ?>"
+												name="<?php echo esc_attr( ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR ); ?>[post_types][<?php echo esc_attr( $post_type ); ?>]"
+												value="1"
+												<?php checked( ! empty( $content_type_behavior_settings['post_types'][ $post_type ] ) ); ?>
+											/>
+											<span class="elodin-bridge-admin__content-type-label"><?php echo esc_html( $label ); ?></span>
+										</label>
+									<?php endforeach; ?>
+								</div>
+								<p class="elodin-bridge-admin__note">
+									<?php esc_html_e( 'Checked content types receive that backend title styling; unchecked content types do not.', 'elodin-bridge' ); ?>
+								</p>
+							<?php endif; ?>
+						</div>
+					</div>
+				</div>
 			</div>
 
 		</form>

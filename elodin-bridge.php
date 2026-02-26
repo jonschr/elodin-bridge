@@ -3,7 +3,7 @@
 	Plugin Name: Elodin Bridge
 	Plugin URI: https://elod.in
     Description: Just another plugin
-	Version: 1.0
+	Version: 1.1
     Author: Jon Schroeder
     Author URI: https://elod.in
 
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'ELODIN_BRIDGE_PLUGIN_FILE', __FILE__ );
 define( 'ELODIN_BRIDGE_DIR', dirname( __FILE__ ) );
 define( 'ELODIN_BRIDGE_URL', plugin_dir_url( __FILE__ ) );
-define( 'ELODIN_BRIDGE_VERSION', '1.0' );
+define( 'ELODIN_BRIDGE_VERSION', '1.1' );
 define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_REDIRECT', 'elodin_bridge_setup_wizard_redirect' );
 define( 'ELODIN_BRIDGE_OPTION_SETUP_WIZARD_BACKUP', 'elodin_bridge_setup_wizard_backup' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_HEADING_PARAGRAPH_OVERRIDES', 'elodin_bridge_enable_heading_paragraph_overrides' );
@@ -36,6 +36,7 @@ define( 'ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR', 'elodin_bridge_content_typ
 define( 'ELODIN_BRIDGE_OPTION_AUTOMATIC_HEADING_MARGINS', 'elodin_bridge_automatic_heading_margins' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_UI_RESTRICTIONS', 'elodin_bridge_enable_editor_ui_restrictions' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION', 'elodin_bridge_enable_editor_publish_sidebar_restriction' );
+define( 'ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT', 'elodin_bridge_enable_editor_show_template_default' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_MEDIA_LIBRARY_INFINITE_SCROLLING', 'elodin_bridge_enable_media_library_infinite_scrolling' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_SHORTCODES', 'elodin_bridge_enable_shortcodes' );
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_GENERATEBLOCKS_BOUNDARY_HIGHLIGHTS', 'elodin_bridge_enable_generateblocks_boundary_highlights' );
@@ -55,6 +56,8 @@ define( 'ELODIN_BRIDGE_OPTION_FONT_SIZE_VARIABLES', 'elodin_bridge_font_size_var
 define( 'ELODIN_BRIDGE_OPTION_ENABLE_CSS_VARIABLE_AUTOWRAP', 'elodin_bridge_enable_css_variable_autowrap' );
 define( 'ELODIN_BRIDGE_OPTION_GENERATEBLOCKS_LAYOUT_GAP_DEFAULTS', 'elodin_bridge_generateblocks_layout_gap_defaults' );
 define( 'ELODIN_BRIDGE_OPTION_ROOT_LEVEL_CONTAINER_PADDING', 'elodin_bridge_root_level_container_padding' );
+define( 'ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING', 'elodin_bridge_root_level_group_padding' );
+define( 'ELODIN_BRIDGE_OPTION_ENABLE_FSE_GB_CONTAINER_WIDTH_OVERRIDE', 'elodin_bridge_enable_fse_gb_container_width_override' );
 define( 'ELODIN_BRIDGE_TYPOGRAPHY_RESET', '__elodin_bridge_typography_reset__' );
 define( 'ELODIN_BRIDGE_UPDATE_REPOSITORY', 'https://github.com/jonschr/elodin-bridge' );
 // Empty branch means update checks are tag/release-based by default.
@@ -75,6 +78,7 @@ require_once ELODIN_BRIDGE_DIR . '/inc/theme-json-button-padding-important.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/mobile-fixed-background-repair.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/reusable-block-flow-spacing-fix.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-boundary-highlights.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/editor-group-border.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/prettier-widgets.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/block-edge-classes.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/image-sizes.php';
@@ -82,7 +86,11 @@ require_once ELODIN_BRIDGE_DIR . '/inc/spacing-variables.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/font-size-variables.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/css-variable-autowrap.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-layout-gap-defaults.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/generateblocks-inner-container-appender.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/root-level-container-padding.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/root-level-group-padding.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/fse-gb-container-width-override.php';
+require_once ELODIN_BRIDGE_DIR . '/inc/fse-content-top-margin-reset.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/setup-wizard.php';
 require_once ELODIN_BRIDGE_DIR . '/inc/update-checker.php';
 

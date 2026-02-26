@@ -17,3 +17,23 @@ h4:last-child,
 .wp-block-buttons:last-child {
 	margin-bottom: 0;
 }
+
+p:first-child,
+ul:first-child,
+ol:first-child,
+dl:first-child,
+blockquote:first-child,
+h1:first-child,
+h2:first-child,
+h3:first-child,
+h4:first-child,
+.p:first-child,
+.li:first-child,
+.h1:first-child,
+.h2:first-child,
+.h3:first-child,
+.h4:first-child,
+.wp-block-list:first-child,
+.wp-block-buttons:first-child {
+	margin-top: 0;
+}

@@ -14,17 +14,35 @@ function elodin_bridge_build_reusable_block_flow_spacing_fix_css() {
 }
 
 /**
- * Enqueue reusable block flow spacing fix styles in the block editor only.
+ * Inject reusable block flow spacing fix styles into editor iframe settings.
+ *
+ * @param array<string,mixed> $settings Block editor settings.
+ * @param mixed               $editor_context Block editor context.
+ * @return array<string,mixed>
  */
-function elodin_bridge_enqueue_reusable_block_flow_spacing_fix_styles() {
-	$css = elodin_bridge_build_reusable_block_flow_spacing_fix_css();
-	if ( '' === $css ) {
-		return;
+function elodin_bridge_inject_reusable_block_flow_spacing_fix_styles_into_editor_settings( $settings, $editor_context ) {
+	$context_name = '';
+	if ( is_object( $editor_context ) && isset( $editor_context->name ) ) {
+		$context_name = (string) $editor_context->name;
 	}
 
-	$handle = 'elodin-bridge-reusable-block-flow-spacing-fix';
-	wp_register_style( $handle, false, array(), ELODIN_BRIDGE_VERSION );
-	wp_enqueue_style( $handle );
-	wp_add_inline_style( $handle, $css );
+	if ( ! in_array( $context_name, array( 'core/edit-post', 'core/edit-site' ), true ) ) {
+		return $settings;
+	}
+
+	$css = elodin_bridge_build_reusable_block_flow_spacing_fix_css();
+	if ( '' === $css ) {
+		return $settings;
+	}
+
+	if ( ! isset( $settings['styles'] ) || ! is_array( $settings['styles'] ) ) {
+		$settings['styles'] = array();
+	}
+
+	$settings['styles'][] = array(
+		'css' => $css,
+	);
+
+	return $settings;
 }
-add_action( 'enqueue_block_editor_assets', 'elodin_bridge_enqueue_reusable_block_flow_spacing_fix_styles' );
+add_filter( 'block_editor_settings_all', 'elodin_bridge_inject_reusable_block_flow_spacing_fix_styles_into_editor_settings', 120, 2 );

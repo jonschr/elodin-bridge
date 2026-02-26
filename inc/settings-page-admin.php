@@ -6,7 +6,11 @@
  * @param string $hook_suffix Current admin page hook suffix.
  */
 function elodin_bridge_enqueue_admin_assets( $hook_suffix ) {
-	if ( 'appearance_page_elodin-bridge' !== $hook_suffix ) {
+	$allowed_hooks = array(
+		'appearance_page_elodin-bridge',
+		'appearance_page_elodin-bridge-setup',
+	);
+	if ( ! in_array( $hook_suffix, $allowed_hooks, true ) ) {
 		return;
 	}
 
@@ -60,8 +64,8 @@ function elodin_bridge_render_admin_page() {
 
 	$bridge_view = sanitize_key( wp_unslash( $_GET['bridge_view'] ?? '' ) );
 	if ( 'setup' === $bridge_view ) {
-		elodin_bridge_render_setup_wizard_page();
-		return;
+		wp_safe_redirect( elodin_bridge_get_setup_wizard_url() );
+		exit;
 	}
 
 	$heading_paragraph_overrides_available = elodin_bridge_is_generatepress_parent_theme();
@@ -83,6 +87,9 @@ function elodin_bridge_render_admin_page() {
 	$generateblocks_layout_gap_defaults_enabled = elodin_bridge_is_generateblocks_layout_gap_defaults_enabled();
 	$root_level_container_padding_settings = elodin_bridge_get_root_level_container_padding_settings();
 	$root_level_container_padding_enabled = elodin_bridge_is_root_level_container_padding_enabled();
+	$root_level_group_padding_settings = elodin_bridge_get_root_level_group_padding_settings();
+	$root_level_group_padding_enabled = elodin_bridge_is_root_level_group_padding_enabled();
+	$fse_gb_container_width_override_enabled = elodin_bridge_is_fse_gb_container_width_override_enabled();
 	$theme_json_source_mode = elodin_bridge_get_theme_json_source_mode();
 	$theme_json_source_mode_effective = elodin_bridge_get_effective_theme_json_source_mode();
 	$theme_json_source_theme_fallback_active = 'theme' === $theme_json_source_mode && 'plugin' === $theme_json_source_mode_effective;
@@ -117,6 +124,7 @@ function elodin_bridge_render_admin_page() {
 	}
 	$editor_ui_restrictions_enabled = elodin_bridge_is_editor_ui_restrictions_enabled();
 	$editor_publish_sidebar_restriction_enabled = elodin_bridge_is_editor_publish_sidebar_restriction_enabled();
+	$editor_show_template_default_enabled = elodin_bridge_is_editor_show_template_default_enabled();
 	$media_library_infinite_scrolling_enabled = elodin_bridge_is_media_library_infinite_scrolling_enabled();
 	$shortcodes_enabled = elodin_bridge_is_shortcodes_enabled();
 	$css_variable_autowrap_enabled = elodin_bridge_is_css_variable_autowrap_enabled();
@@ -133,6 +141,10 @@ function elodin_bridge_render_admin_page() {
 	$block_edge_classes_enabled = elodin_bridge_is_block_edge_classes_enabled();
 	$image_sizes_settings = elodin_bridge_get_image_sizes_settings();
 	$image_size_rows = array_values( $image_sizes_settings['sizes'] );
+	$using_block_theme = function_exists( 'wp_is_block_theme' ) && wp_is_block_theme();
+	$editor_show_template_default_available = $using_block_theme;
+	$fse_gb_container_width_override_available = $using_block_theme;
+	$content_type_behavior_available = ! $using_block_theme;
 	$content_type_behavior_settings = elodin_bridge_get_content_type_behavior_settings();
 	$content_type_behavior_post_types = elodin_bridge_get_content_type_behavior_post_types();
 

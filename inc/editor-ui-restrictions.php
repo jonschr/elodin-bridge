@@ -18,7 +18,9 @@ add_action( 'after_setup_theme', 'elodin_bridge_detach_theme_editor_callbacks', 
 function elodin_bridge_enqueue_editor_ui_restrictions() {
 	$disable_fullscreen = elodin_bridge_is_editor_ui_restrictions_enabled();
 	$disable_publish_sidebar = elodin_bridge_is_editor_publish_sidebar_restriction_enabled();
-	if ( ! $disable_fullscreen && ! $disable_publish_sidebar ) {
+	$enable_show_template_default = elodin_bridge_is_editor_show_template_default_enabled();
+	$is_block_theme = function_exists( 'wp_is_block_theme' ) && wp_is_block_theme();
+	if ( ! $disable_fullscreen && ! $disable_publish_sidebar && ! $enable_show_template_default ) {
 		return;
 	}
 
@@ -37,6 +39,8 @@ function elodin_bridge_enqueue_editor_ui_restrictions() {
 			array(
 				'disableFullscreen'     => $disable_fullscreen,
 				'disablePublishSidebar' => $disable_publish_sidebar,
+				'enableShowTemplateDefault' => $enable_show_template_default,
+				'isBlockTheme'          => $is_block_theme,
 			)
 		) . ';',
 		'before'
@@ -49,7 +53,7 @@ function elodin_bridge_enqueue_editor_ui_restrictions() {
 					return;
 				}
 
-				const config = window.elodinBridgeEditorUiRestrictions || {};
+					const config = window.elodinBridgeEditorUiRestrictions || {};
 
 				wp.domReady( function() {
 					if ( config.disableFullscreen ) {
@@ -66,8 +70,103 @@ function elodin_bridge_enqueue_editor_ui_restrictions() {
 							dispatchEditor.disablePublishSidebar();
 						}
 					}
-				} );
-			} )( window.wp );'
+
+					if ( config.enableShowTemplateDefault ) {
+						const applyShowTemplateDefault = function() {
+							const selectEditor = wp.data.select( "core/editor" );
+							const selectPreferences = wp.data.select( "core/preferences" );
+							const selectCore = wp.data.select( "core" );
+							const dispatchEditor = wp.data.dispatch( "core/editor" );
+							const dispatchPreferences = wp.data.dispatch( "core/preferences" );
+
+							if ( ! selectEditor || ! selectPreferences || ! selectCore || ! dispatchEditor || ! dispatchPreferences ) {
+								return false;
+							}
+
+							if ( typeof selectEditor.getCurrentPostType !== "function" ) {
+								return false;
+							}
+
+							const editorSettings = typeof selectEditor.getEditorSettings === "function"
+								? ( selectEditor.getEditorSettings() || {} )
+								: {};
+							const editorFlag = !! editorSettings.__unstableIsBlockBasedTheme;
+							const templateId = typeof selectEditor.getCurrentTemplateId === "function"
+								? selectEditor.getCurrentTemplateId()
+								: null;
+							const templateSuggestsBlockTheme = typeof templateId === "string" && templateId.indexOf( "//" ) !== -1;
+
+							if ( ! config.isBlockTheme && ! editorFlag && typeof templateId === "undefined" ) {
+								return false;
+							}
+
+							const isBlockThemeContext = !! config.isBlockTheme || editorFlag || templateSuggestsBlockTheme;
+							if ( ! isBlockThemeContext ) {
+								return true;
+							}
+
+							const postType = selectEditor.getCurrentPostType();
+							if ( ! postType ) {
+								return false;
+							}
+
+							const blockedPostTypes = {
+								wp_template: true,
+								wp_template_part: true,
+								wp_navigation: true,
+							};
+							if ( Object.prototype.hasOwnProperty.call( blockedPostTypes, postType ) ) {
+								return true;
+							}
+
+							if ( typeof selectCore.getCurrentTheme !== "function" || typeof selectPreferences.get !== "function" || typeof dispatchPreferences.set !== "function" ) {
+								return false;
+							}
+
+							const currentTheme = selectCore.getCurrentTheme() || {};
+							const stylesheet = currentTheme && typeof currentTheme.stylesheet === "string" ? currentTheme.stylesheet : "";
+							if ( ! stylesheet ) {
+								return false;
+							}
+
+							const savedRenderingModes = selectPreferences.get( "core", "renderingModes" );
+							const renderingModes = savedRenderingModes && typeof savedRenderingModes === "object" ? savedRenderingModes : {};
+							const themeModes = renderingModes[ stylesheet ] && typeof renderingModes[ stylesheet ] === "object"
+								? renderingModes[ stylesheet ]
+								: {};
+
+							if ( themeModes[ postType ] !== "template-locked" ) {
+								const newRenderingModes = {
+									...renderingModes,
+									[ stylesheet ]: {
+										...themeModes,
+										[ postType ]: "template-locked",
+									},
+								};
+								dispatchPreferences.set( "core", "renderingModes", newRenderingModes );
+							}
+
+							if ( typeof dispatchEditor.setRenderingMode === "function" ) {
+								dispatchEditor.setRenderingMode( "template-locked" );
+							}
+
+							return true;
+						};
+
+						const resolvedImmediately = applyShowTemplateDefault();
+						if ( ! resolvedImmediately ) {
+							let attempts = 0;
+							const maxAttempts = 200;
+								const unsubscribe = wp.data.subscribe( function() {
+									attempts += 1;
+									if ( applyShowTemplateDefault() || attempts >= maxAttempts ) {
+										unsubscribe();
+									}
+								} );
+							}
+						}
+					} );
+				} )( window.wp );'
 	);
 }
 add_action( 'enqueue_block_editor_assets', 'elodin_bridge_enqueue_editor_ui_restrictions' );

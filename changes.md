@@ -1,5 +1,17 @@
 # Elodin Bridge Changes
 
+## Version 1.1
+
+### Changed
+- Admin navigation for Bridge pages is now consistent:
+  - Added a dedicated `Appearance > Elodin Bridge Setup Wizard` submenu page.
+  - Added persistent in-page navigation buttons on both Bridge screens (`Main Settings` and `Setup Wizard`).
+  - Updated legacy `bridge_view=setup` requests to redirect to the dedicated setup wizard page slug.
+- Post-activation redirect now opens the main Bridge settings page by default instead of the setup wizard.
+
+### Fixed
+- Radio controls in source-mode option groups now use native browser/WordPress radio rendering so the checked state is clearly visible.
+
 ## Version 1.0
 
 ### Changed

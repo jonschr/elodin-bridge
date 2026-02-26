@@ -1798,6 +1798,75 @@ function elodin_bridge_is_root_level_container_padding_enabled() {
 }
 
 /**
+ * Get default values for root-level group padding settings in block themes.
+ *
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
+ */
+function elodin_bridge_get_root_level_group_padding_defaults() {
+	$defaults = elodin_bridge_get_root_level_container_padding_defaults();
+	$defaults['enabled'] = 1;
+
+	return $defaults;
+}
+
+/**
+ * Sanitize root-level group padding settings.
+ *
+ * @param mixed $value Raw setting value.
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
+ */
+function elodin_bridge_sanitize_root_level_group_padding_settings( $value ) {
+	$defaults = elodin_bridge_get_root_level_group_padding_defaults();
+	$value = is_array( $value ) ? $value : array();
+	$desktop_legacy = $value['desktop'] ?? null;
+	$tablet_legacy = $value['tablet'] ?? null;
+	$mobile_legacy = $value['mobile'] ?? null;
+
+	return array(
+		'enabled'            => elodin_bridge_sanitize_toggle( $value['enabled'] ?? $defaults['enabled'] ),
+		'desktop_vertical'   => elodin_bridge_sanitize_css_value( $value['desktop_vertical'] ?? $desktop_legacy ?? $defaults['desktop_vertical'], $defaults['desktop_vertical'] ),
+		'desktop_horizontal' => elodin_bridge_sanitize_css_value( $value['desktop_horizontal'] ?? $desktop_legacy ?? $defaults['desktop_horizontal'], $defaults['desktop_horizontal'] ),
+		'tablet_vertical'    => elodin_bridge_sanitize_css_value( $value['tablet_vertical'] ?? $tablet_legacy ?? $defaults['tablet_vertical'], $defaults['tablet_vertical'] ),
+		'tablet_horizontal'  => elodin_bridge_sanitize_css_value( $value['tablet_horizontal'] ?? $tablet_legacy ?? $defaults['tablet_horizontal'], $defaults['tablet_horizontal'] ),
+		'mobile_vertical'    => elodin_bridge_sanitize_css_value( $value['mobile_vertical'] ?? $mobile_legacy ?? $defaults['mobile_vertical'], $defaults['mobile_vertical'] ),
+		'mobile_horizontal'  => elodin_bridge_sanitize_css_value( $value['mobile_horizontal'] ?? $mobile_legacy ?? $defaults['mobile_horizontal'], $defaults['mobile_horizontal'] ),
+	);
+}
+
+/**
+ * Get normalized root-level group padding settings.
+ *
+ * @return array{enabled:int,desktop_vertical:string,desktop_horizontal:string,tablet_vertical:string,tablet_horizontal:string,mobile_vertical:string,mobile_horizontal:string}
+ */
+function elodin_bridge_get_root_level_group_padding_settings() {
+	$saved = get_option( ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING, null );
+	if ( null === $saved || false === $saved ) {
+		return elodin_bridge_get_root_level_group_padding_defaults();
+	}
+
+	return elodin_bridge_sanitize_root_level_group_padding_settings( $saved );
+}
+
+/**
+ * Check if root-level group padding is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_root_level_group_padding_enabled() {
+	$settings = elodin_bridge_get_root_level_group_padding_settings();
+	return ! empty( $settings['enabled'] );
+}
+
+/**
+ * Check if FSE GenerateBlocks container width override is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_fse_gb_container_width_override_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_FSE_GB_CONTAINER_WIDTH_OVERRIDE, 1 );
+}
+
+/**
  * Check if heading/paragraph style overrides are enabled.
  *
  * @return bool
@@ -1881,6 +1950,15 @@ function elodin_bridge_is_editor_ui_restrictions_enabled() {
  */
 function elodin_bridge_is_editor_publish_sidebar_restriction_enabled() {
 	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION, 1 );
+}
+
+/**
+ * Check if block-theme editor "Show template" default is enabled.
+ *
+ * @return bool
+ */
+function elodin_bridge_is_editor_show_template_default_enabled() {
+	return (bool) get_option( ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT, 1 );
 }
 
 /**
@@ -1982,6 +2060,10 @@ function elodin_bridge_is_reusable_block_flow_spacing_fix_enabled() {
  * @return bool
  */
 function elodin_bridge_is_content_type_behavior_enabled() {
+	if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+		return false;
+	}
+
 	$settings = elodin_bridge_get_content_type_behavior_settings();
 	return ! empty( $settings['enabled'] );
 }
@@ -2115,6 +2197,26 @@ function elodin_bridge_register_settings() {
 
 	register_setting(
 		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ROOT_LEVEL_GROUP_PADDING,
+		array(
+			'type'              => 'array',
+			'sanitize_callback' => 'elodin_bridge_sanitize_root_level_group_padding_settings',
+			'default'           => elodin_bridge_get_root_level_group_padding_defaults(),
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_FSE_GB_CONTAINER_WIDTH_OVERRIDE,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_CONTENT_TYPE_BEHAVIOR,
 		array(
 			'type'              => 'array',
@@ -2136,6 +2238,16 @@ function elodin_bridge_register_settings() {
 	register_setting(
 		'elodin_bridge_settings',
 		ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_PUBLISH_SIDEBAR_RESTRICTION,
+		array(
+			'type'              => 'boolean',
+			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',
+			'default'           => 1,
+		)
+	);
+
+	register_setting(
+		'elodin_bridge_settings',
+		ELODIN_BRIDGE_OPTION_ENABLE_EDITOR_SHOW_TEMPLATE_DEFAULT,
 		array(
 			'type'              => 'boolean',
 			'sanitize_callback' => 'elodin_bridge_sanitize_toggle',

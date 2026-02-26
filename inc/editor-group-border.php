@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Get GenerateBlocks boundary highlight CSS.
+ * Get Group block border editor CSS.
  *
  * @return string
  */
-function elodin_bridge_get_generateblocks_boundary_highlight_css() {
+function elodin_bridge_get_editor_group_border_css() {
 	static $cached_css = null;
 	if ( null !== $cached_css ) {
 		return $cached_css;
 	}
 
-	$style_path = ELODIN_BRIDGE_DIR . '/assets/editor-generateblocks-boundary-highlights.css';
+	$style_path = ELODIN_BRIDGE_DIR . '/assets/editor-group-border.css';
 	if ( ! file_exists( $style_path ) || ! is_readable( $style_path ) ) {
 		$cached_css = '';
 		return $cached_css;
@@ -23,21 +23,13 @@ function elodin_bridge_get_generateblocks_boundary_highlight_css() {
 }
 
 /**
- * Inject GenerateBlocks boundary highlight styles into editor iframe settings.
+ * Inject Group block border styles into editor iframe settings.
  *
  * @param array<string,mixed> $settings Block editor settings.
  * @param mixed               $editor_context Block editor context.
  * @return array<string,mixed>
  */
-function elodin_bridge_inject_generateblocks_boundary_highlight_styles_into_editor_settings( $settings, $editor_context ) {
-	if ( ! elodin_bridge_is_generateblocks_available() ) {
-		return $settings;
-	}
-
-	if ( ! elodin_bridge_is_generateblocks_boundary_highlights_enabled() ) {
-		return $settings;
-	}
-
+function elodin_bridge_inject_editor_group_border_styles_into_editor_settings( $settings, $editor_context ) {
 	$context_name = '';
 	if ( is_object( $editor_context ) && isset( $editor_context->name ) ) {
 		$context_name = (string) $editor_context->name;
@@ -47,7 +39,7 @@ function elodin_bridge_inject_generateblocks_boundary_highlight_styles_into_edit
 		return $settings;
 	}
 
-	$css = elodin_bridge_get_generateblocks_boundary_highlight_css();
+	$css = elodin_bridge_get_editor_group_border_css();
 	if ( '' === $css ) {
 		return $settings;
 	}
@@ -62,4 +54,4 @@ function elodin_bridge_inject_generateblocks_boundary_highlight_styles_into_edit
 
 	return $settings;
 }
-add_filter( 'block_editor_settings_all', 'elodin_bridge_inject_generateblocks_boundary_highlight_styles_into_editor_settings', 120, 2 );
+add_filter( 'block_editor_settings_all', 'elodin_bridge_inject_editor_group_border_styles_into_editor_settings', 120, 2 );

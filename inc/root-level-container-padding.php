@@ -58,17 +58,19 @@ function elodin_bridge_build_root_level_container_padding_css() {
 		return '';
 	}
 
-	$settings = elodin_bridge_get_root_level_container_padding_settings();
-	if ( empty( $settings['enabled'] ) ) {
+	$container_settings = elodin_bridge_get_root_level_container_padding_settings();
+	if ( empty( $container_settings['enabled'] ) ) {
 		return '';
 	}
 
-	$desktop_vertical = trim( (string) ( $settings['desktop_vertical'] ?? $settings['desktop'] ?? '' ) );
-	$desktop_horizontal = trim( (string) ( $settings['desktop_horizontal'] ?? $settings['desktop'] ?? '' ) );
-	$tablet_vertical = trim( (string) ( $settings['tablet_vertical'] ?? $settings['tablet'] ?? '' ) );
-	$tablet_horizontal = trim( (string) ( $settings['tablet_horizontal'] ?? $settings['tablet'] ?? '' ) );
-	$mobile_vertical = trim( (string) ( $settings['mobile_vertical'] ?? $settings['mobile'] ?? '' ) );
-	$mobile_horizontal = trim( (string) ( $settings['mobile_horizontal'] ?? $settings['mobile'] ?? '' ) );
+	// Inherit axis values from the FSE root-level Group block padding setting.
+	$source_settings = elodin_bridge_get_root_level_group_padding_settings();
+	$desktop_vertical = trim( (string) ( $source_settings['desktop_vertical'] ?? $container_settings['desktop_vertical'] ?? $container_settings['desktop'] ?? '' ) );
+	$desktop_horizontal = trim( (string) ( $source_settings['desktop_horizontal'] ?? $container_settings['desktop_horizontal'] ?? $container_settings['desktop'] ?? '' ) );
+	$tablet_vertical = trim( (string) ( $source_settings['tablet_vertical'] ?? $container_settings['tablet_vertical'] ?? $container_settings['tablet'] ?? '' ) );
+	$tablet_horizontal = trim( (string) ( $source_settings['tablet_horizontal'] ?? $container_settings['tablet_horizontal'] ?? $container_settings['tablet'] ?? '' ) );
+	$mobile_vertical = trim( (string) ( $source_settings['mobile_vertical'] ?? $container_settings['mobile_vertical'] ?? $container_settings['mobile'] ?? '' ) );
+	$mobile_horizontal = trim( (string) ( $source_settings['mobile_horizontal'] ?? $container_settings['mobile_horizontal'] ?? $container_settings['mobile'] ?? '' ) );
 	if (
 		'' === $desktop_vertical &&
 		'' === $desktop_horizontal &&
@@ -85,11 +87,17 @@ function elodin_bridge_build_root_level_container_padding_css() {
 		':where(.entry-content > :is([class^=\'gb-element-\'], [class*=\' gb-element-\']))',
 		':where(.entry-content > div:not([class]))',
 		':where(body > :is([class^=\'gb-element-\'], [class*=\' gb-element-\']))',
+		':where(.is-root-container > div:not([class]))',
+		':where(.wp-block-post-content > div:not([class]))',
+		':where(.is-root-container > .wp-block-generateblocks-element)',
+		':where(.wp-block-post-content > .wp-block-generateblocks-element)',
 		':where(.gb-is-root-block > [class^=\'gb-element-\'])',
 		':where(.gb-root-block-generateblocks-container > [class^=\'gb-element-\'])',
 		':where(.block-library-block__reusable-block-container > [class^=\'gb-element-\'])',
+		':where(.block-library-block__reusable-block-container > div:not([class]))',
 		':where(.gb-is-root-block > .wp-block-generateblocks-element)',
 		':where(.is-root-container > .block-library-block__reusable-block-container > .wp-block-generateblocks-element)',
+		':where(.is-root-container > .block-library-block__reusable-block-container > div:not([class]))',
 	);
 	$selector_list = implode( ',', $selectors );
 	$css = '';
